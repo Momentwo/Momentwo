@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import cord.eoeo.momentwo.ui.login.LoginRoute
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -21,7 +22,10 @@ fun MomentwoNavGraph(
         composable(
             route = MomentwoDestination.LOGIN_ROUTE
         ) {
-
+            LoginRoute(
+                coroutineScope = coroutineScope,
+                navigateToAlbum = navActions.navigateToAlbum
+            )
         }
 
         composable(

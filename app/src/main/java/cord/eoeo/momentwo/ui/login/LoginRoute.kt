@@ -8,10 +8,12 @@ import kotlinx.coroutines.CoroutineScope
 fun LoginRoute(
     coroutineScope: CoroutineScope,
     navigateToAlbum: () -> Unit,
+    navigateToSignUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LoginScreen(
         coroutineScope = coroutineScope,
-        navigateToAlbum = navigateToAlbum
+        navigateToAlbum = navigateToAlbum,
+        navigateToSignUp = navigateToSignUp,
     )
 }

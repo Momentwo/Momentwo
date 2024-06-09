@@ -14,8 +14,11 @@ interface UiState
 interface UiEvent
 interface UiEffect
 
+const val SIDE_EFFECTS_KEY = "side_effects"
+
 abstract class BaseViewModel<State : UiState, Event : UiEvent, Effect : UiEffect> : ViewModel() {
     private val initialState: State by lazy { createInitialState() }
+
     abstract fun createInitialState(): State
 
     private val _uiState: MutableStateFlow<State> = MutableStateFlow(initialState)

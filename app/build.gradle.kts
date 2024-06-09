@@ -2,6 +2,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -48,16 +50,36 @@ android {
 }
 
 dependencies {
-
     implementation(libs.core.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+
+    // Lifecycle
+    implementation(libs.lifecycle.runtime)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.viewmodel.savedstate)
+
+    // Navigation Compose
     implementation(libs.navigation.compose)
+
+    // Hilt
+    implementation(libs.hilt.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // retrofit
+    implementation(libs.retrofit)
+
+    // moshi
+    implementation(libs.moshi)
+    implementation(libs.moshi.converter)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

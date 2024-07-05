@@ -9,6 +9,9 @@ object MomentwoDestination {
 }
 
 class MomentwoNavigationActions(navController: NavHostController) {
+    val popBackStack: () -> Unit = {
+        navController.popBackStack()
+    }
     val navigateToLogin: () -> Unit = {
         navController.navigate(MomentwoDestination.LOGIN_ROUTE) {
             launchSingleTop = true

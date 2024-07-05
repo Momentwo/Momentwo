@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 interface UiState
@@ -35,7 +36,7 @@ abstract class BaseViewModel<State : UiState, Event : UiEvent, Effect : UiEffect
     }
 
     protected fun setState(newState: State) {
-        _uiState.value = newState
+        viewModelScope.launch { _uiState.update { newState } }
     }
 
     fun setEvent(newEvent: Event) {

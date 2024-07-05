@@ -7,47 +7,51 @@ import cord.eoeo.momentwo.ui.UiState
 
 class SignUpContract {
     data class State(
-        val email: String = "",
-        val password: String = "",
-        val passwordCheck: String = "",
-        val nickname: String = "",
-        val name: String = "",
-        val birthday: String = "",
-        val phone1: String = "",
-        val phone2: String = "",
-        val phone3: String = "",
-        val address1: String = "",
-        val address2: String = "",
+        val email: InfoState = InfoState(),
+        val password: InfoState = InfoState(),
+        val passwordCheck: InfoState = InfoState(),
+        val nickname: InfoState = InfoState(),
+        val name: InfoState = InfoState(),
+        val birthday: InfoState = InfoState(),
+        val phone: InfoState = InfoState(),
         val isLoading: Boolean = false,
+        val isSuccess: Boolean = false,
         val isError: Boolean = false,
     ) : UiState {
         fun mapToUser(): User = User(
-            name = name,
-            username = email,
-            password = password,
-            nickname = nickname,
-            birthday = birthday,
-            phone = "$phone1-$phone2-$phone3",
-            address = "$address1 $address2",
+            name = name.value,
+            username = email.value,
+            password = password.value,
+            nickname = nickname.value,
+            birthday = "${birthday.value.substring(0..3)}-${birthday.value.substring(4..5)}-${birthday.value.substring(6)}",
+            phone = "${phone.value.substring(0..2)}-${phone.value.substring(3..6)}-${phone.value.substring(7)}",
         )
     }
+
+    data class InfoState(
+        val value: String = "",
+        val isError: Boolean = false,
+        val errorMessage: String = "",
+    )
 
     sealed interface Event : UiEvent {
         data class OnEmailEntered(val email: String) : Event
         data class OnPasswordEntered(val password: String) : Event
-        data class OnPasswordCheckEntered(val password: String) : Event
+        data class OnPasswordCheckEntered(val passwordCheck: String) : Event
         data class OnNicknameEntered(val nickname: String) : Event
         data class OnNameEntered(val name: String) : Event
         data class OnBirthdayEntered(val birthday: String) : Event
-        data class OnPhone1Entered(val phone1: String) : Event
-        data class OnPhone2Entered(val phone2: String) : Event
-        data class OnPhone3Entered(val phone3: String) : Event
-        data class OnAddress1Entered(val address1: String) : Event
-        data class OnAddress2Entered(val address2: String) : Event
+        data class OnPhoneEntered(val phone: String) : Event
+        data object OnNextClicked : Event
         data object OnAcceptClicked : Event
+        data object OnBack : Event
+        data class OnError(val errorMessage: String) : Event
     }
 
     sealed interface Effect : UiEffect {
+        data object ScrollToNextPage : Effect
+        data object ScrollToPreviousPage : Effect
         data object NavigateToLogin : Effect
+        data class ShowSnackbar(val message: String) : Effect
     }
 }

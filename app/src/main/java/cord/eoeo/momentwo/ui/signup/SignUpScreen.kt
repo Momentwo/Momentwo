@@ -1,23 +1,24 @@
 package cord.eoeo.momentwo.ui.signup
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -26,11 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.ui.signup.transformation.DateVisualTransformation
+import cord.eoeo.momentwo.ui.signup.transformation.PhoneVisualTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -45,20 +46,47 @@ fun SignUpScreen(
     uiState: () -> SignUpContract.State,
     effectFlow: () -> Flow<SignUpContract.Effect>,
     onEvent: (event: SignUpContract.Event) -> Unit,
+    snackbarHostState: () -> SnackbarHostState,
+    popBackStack: () -> Unit,
     navigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
         effectFlow().onEach { effect ->
             when (effect) {
-                SignUpContract.Effect.NavigateToLogin -> {
+                is SignUpContract.Effect.ScrollToNextPage -> {
+                    launch { pagerState().animateScrollToPage(page = 1) }
+                }
+
+                is SignUpContract.Effect.ScrollToPreviousPage -> {
+                    launch { pagerState().animateScrollToPage(page = 0) }
+                }
+
+                is SignUpContract.Effect.NavigateToLogin -> {
                     navigateToLogin()
+                }
+
+                is SignUpContract.Effect.ShowSnackbar -> {
+                    snackbarHostState().showSnackbar(
+                        message = effect.message,
+                    )
                 }
             }
         }.collect()
     }
 
-    Scaffold(modifier = Modifier.fillMaxWidth()) { paddingValues ->
+    BackHandler {
+        if (pagerState().currentPage == 0) {
+            popBackStack()
+        } else {
+            onEvent(SignUpContract.Event.OnBack)
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState()) },
+        modifier = Modifier.fillMaxWidth()
+    ) { paddingValues ->
         HorizontalPager(
             state = pagerState(),
             userScrollEnabled = false,
@@ -70,17 +98,13 @@ fun SignUpScreen(
                     email = { uiState().email },
                     password = { uiState().password },
                     passwordCheck = { uiState().passwordCheck },
-                    nickname = { uiState().nickname },
                 ) { event -> onEvent(event) }
             } else {
                 SecondSignUpPage(
+                    nickname = { uiState().nickname },
                     name = { uiState().name },
                     birthday = { uiState().birthday },
-                    phone1 = { uiState().phone1 },
-                    phone2 = { uiState().phone2 },
-                    phone3 = { uiState().phone3 },
-                    address1 = { uiState().address1 },
-                    address2 = { uiState().address2 },
+                    phone = { uiState().phone },
                 ) { event -> onEvent(event) }
             }
         }
@@ -95,7 +119,7 @@ fun SignUpScreen(
             Button(
                 onClick = {
                     if (pagerState().currentPage == 0) {
-                        coroutineScope.launch { pagerState().animateScrollToPage(page = 1) }
+                        onEvent(SignUpContract.Event.OnNextClicked)
                     } else {
                         onEvent(SignUpContract.Event.OnAcceptClicked)
                     }
@@ -113,10 +137,9 @@ fun SignUpScreen(
 
 @Composable
 fun FirstSignUpPage(
-    email: () -> String,
-    password: () -> String,
-    passwordCheck: () -> String,
-    nickname: () -> String,
+    email: () -> SignUpContract.InfoState,
+    password: () -> SignUpContract.InfoState,
+    passwordCheck: () -> SignUpContract.InfoState,
     onEvent: (event: SignUpContract.Event) -> Unit
 ) {
     Column(
@@ -126,49 +149,47 @@ fun FirstSignUpPage(
     ) {
         ItemText(text = { "E-Mail" })
         ItemTextField(
-            value = email,
+            value = { email().value },
             placeholder = { "ex: momentwo@email.com" },
             keyboardType = { KeyboardType.Email },
+            isError = { email().isError },
+            errorMessage = { email().errorMessage },
         ) {
             onEvent(SignUpContract.Event.OnEmailEntered(it))
         }
 
         ItemText(text = { "비밀번호" })
         ItemTextField(
-            value = password,
-            placeholder = { "영문, 숫자, 특수문자 8~16자" },
+            value = { password().value },
+            placeholder = { "영문, 숫자, 특수문자 8~20자" },
             keyboardType = { KeyboardType.Password },
             visualTransformation = { PasswordVisualTransformation() },
+            isError = { password().isError },
+            errorMessage = { password().errorMessage },
         ) {
             onEvent(SignUpContract.Event.OnPasswordEntered(it))
         }
 
         ItemText(text = { "비밀번호 재입력" })
         ItemTextField(
-            value = passwordCheck,
+            value = { passwordCheck().value },
             placeholder = { "비밀번호를 다시 입력하세요" },
             keyboardType = { KeyboardType.Password },
             visualTransformation = { PasswordVisualTransformation() },
+            isError = { passwordCheck().isError },
+            errorMessage = { passwordCheck().errorMessage },
         ) {
             onEvent(SignUpContract.Event.OnPasswordCheckEntered(it))
-        }
-
-        ItemText(text = { "별명" })
-        ItemTextField(value = nickname, placeholder = { "다른 사용자에게 보여질 별명" }) {
-            onEvent(SignUpContract.Event.OnNicknameEntered(it))
         }
     }
 }
 
 @Composable
 fun SecondSignUpPage(
-    name: () -> String,
-    birthday: () -> String,
-    phone1: () -> String,
-    phone2: () -> String,
-    phone3: () -> String,
-    address1: () -> String,
-    address2: () -> String,
+    nickname: () -> SignUpContract.InfoState,
+    name: () -> SignUpContract.InfoState,
+    birthday: () -> SignUpContract.InfoState,
+    phone: () -> SignUpContract.InfoState,
     onEvent: (event: SignUpContract.Event) -> Unit
 ) {
     Column(
@@ -176,53 +197,48 @@ fun SecondSignUpPage(
             .fillMaxSize()
             .padding(32.dp, 32.dp),
     ) {
+        ItemText(text = { "별명" })
+        ItemTextField(
+            value = { nickname().value },
+            placeholder = { "다른 사용자에게 보여질 별명" },
+            isError = { nickname().isError },
+            errorMessage = { nickname().errorMessage },
+        ) {
+            onEvent(SignUpContract.Event.OnNicknameEntered(it))
+        }
+
         ItemText(text = { "이름" })
-        ItemTextField(value = name, placeholder = { "이름을 입력하세요" }) {
+        ItemTextField(
+            value = { name().value },
+            placeholder = { "이름을 입력하세요" },
+            isError = { name().isError },
+            errorMessage = { name().errorMessage },
+        ) {
             onEvent(SignUpContract.Event.OnNameEntered(it))
         }
 
         ItemText(text = { "생년월일" })
-        ItemTextField(value = birthday, placeholder = { "YYYY-MM-DD" }, keyboardType = { KeyboardType.Number }) {
+        ItemTextField(
+            value = { birthday().value },
+            placeholder = { "ex: 2024-01-01" },
+            keyboardType = { KeyboardType.Number },
+            visualTransformation = { DateVisualTransformation() },
+            isError = { birthday().isError },
+            errorMessage = { birthday().errorMessage },
+        ) {
             onEvent(SignUpContract.Event.OnBirthdayEntered(it))
         }
 
         ItemText(text = { "전화번호" })
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(0.dp, 8.dp, 0.dp, 24.dp),
+        ItemTextField(
+            value = { phone().value },
+            placeholder = { "번호만 입력하세요" },
+            keyboardType = { KeyboardType.Phone },
+            visualTransformation = { PhoneVisualTransformation() },
+            isError = { phone().isError },
+            errorMessage = { phone().errorMessage },
         ) {
-            PhoneNumberTextField(
-                value = phone1,
-                modifier = Modifier.weight(3f),
-            ) { onEvent(SignUpContract.Event.OnPhone1Entered(it)) }
-            PhoneNumberBorderText(
-                modifier = Modifier
-                    .height(TextFieldDefaults.MinHeight)
-                    .weight(1f),
-            )
-            PhoneNumberTextField(
-                value = phone2,
-                modifier = Modifier.weight(4f),
-            ) { onEvent(SignUpContract.Event.OnPhone2Entered(it)) }
-            PhoneNumberBorderText(
-                modifier = Modifier
-                    .height(TextFieldDefaults.MinHeight)
-                    .weight(1f),
-            )
-            PhoneNumberTextField(
-                value = phone3,
-                modifier = Modifier.weight(4f),
-            ) { onEvent(SignUpContract.Event.OnPhone3Entered(it)) }
-        }
-
-        ItemText(text = { "주소" })
-        ItemTextField(value = address1, placeholder = { "기본 주소" }, bottomPadding = { 0.dp }) {
-            onEvent(SignUpContract.Event.OnAddress1Entered(it))
-        }
-        ItemTextField(value = address2, placeholder = { "상세 주소" }) {
-            onEvent(SignUpContract.Event.OnAddress2Entered(it))
+            onEvent(SignUpContract.Event.OnPhoneEntered(it))
         }
     }
 }
@@ -246,7 +262,8 @@ fun ItemTextField(
     placeholder: () -> String,
     keyboardType: () -> KeyboardType = { KeyboardType.Text },
     visualTransformation: () -> VisualTransformation = { VisualTransformation.None },
-    bottomPadding: () -> Dp = { 24.dp },
+    isError: () -> Boolean,
+    errorMessage: () -> String,
     onValueChange: (String) -> Unit
 ) {
     OutlinedTextField(
@@ -256,38 +273,14 @@ fun ItemTextField(
         placeholder = { Text(text = placeholder()) },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType()),
         visualTransformation = visualTransformation(),
+        isError = isError(),
+        colors = OutlinedTextFieldDefaults.colors(
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            errorTextColor = MaterialTheme.colorScheme.error,
+        ),
+        supportingText = { if (isError()) Text(text = errorMessage()) },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(0.dp, 8.dp, 0.dp, bottomPadding()),
+            .padding(0.dp, 8.dp),
     )
-}
-
-@Composable
-fun PhoneNumberTextField(
-    value: () -> String,
-    modifier: Modifier,
-    onValueChange: (String) -> Unit
-) {
-    OutlinedTextField(
-        value = value(),
-        onValueChange = { onValueChange(it) },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-        modifier = modifier,
-    )
-}
-
-@Composable
-fun PhoneNumberBorderText(modifier: Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier,
-    ) {
-        Text(
-            text = "-",
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
 }

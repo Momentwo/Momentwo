@@ -4,4 +4,8 @@ import cord.eoeo.momentwo.data.model.User
 
 interface SignUpRepository {
     suspend fun requestSignUp(user: User): Result<Unit>
+
+    suspend fun checkEmail(email: String): Result<Boolean>
+
+    suspend fun checkNickname(nickname: String): Result<Boolean>
 }

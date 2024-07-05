@@ -36,6 +36,7 @@ fun MomentwoNavGraph(
         ) {
             SignUpRoute(
                 coroutineScope = coroutineScope,
+                popBackStack = navActions.popBackStack,
                 navigateToLogin = navActions.navigateToLogin,
             )
         }

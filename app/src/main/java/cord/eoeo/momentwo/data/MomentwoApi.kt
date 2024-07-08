@@ -7,4 +7,7 @@ object MomentwoApi {
     const val POST_SIGN_UP = "/signup"
     const val POST_CHECK_EMAIL = "/check_email"
     const val POST_CHECK_NICKNAME = "/check_nickname"
+
+    // Login
+    const val POST_LOGIN = "/signin"
 }

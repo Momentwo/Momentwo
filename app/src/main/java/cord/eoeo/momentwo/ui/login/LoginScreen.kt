@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.sp
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -60,7 +60,7 @@ fun LoginScreen(
                     )
                 }
             }
-        }
+        }.collect()
     }
 
     Scaffold(

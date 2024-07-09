@@ -7,6 +7,7 @@ class LoginRepositoryImpl(
     private val loginRemoteDataSource: LoginDataSource
 ) : LoginRepository {
     override suspend fun requestLogin(email: String, password: String): Result<LoginResponse> {
-        return loginRemoteDataSource.requestLogin(LoginRequest(email, password))
+        return Result.success(LoginResponse("origin", "refresh"))
+        // return loginRemoteDataSource.requestLogin(LoginRequest(email, password))
     }
 }

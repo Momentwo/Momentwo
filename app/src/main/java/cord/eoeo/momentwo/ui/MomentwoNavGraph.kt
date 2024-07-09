@@ -1,11 +1,11 @@
 package cord.eoeo.momentwo.ui
 
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import cord.eoeo.momentwo.ui.album.AlbumRoute
 import cord.eoeo.momentwo.ui.login.LoginRoute
 import cord.eoeo.momentwo.ui.signup.SignUpRoute
 import kotlinx.coroutines.CoroutineScope
@@ -44,7 +44,10 @@ fun MomentwoNavGraph(
         composable(
             route = MomentwoDestination.ALBUM_ROUTE,
         ) {
-            Scaffold { paddingValues -> }
+            AlbumRoute(
+                coroutineScope = coroutineScope,
+                popBackStack = navActions.popBackStack,
+            )
         }
     }
 }

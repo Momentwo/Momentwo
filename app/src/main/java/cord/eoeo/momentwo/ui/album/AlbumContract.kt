@@ -6,19 +6,19 @@ import cord.eoeo.momentwo.ui.UiState
 
 class AlbumContract {
     data class State(
-        val initState: InitState
+        val isLoading: Boolean = false,
+        val isSuccess: Boolean = false,
+        val isError: Boolean = false,
     ) : UiState
 
     sealed interface Event : UiEvent {
-        data object InitEvent : Event
-        data class SecondEvent(val element: Int) : Event
+        data class OnBack(val isDrawerOpen: Boolean) : Event
+        data class OnError(val errorMessage: String) : Event
     }
 
     sealed interface Effect : UiEffect {
-
-    }
-
-    sealed interface InitState {
-        data object Init : InitState
+        data object CloseDrawer : Effect
+        data object PopBackStack : Effect
+        data class ShowSnackbar(val message: String) : Effect
     }
 }

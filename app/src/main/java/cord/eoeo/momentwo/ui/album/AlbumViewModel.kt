@@ -12,12 +12,8 @@ class AlbumViewModel @Inject constructor(
 
     override fun handleEvent(newEvent: AlbumContract.Event) {
         when (newEvent) {
-            is AlbumContract.Event.OnBack -> {
-                if (newEvent.isDrawerOpen) {
-                    setEffect { AlbumContract.Effect.CloseDrawer }
-                } else {
-                    setEffect { AlbumContract.Effect.PopBackStack }
-                }
+            is AlbumContract.Event.OnCloseDrawer -> {
+                setEffect { AlbumContract.Effect.CloseDrawer }
             }
 
             is AlbumContract.Event.OnError -> {

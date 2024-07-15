@@ -12,13 +12,12 @@ class AlbumContract {
     ) : UiState
 
     sealed interface Event : UiEvent {
-        data class OnBack(val isDrawerOpen: Boolean) : Event
+        data object OnCloseDrawer : Event
         data class OnError(val errorMessage: String) : Event
     }
 
     sealed interface Effect : UiEffect {
         data object CloseDrawer : Effect
-        data object PopBackStack : Effect
         data class ShowSnackbar(val message: String) : Effect
     }
 }

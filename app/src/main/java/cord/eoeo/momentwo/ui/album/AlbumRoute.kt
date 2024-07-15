@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AlbumRoute(
     coroutineScope: CoroutineScope,
-    popBackStack: () -> Unit,
+    navigateToCreateAlbum: () -> Unit,
     modifier: Modifier = Modifier,
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -33,6 +33,6 @@ fun AlbumRoute(
         snackbarHostState = { snackbarHostState },
         onClickDrawer = { coroutineScope.launch { drawerState.open() } },
         onCloseDrawer = { coroutineScope.launch { drawerState.close() } },
-        popBackStack = popBackStack,
+        navigateToCreateAlbum = navigateToCreateAlbum,
     )
 }

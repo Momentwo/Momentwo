@@ -50,7 +50,7 @@ fun AlbunScreen(
     snackbarHostState: () -> SnackbarHostState,
     onClickDrawer: () -> Unit,
     onCloseDrawer: () -> Unit,
-    popBackStack: () -> Unit,
+    navigateToCreateAlbum: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
@@ -58,10 +58,6 @@ fun AlbunScreen(
             when (effect) {
                 is AlbumContract.Effect.CloseDrawer -> {
                     onCloseDrawer()
-                }
-
-                is AlbumContract.Effect.PopBackStack -> {
-                    popBackStack()
                 }
 
                 is AlbumContract.Effect.ShowSnackbar -> {
@@ -73,8 +69,8 @@ fun AlbunScreen(
         }.collect()
     }
 
-    BackHandler {
-        onEvent(AlbumContract.Event.OnBack(drawerState().isOpen))
+    BackHandler(drawerState().isOpen) {
+        onEvent(AlbumContract.Event.OnCloseDrawer)
     }
 
     // 테스트용 가짜 앨범 아이템 리스트
@@ -103,7 +99,7 @@ fun AlbunScreen(
                     onClickSearch = { /*TODO: Navigate to Search*/ },
                 )
             },
-            floatingActionButton = { CreateAlbumFAB { /*TODO: Navigate to Create Album*/ } },
+            floatingActionButton = { CreateAlbumFAB(onClick = navigateToCreateAlbum) },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState()) },
             modifier = Modifier.fillMaxSize(),
         ) { paddingValues ->

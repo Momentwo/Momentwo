@@ -1,9 +1,6 @@
-package cord.eoeo.momentwo.ui.album
+package cord.eoeo.momentwo.ui.createalbum
 
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -11,28 +8,23 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
-fun AlbumRoute(
+fun CreateAlbumRoute(
     coroutineScope: CoroutineScope,
-    navigateToCreateAlbum: () -> Unit,
+    popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
-    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    viewModel: AlbumViewModel = hiltViewModel()
+    viewModel: CreateAlbumViewModel = hiltViewModel(),
 ) {
-    val uiState: AlbumContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState: CreateAlbumContract.State by viewModel.uiState.collectAsStateWithLifecycle()
 
-    AlbunScreen(
+    CreateAlbumScreen(
         coroutineScope = coroutineScope,
         uiState = { uiState },
         effectFlow = { viewModel.effect },
         onEvent = { event -> viewModel.setEvent(event) },
-        drawerState = { drawerState },
         snackbarHostState = { snackbarHostState },
-        onClickDrawer = { coroutineScope.launch { drawerState.open() } },
-        onCloseDrawer = { coroutineScope.launch { drawerState.close() } },
-        navigateToCreateAlbum = navigateToCreateAlbum,
+        popBackStack = popBackStack,
     )
 }

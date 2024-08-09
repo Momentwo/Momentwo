@@ -7,6 +7,7 @@ object MomentwoDestination {
     const val SIGNUP_ROUTE = "signup"
     const val ALBUM_ROUTE = "album"
     const val CREATE_ALBUM_ROUTE = "create_album"
+    const val FRIEND_ROUTE = "friend"
 }
 
 class MomentwoNavigationActions(navController: NavHostController) {
@@ -30,5 +31,8 @@ class MomentwoNavigationActions(navController: NavHostController) {
     }
     val navigateToCreateAlbum: () -> Unit = {
         navController.navigate(MomentwoDestination.CREATE_ALBUM_ROUTE)
+    }
+    val navigateToFriend: () -> Unit = {
+        navController.navigate(MomentwoDestination.FRIEND_ROUTE)
     }
 }

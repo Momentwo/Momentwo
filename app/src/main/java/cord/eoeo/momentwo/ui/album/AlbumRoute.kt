@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 fun AlbumRoute(
     coroutineScope: CoroutineScope,
     navigateToCreateAlbum: () -> Unit,
+    navigateToFriend: () -> Unit,
     modifier: Modifier = Modifier,
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -34,5 +35,6 @@ fun AlbumRoute(
         onClickDrawer = { coroutineScope.launch { drawerState.open() } },
         onCloseDrawer = { coroutineScope.launch { drawerState.close() } },
         navigateToCreateAlbum = navigateToCreateAlbum,
+        navigateToFriend = navigateToFriend,
     )
 }

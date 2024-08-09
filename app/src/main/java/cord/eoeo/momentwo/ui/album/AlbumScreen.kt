@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -51,6 +52,7 @@ fun AlbunScreen(
     onClickDrawer: () -> Unit,
     onCloseDrawer: () -> Unit,
     navigateToCreateAlbum: () -> Unit,
+    navigateToFriend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
@@ -90,7 +92,13 @@ fun AlbunScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState(),
-        drawerContent = { AlbumDrawerContent() },
+        drawerContent = {
+            AlbumDrawerContent(
+                navigateToProfile = { /*TODO: Navigate to Profile*/ },
+                navigateToFriend = navigateToFriend,
+                navigateToSetting = { /*TODO: Navigate to Search*/ },
+            )
+        },
     ) {
         Scaffold(
             topBar = {
@@ -122,23 +130,34 @@ fun AlbunScreen(
 }
 
 @Composable
-fun AlbumDrawerContent() {
+fun AlbumDrawerContent(
+    navigateToProfile: () -> Unit,
+    navigateToFriend: () -> Unit,
+    navigateToSetting: () -> Unit
+) {
     ModalDrawerSheet {
         NavigationDrawerItem(
             label = { Text(text = "Profile", maxLines = 1) },
             icon = { Icon(Icons.Default.AccountCircle, "") },
             selected = false,
-            onClick = { /*TODO: Navigate to Profile*/ },
+            onClick = navigateToProfile,
             modifier = Modifier.padding(16.dp, 8.dp),
         )
 
         HorizontalDivider(modifier = Modifier.padding(16.dp, 0.dp))
 
         NavigationDrawerItem(
+            label = { Text(text = "Friends", maxLines = 1) },
+            icon = { Icon(Icons.Default.Groups, "") },
+            selected = false,
+            onClick = navigateToFriend,
+            modifier = Modifier.padding(16.dp, 8.dp),
+        )
+        NavigationDrawerItem(
             label = { Text(text = "Setting", maxLines = 1) },
             icon = { Icon(Icons.Default.Settings, "") },
             selected = false,
-            onClick = { /*TODO: Navigate to Setting*/ },
+            onClick = navigateToSetting,
             modifier = Modifier.padding(16.dp, 8.dp),
         )
     }

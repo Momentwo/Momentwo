@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import cord.eoeo.momentwo.ui.album.AlbumRoute
 import cord.eoeo.momentwo.ui.createalbum.CreateAlbumRoute
+import cord.eoeo.momentwo.ui.friend.FriendRoute
 import cord.eoeo.momentwo.ui.login.LoginRoute
 import cord.eoeo.momentwo.ui.signup.SignUpRoute
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 fun MomentwoNavGraph(
     coroutineScope: CoroutineScope,
     navController: NavHostController,
-    navActions: MomentwoNavigationActions
+    navActions: MomentwoNavigationActions,
 ) {
     NavHost(
         navController = navController,
@@ -48,6 +49,7 @@ fun MomentwoNavGraph(
             AlbumRoute(
                 coroutineScope = coroutineScope,
                 navigateToCreateAlbum = navActions.navigateToCreateAlbum,
+                navigateToFriend = navActions.navigateToFriend,
             )
         }
 
@@ -55,6 +57,15 @@ fun MomentwoNavGraph(
             route = MomentwoDestination.CREATE_ALBUM_ROUTE,
         ) {
             CreateAlbumRoute(
+                coroutineScope = coroutineScope,
+                popBackStack = navActions.popBackStack,
+            )
+        }
+
+        composable(
+            route = MomentwoDestination.FRIEND_ROUTE,
+        ) {
+            FriendRoute(
                 coroutineScope = coroutineScope,
                 popBackStack = navActions.popBackStack,
             )

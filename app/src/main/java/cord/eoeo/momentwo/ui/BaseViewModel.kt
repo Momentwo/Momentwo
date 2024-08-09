@@ -16,6 +16,8 @@ interface UiEvent
 interface UiEffect
 
 const val SIDE_EFFECTS_KEY = "side_effects"
+const val START_EFFECTS_KEY = "start_effects"
+const val RESUME_EFFECTS_KEY = "resume_effects"
 
 abstract class BaseViewModel<State : UiState, Event : UiEvent, Effect : UiEffect> : ViewModel() {
     private val initialState: State by lazy { createInitialState() }

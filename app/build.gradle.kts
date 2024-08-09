@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation(libs.icons)
+    implementation(libs.icons.extended)
 
     // Lifecycle
     implementation(libs.lifecycle.runtime)

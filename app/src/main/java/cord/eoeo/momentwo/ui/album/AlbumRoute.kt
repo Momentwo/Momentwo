@@ -10,12 +10,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.ImageLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun AlbumRoute(
     coroutineScope: CoroutineScope,
+    imageLoader: ImageLoader,
     navigateToCreateAlbum: () -> Unit,
     navigateToFriend: () -> Unit,
     modifier: Modifier = Modifier,
@@ -27,6 +29,7 @@ fun AlbumRoute(
 
     AlbunScreen(
         coroutineScope = coroutineScope,
+        imageLoader = imageLoader,
         uiState = { uiState },
         effectFlow = { viewModel.effect },
         onEvent = { event -> viewModel.setEvent(event) },

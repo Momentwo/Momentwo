@@ -82,6 +82,10 @@ dependencies {
     implementation(libs.moshi)
     implementation(libs.moshi.converter)
 
+    // coil
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

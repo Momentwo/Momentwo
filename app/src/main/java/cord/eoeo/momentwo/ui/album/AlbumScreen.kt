@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.album.composable.AlbumItemCard
 import cord.eoeo.momentwo.ui.model.AlbumItem
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.onEach
 @Composable
 fun AlbunScreen(
     coroutineScope: CoroutineScope,
+    imageLoader: ImageLoader,
     uiState: () -> AlbumContract.State,
     effectFlow: () -> Flow<AlbumContract.Effect>,
     onEvent: (event: AlbumContract.Event) -> Unit,
@@ -77,17 +79,17 @@ fun AlbunScreen(
 
     // 테스트용 가짜 앨범 아이템 리스트
     val fakeItems = listOf(
-        AlbumItem(1, "Album1"),
-        AlbumItem(2, "Album2"),
-        AlbumItem(3, "Album3"),
-        AlbumItem(4, "Album4"),
-        AlbumItem(5, "Album5"),
-        AlbumItem(6, "Album6"),
-        AlbumItem(7, "Album7"),
-        AlbumItem(8, "Album8"),
-        AlbumItem(9, "Album9"),
-        AlbumItem(10, "Album10"),
-        AlbumItem(11, "Album11"),
+        AlbumItem(1, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album1", "Album1 Sub"),
+        AlbumItem(2, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album2", "Album2 Subb"),
+        AlbumItem(3, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album3", "Album3 Subbb"),
+        AlbumItem(4, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album4", "Album4 Subbbb"),
+        AlbumItem(5, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album5", "Album5 Subbbbb"),
+        AlbumItem(6, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album6", "Album6 Subbbbbb"),
+        AlbumItem(7, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album7", "Album7 Sub"),
+        AlbumItem(8, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album8", "Album8 Subbbbbbbbbbbbbbbbbb"),
+        AlbumItem(9, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album9", "Album9 Subbbbbbbbbbbb"),
+        AlbumItem(10, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album10", "Album10 Sub"),
+        AlbumItem(11, "https://avatars.githubusercontent.com/u/166040906?s=200&v=4", "Album11", "Album11 Subbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
     )
 
     ModalNavigationDrawer(
@@ -120,6 +122,7 @@ fun AlbunScreen(
             ) {
                 items(items = fakeItems, key = { it.id }) { albumItem ->
                     AlbumItemCard(
+                        imageLoader = imageLoader,
                         albumItem = { albumItem },
                         modifier = Modifier.animateItemPlacement(),
                     )

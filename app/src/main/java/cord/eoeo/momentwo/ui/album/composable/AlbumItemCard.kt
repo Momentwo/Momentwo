@@ -4,42 +4,67 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.ImageLoader
+import coil.compose.AsyncImage
 import cord.eoeo.momentwo.ui.model.AlbumItem
 
 @Composable
 fun AlbumItemCard(
+    imageLoader: ImageLoader,
     albumItem: () -> AlbumItem,
-    modifier: Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(16.dp),
     ) {
         ElevatedCard(
             onClick = { /*TODO: Navigate to Album Detail*/ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f),
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            /* TODO: 앨범 대표사진 Grid 구현 */
+            AsyncImage(
+                model = albumItem().image,
+                contentDescription = "대표 이미지",
+                imageLoader = imageLoader,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(8.dp)),
+            )
+            Text(
+                text = albumItem().title,
+                maxLines = 1,
+                fontWeight = FontWeight.SemiBold,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, start = 8.dp, end = 8.dp),
+            )
+            Text(
+                text = albumItem().subTitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontSize = 13.sp,
+                color = Color.Gray,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
+            )
         }
-
-        Text(
-            text = albumItem().title,
-            maxLines = 1,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp, 8.dp, 0.dp, 0.dp),
-        )
     }
 }

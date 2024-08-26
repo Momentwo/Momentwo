@@ -6,6 +6,7 @@ object MomentwoDestination {
     const val LOGIN_ROUTE = "login"
     const val SIGNUP_ROUTE = "signup"
     const val ALBUM_ROUTE = "album"
+    const val ALBUM_DETAIL_ROUTE = "album_detail"
     const val CREATE_ALBUM_ROUTE = "create_album"
     const val FRIEND_ROUTE = "friend"
 }
@@ -28,6 +29,9 @@ class MomentwoNavigationActions(navController: NavHostController) {
             launchSingleTop = true
             popUpTo(navController.graph.id)
         }
+    }
+    val navigateToAlbumDetail: () -> Unit = {
+        navController.navigate(MomentwoDestination.ALBUM_DETAIL_ROUTE)
     }
     val navigateToCreateAlbum: () -> Unit = {
         navController.navigate(MomentwoDestination.CREATE_ALBUM_ROUTE)

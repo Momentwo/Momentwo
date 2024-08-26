@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.ImageLoader
 import cord.eoeo.momentwo.ui.album.AlbumRoute
+import cord.eoeo.momentwo.ui.albumdetail.AlbumDetailRoute
 import cord.eoeo.momentwo.ui.createalbum.CreateAlbumRoute
 import cord.eoeo.momentwo.ui.friend.FriendRoute
 import cord.eoeo.momentwo.ui.login.LoginRoute
@@ -52,7 +53,18 @@ fun MomentwoNavGraph(
                 coroutineScope = coroutineScope,
                 navigateToCreateAlbum = navActions.navigateToCreateAlbum,
                 navigateToFriend = navActions.navigateToFriend,
+                navigateToAlbumDetail = navActions.navigateToAlbumDetail,
                 imageLoader = imageLoader,
+            )
+        }
+
+        composable(
+            route = MomentwoDestination.ALBUM_DETAIL_ROUTE,
+        ) {
+            AlbumDetailRoute(
+                coroutineScope = coroutineScope,
+                imageLoader = imageLoader,
+                popBackStack = navActions.popBackStack,
             )
         }
 

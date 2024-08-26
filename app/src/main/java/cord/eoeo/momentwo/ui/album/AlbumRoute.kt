@@ -20,6 +20,7 @@ fun AlbumRoute(
     imageLoader: ImageLoader,
     navigateToCreateAlbum: () -> Unit,
     navigateToFriend: () -> Unit,
+    navigateToAlbumDetail: () -> Unit,
     modifier: Modifier = Modifier,
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -27,7 +28,7 @@ fun AlbumRoute(
 ) {
     val uiState: AlbumContract.State by viewModel.uiState.collectAsStateWithLifecycle()
 
-    AlbunScreen(
+    AlbumScreen(
         coroutineScope = coroutineScope,
         imageLoader = imageLoader,
         uiState = { uiState },
@@ -39,5 +40,6 @@ fun AlbumRoute(
         onCloseDrawer = { coroutineScope.launch { drawerState.close() } },
         navigateToCreateAlbum = navigateToCreateAlbum,
         navigateToFriend = navigateToFriend,
+        navigateToAlbumDetail = navigateToAlbumDetail,
     )
 }

@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.onEach
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AlbunScreen(
+fun AlbumScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     uiState: () -> AlbumContract.State,
@@ -55,6 +55,7 @@ fun AlbunScreen(
     onCloseDrawer: () -> Unit,
     navigateToCreateAlbum: () -> Unit,
     navigateToFriend: () -> Unit,
+    navigateToAlbumDetail: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
@@ -98,7 +99,7 @@ fun AlbunScreen(
             AlbumDrawerContent(
                 navigateToProfile = { /*TODO: Navigate to Profile*/ },
                 navigateToFriend = navigateToFriend,
-                navigateToSetting = { /*TODO: Navigate to Search*/ },
+                navigateToSetting = { /*TODO: Navigate to Setting*/ },
             )
         },
     ) {
@@ -124,6 +125,7 @@ fun AlbunScreen(
                     AlbumItemCard(
                         imageLoader = imageLoader,
                         albumItem = { albumItem },
+                        navigateToAlbumDetail = navigateToAlbumDetail,
                         modifier = Modifier.animateItemPlacement(),
                     )
                 }

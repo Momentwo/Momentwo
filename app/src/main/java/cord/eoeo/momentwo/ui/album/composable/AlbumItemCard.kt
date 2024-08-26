@@ -1,16 +1,19 @@
 package cord.eoeo.momentwo.ui.album.composable
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -23,6 +26,7 @@ import cord.eoeo.momentwo.ui.model.AlbumItem
 fun AlbumItemCard(
     imageLoader: ImageLoader,
     albumItem: () -> AlbumItem,
+    navigateToAlbumDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -32,18 +36,19 @@ fun AlbumItemCard(
                 .padding(16.dp),
     ) {
         ElevatedCard(
-            onClick = { /*TODO: Navigate to Album Detail*/ },
+            onClick = navigateToAlbumDetail,
             modifier = Modifier.fillMaxWidth(),
         ) {
             AsyncImage(
                 model = albumItem().image,
                 contentDescription = "대표 이미지",
                 imageLoader = imageLoader,
+                contentScale = ContentScale.Crop,
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(RoundedCornerShape(6.dp)),
             )
             Text(
                 text = albumItem().title,

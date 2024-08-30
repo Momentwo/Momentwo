@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -14,13 +15,14 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -41,47 +43,55 @@ fun LoginScreen(
     snackbarHostState: () -> SnackbarHostState,
     navigateToAlbum: () -> Unit,
     navigateToSignUp: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow().onEach { effect ->
-            when (effect) {
-                is LoginContract.Effect.NavigateToAlbum -> {
-                    navigateToAlbum()
-                }
+        onEvent(LoginContract.Event.OnRequestAutoLogin)
 
-                is LoginContract.Effect.NavigateToSignUp -> {
-                    navigateToSignUp()
-                }
+        effectFlow()
+            .onEach { effect ->
+                when (effect) {
+                    is LoginContract.Effect.NavigateToAlbum -> {
+                        navigateToAlbum()
+                    }
 
-                is LoginContract.Effect.ShowSnackbar -> {
-                    snackbarHostState().showSnackbar(
-                        message = effect.message,
-                    )
+                    is LoginContract.Effect.NavigateToSignUp -> {
+                        navigateToSignUp()
+                    }
+
+                    is LoginContract.Effect.ShowSnackbar -> {
+                        snackbarHostState().showSnackbar(
+                            message = effect.message,
+                        )
+                    }
                 }
-            }
-        }.collect()
+            }.collect()
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
-    ) { paddingValues ->
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
         Text(
             text = "Momentwo",
             fontSize = 48.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            fontFamily = FontFamily.Cursive,
             textAlign = TextAlign.Center,
-            lineHeight = 160.sp,
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+                    .wrapContentHeight(align = Alignment.CenterVertically),
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
+            modifier =
+                Modifier
+                    .weight(2f)
+                    .fillMaxSize(),
         ) {
             TextField(
                 value = uiState().email,
@@ -90,9 +100,10 @@ fun LoginScreen(
                 leadingIcon = { Icon(Icons.Default.Email, "E-Mail") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 onValueChange = { onEvent(LoginContract.Event.OnEmailEntered(it)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp, 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp, 12.dp),
             )
             TextField(
                 value = uiState().password,
@@ -103,38 +114,43 @@ fun LoginScreen(
                 keyboardActions = KeyboardActions(onDone = { onEvent(LoginContract.Event.OnLoginClicked) }),
                 visualTransformation = PasswordVisualTransformation(),
                 onValueChange = { onEvent(LoginContract.Event.OnPasswordEntered(it)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp, 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp, 12.dp),
             )
 
             Button(
                 onClick = { onEvent(LoginContract.Event.OnLoginClicked) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp, 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp, 12.dp),
             ) {
                 Text(text = "Login")
             }
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp, 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp, 12.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Text(
                     text = "회원가입",
-                    modifier = Modifier
-                        .padding(8.dp, 0.dp)
-                        .clickable { onEvent(LoginContract.Event.OnSignUpClicked) },
+                    modifier =
+                        Modifier
+                            .padding(8.dp, 0.dp)
+                            .clickable { onEvent(LoginContract.Event.OnSignUpClicked) },
                 )
                 Text(text = "|", modifier = Modifier.padding(16.dp, 0.dp))
                 Text(
                     text = "아이디/비밀번호 찾기",
-                    modifier = Modifier
-                        .padding(8.dp, 0.dp)
-                        .clickable { /* TODO */ },
+                    modifier =
+                        Modifier
+                            .padding(8.dp, 0.dp)
+                            .clickable { /* TODO */ },
                 )
             }
         }

@@ -86,6 +86,9 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.compose)
 
+    // DataStore
+    implementation(libs.datastore)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

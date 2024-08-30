@@ -18,6 +18,7 @@ class LoginContract {
         data class OnPasswordEntered(val password: String) : Event
         data object OnLoginClicked : Event
         data object OnSignUpClicked : Event
+        data object OnRequestAutoLogin : Event
         data class OnError(val errorMessage: String) : Event
     }
 

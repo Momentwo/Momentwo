@@ -10,6 +10,6 @@ data class LoginRequest(
 
 @JsonClass(generateAdapter = true)
 data class LoginResponse(
-    val originToken: String,
+    val accessToken: String,
     val refreshToken: String,
 )

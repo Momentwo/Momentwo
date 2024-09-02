@@ -17,9 +17,18 @@
 > - 공유된 사진에 좋아요, 댓글을 남겨 추억을 함께 떠올려보세요.
 
 ## 🔗 Links
-<a href="" target="_blank"><img src="https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=Figma&logoColor=white"/></a> <!-- Figma -->
-<a href="" target="_blank"><img src="https://img.shields.io/badge/Wiki-181717?style=for-the-badge&logo=Github&logoColor=white"/></a> <!-- Wiki -->
-<a href="" target="_blank"><img src="https://img.shields.io/badge/API 명세서-34A853?style=for-the-badge&logo=Google Sheets&logoColor=white"/></a> <!-- Google Sheet -->
+<a href="https://www.figma.com/design/9BrDrys4FBGbLddElob9fe/Momentwo-App?node-id=0-1&node-type=CANVAS" target="_blank"><img src="https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=Figma&logoColor=white"/></a> <!-- Figma -->
+<a href="https://github.com/orgs/Momentwo/projects/2/views/1" target="_blank"><img src="https://img.shields.io/badge/Projects-181717?style=for-the-badge&logo=Github&logoColor=white"/></a> <!-- Projects -->
+<a href="https://github.com/Momentwo/.github/wiki" target="_blank"><img src="https://img.shields.io/badge/Wiki-181717?style=for-the-badge&logo=Github&logoColor=white"/></a> <!-- Wiki -->
+<a href="https://docs.google.com/spreadsheets/d/1YRfMq25zHXb-t9I5BtCy1J-0f9CEuApI4UbKw0r2kqg/edit?gid=0#gid=0" target="_blank"><img src="https://img.shields.io/badge/API 명세서-34A853?style=for-the-badge&logo=Google Sheets&logoColor=white"/></a> <!-- Google Sheet -->
+
+---
+
+## 👨🏻‍💻팀원 소개🧑🏻‍💻
+
+|               |              |
+|:---------------------------------------:|:--------------------------------------:|
+|   [이지우](https://github.com/CordHouse)   |   [김재현](https://github.com/eoeo0326)   |
 
 ---
 
@@ -61,10 +70,12 @@
             <tr>
                 <td><img src="https://github.com/user-attachments/assets/817b703d-a0d0-462d-948c-7a4ebb093cd6" width="180" /></td>
                 <td><img src="https://github.com/user-attachments/assets/fed39523-dfc6-4c64-85ff-13f8277dc867" width="180" /></td>
+                <td></td>
             </tr>
             <tr>
                 <td>친구 목록</td>
                 <td>친구 요청 목록</td>
+                <td></td>
             </tr>
       </table>
 </details>
@@ -74,12 +85,11 @@
 ## 🔎 주요 기능 소개
 
 ### 앨범
-
-https://github.com/user-attachments/assets/22dc2f31-8c77-431c-85ac-c6fbb37216be
+| <img src="https://github.com/user-attachments/assets/ee0bb61f-4276-4a4c-aa6d-31dd14caca39" width="250" /> | <img src="https://github.com/user-attachments/assets/331bfa0a-2451-4935-ae41-f5934c8b73c3" width="250" /> |
+|:---------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|
+|                                               홈 화면 - 앨범 생성                                                |                                                앨범 상세 정보 화면                                                |
 - 앨범 목록에서 각 앨범의 대표 사진, 제목, 소제목을 확인할 수 있습니다.
 - 우측 하단의 ‘+’ 버튼을 클릭하여 새로운 앨범을 생성할 수 있습니다.
-
-https://github.com/user-attachments/assets/8297eb7e-5789-4169-a4f4-2efbf49f88dc
 - 앨범을 클릭하면 해당 앨범의 서브 앨범 목록을 확인할 수 있습니다.
 - 앨범에 속한 멤버 목록을 확인할 수 있습니다.
 - 앨범 제목, 대표 사진 등 앨범의 구성요소를 수정할 수 있습니다. (관리자 권한)
@@ -93,8 +103,9 @@ https://github.com/user-attachments/assets/8297eb7e-5789-4169-a4f4-2efbf49f88dc
 - Work In Progress…
 
 ### 친구
-
-https://github.com/user-attachments/assets/64cb6035-b313-4db6-9544-8d1bdd58fb0d
+| <img src="https://github.com/user-attachments/assets/54f04c94-35d3-4b59-afde-965bfbbd1590" width="250" /> |
+|:---------------------------------------------------------------------------------------------------------:|
+|                                               친구 목록 / 요청 목록                                               |
 - 홈 화면 죄측 Drawer를 통해 친구 화면으로 이동할 수 있습니다.
 - 친구 화면에서는 친구 목록을 조회하고, 친구 요청을 관리할 수 있습니다.
 - 우측 상단 친구 추가 버튼을 통해 사용자를 검색하고 친구 요청을 보낼 수 있습니다. (WIP)
@@ -127,4 +138,3 @@ https://github.com/user-attachments/assets/64cb6035-b313-4db6-9544-8d1bdd58fb0d
 | Local Storage | DataStore |
 | Asynchronous | Coroutines, Flow |
 | Others | Coil(Image), Retrofit(HTTP client), Moshi(Serialization) |
-

@@ -78,6 +78,11 @@ dependencies {
     // retrofit
     implementation(libs.retrofit)
 
+    // okhttp
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+
     // moshi
     implementation(libs.moshi)
     implementation(libs.moshi.converter)

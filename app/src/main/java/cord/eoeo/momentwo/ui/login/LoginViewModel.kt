@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.ui.login
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import cord.eoeo.momentwo.data.datastore.PreferenceRepository
+import cord.eoeo.momentwo.data.authentication.PreferenceRepository
 import cord.eoeo.momentwo.data.login.LoginRepository
 import cord.eoeo.momentwo.ui.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

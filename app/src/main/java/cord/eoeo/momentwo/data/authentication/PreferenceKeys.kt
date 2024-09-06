@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.data.datastore
+package cord.eoeo.momentwo.data.authentication
 
 import androidx.datastore.preferences.core.stringPreferencesKey
 

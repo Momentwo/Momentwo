@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend.composable
+package cord.eoeo.momentwo.ui.friend.friendlist
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -16,10 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.ui.model.FriendItem
 
 @Composable
-fun FriendItem(item: () -> UserItem) {
+fun FriendListItem(item: () -> FriendItem) {
     Row(
         modifier =
             Modifier
@@ -30,7 +30,10 @@ fun FriendItem(item: () -> UserItem) {
         Icon(
             imageVector = Icons.Default.AccountCircle,
             contentDescription = "",
-            modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(1f),
         )
         Text(
             text = item().nickname,

@@ -27,6 +27,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.ui.composable.RequestFriendDialog
 import cord.eoeo.momentwo.ui.friend.friendlist.FriendListScreen
 import cord.eoeo.momentwo.ui.friend.friendrequest.FriendRequestRoute
 import cord.eoeo.momentwo.ui.model.BottomNavigationItem
@@ -65,6 +66,13 @@ fun FriendScreen(
             }.collect()
     }
 
+    if (uiState().isRequestDialogOpened) {
+        RequestFriendDialog(
+            onConfirm = { onEvent(FriendContract.Event.SendFriendRequest(it)) },
+            onDismiss = { onEvent(FriendContract.Event.OnDismissRequestFriend) },
+        )
+    }
+
     val items =
         listOf(
             BottomNavigationItem(
@@ -86,7 +94,7 @@ fun FriendScreen(
             FriendTopAppBar(
                 selectedNavIndex = { uiState().selectedNavIndex },
                 onClickBack = { onEvent(FriendContract.Event.OnBack) },
-                onClickAdd = { /* TODO: Open Add Friend Dialog */ },
+                onClickAdd = { onEvent(FriendContract.Event.OnClickRequestFriend) },
             )
         },
         bottomBar = {
@@ -107,7 +115,7 @@ fun FriendScreen(
                     FriendListScreen(
                         friendList = { uiState().friendList },
                         isFriendListChanged = { uiState().isFriendListChanged },
-                        getFriendList = { onEvent(FriendContract.Event.getFriendList) },
+                        getFriendList = { onEvent(FriendContract.Event.GetFriendList) },
                     )
                 }
                 composable(route = FriendDestination.REQUEST_ROUTE) {
@@ -117,8 +125,34 @@ fun FriendScreen(
                         sentRequests = { uiState().sentRequests },
                         isReceivedListChanged = { uiState().isReceivedListChanged },
                         isSentListChanged = { uiState().isSentListChanged },
-                        getReceivedRequests = { onEvent(FriendContract.Event.getReceivedRequests) },
-                        getSentRequests = { onEvent(FriendContract.Event.getSentRequests) },
+                        getReceivedRequests = { onEvent(FriendContract.Event.GetReceivedRequests) },
+                        getSentRequests = { onEvent(FriendContract.Event.GetSentRequests) },
+                        onClickAccept = { index, nickname ->
+                            onEvent(
+                                FriendContract.Event.ResponseFriendRequest(
+                                    index,
+                                    nickname,
+                                    true,
+                                ),
+                            )
+                        },
+                        onClickReject = { index, nickname ->
+                            onEvent(
+                                FriendContract.Event.ResponseFriendRequest(
+                                    index,
+                                    nickname,
+                                    false,
+                                ),
+                            )
+                        },
+                        onClickCancel = { index, nickname ->
+                            onEvent(
+                                FriendContract.Event.CancelFriendRequest(
+                                    index,
+                                    nickname,
+                                ),
+                            )
+                        },
                     )
                 }
             }

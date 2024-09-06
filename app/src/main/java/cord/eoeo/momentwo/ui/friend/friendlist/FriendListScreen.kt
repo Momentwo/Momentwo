@@ -8,28 +8,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
 import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.friend.composable.FriendItem
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.ui.model.FriendItem
 
 @Composable
 fun FriendListScreen(
-    friendList: () -> List<UserItem>,
+    friendList: () -> List<FriendItem>,
     isFriendListChanged: () -> Boolean,
     getFriendList: () -> Unit,
 ) {
     LifecycleStartEffect(START_EFFECTS_KEY) {
-        if (isFriendListChanged()) {
-            getFriendList()
-            Log.d("Friend", "FriendListScreen Started")
+        getFriendList()
+        Log.d("FriendScreen", "FriendListScreen STARTED")
+        onStopOrDispose {
+            Log.d("FriendScreen", "FriendListScreen STOPED")
         }
-        onStopOrDispose { }
     }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
-        items(items = friendList(), key = { it.id }) { userItem ->
-            FriendItem(item = { userItem })
+        items(items = friendList(), key = { it.nickname }) { friendItem ->
+            FriendListItem(item = { friendItem })
         }
     }
 }

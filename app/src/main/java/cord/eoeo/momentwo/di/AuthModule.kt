@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import cord.eoeo.momentwo.data.datastore.PreferenceRepository
-import cord.eoeo.momentwo.data.datastore.PreferenceRepositoryImpl
+import cord.eoeo.momentwo.data.authentication.AuthInterceptor
+import cord.eoeo.momentwo.data.authentication.PreferenceRepository
+import cord.eoeo.momentwo.data.authentication.PreferenceRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object PreferenceModule {
+object AuthModule {
     private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore("momentwo")
 
     @Provides
@@ -27,4 +28,8 @@ object PreferenceModule {
     @Provides
     @Singleton
     fun providePreferenceRepository(userDataStore: DataStore<Preferences>): PreferenceRepository = PreferenceRepositoryImpl(userDataStore)
+
+    @Provides
+    @Singleton
+    fun provideAuthInterceptor(preferenceRepository: PreferenceRepository): AuthInterceptor = AuthInterceptor(preferenceRepository)
 }

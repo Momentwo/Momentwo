@@ -1,12 +1,11 @@
 package cord.eoeo.momentwo.ui.friend.friendrequest
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.Tab
@@ -18,9 +17,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import cord.eoeo.momentwo.ui.RESUME_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.friend.composable.FriendItem
-import cord.eoeo.momentwo.ui.friend.composable.FriendRequestItem
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.ui.model.FriendRequestItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -28,23 +25,20 @@ import kotlinx.coroutines.launch
 @Composable
 fun FriendRequestScreen(
     coroutineScope: CoroutineScope,
-    receivedRequests: () -> List<UserItem>,
-    sentRequests: () -> List<UserItem>,
+    receivedRequests: () -> List<FriendRequestItem>,
+    sentRequests: () -> List<FriendRequestItem>,
     isReceivedListChanged: () -> Boolean,
     isSentListChanged: () -> Boolean,
     getReceivedRequests: () -> Unit,
     getSentRequests: () -> Unit,
+    onClickAccept: (Int, String) -> Unit,
+    onClickReject: (Int, String) -> Unit,
+    onClickCancel: (Int, String) -> Unit,
     pagerState: () -> PagerState,
 ) {
     LifecycleStartEffect(START_EFFECTS_KEY) {
-        if (isReceivedListChanged()) {
-            getReceivedRequests()
-            Log.d("Friend", "ReceivedRequestScreen Started")
-        }
-        if (isSentListChanged()) {
-            getSentRequests()
-            Log.d("Friend", "SentRequestScreen Started")
-        }
+        getReceivedRequests()
+        getSentRequests()
         onStopOrDispose { }
     }
 
@@ -80,6 +74,8 @@ fun FriendRequestScreen(
                         receivedRequests = receivedRequests,
                         isReceivedListChanged = isReceivedListChanged,
                         getReceivedRequests = getReceivedRequests,
+                        onClickAccept = onClickAccept,
+                        onClickReject = onClickReject,
                     )
                 }
 
@@ -88,6 +84,7 @@ fun FriendRequestScreen(
                         sentRequests = sentRequests,
                         isSentListChanged = isSentListChanged,
                         getSentRequests = getSentRequests,
+                        onClickCancel = onClickCancel,
                     )
                 }
             }
@@ -97,27 +94,25 @@ fun FriendRequestScreen(
 
 @Composable
 fun ReceivedRequestScreen(
-    receivedRequests: () -> List<UserItem>,
+    receivedRequests: () -> List<FriendRequestItem>,
     isReceivedListChanged: () -> Boolean,
     getReceivedRequests: () -> Unit,
+    onClickAccept: (Int, String) -> Unit,
+    onClickReject: (Int, String) -> Unit,
 ) {
     LifecycleResumeEffect(RESUME_EFFECTS_KEY) {
-        if (isReceivedListChanged()) {
-            getReceivedRequests()
-            Log.d("Friend", "ReceivedRequestScreen Resumed")
-        }
+        getReceivedRequests()
         onPauseOrDispose { }
     }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
-        /* TODO: 요청 수락, 거절 여부를 알 수 있는 별도의 Data Type 필요 */
-        items(items = receivedRequests(), key = { it.id }) { userItem ->
-            FriendRequestItem(
-                item = { userItem },
-                onAcceptRequest = { /*TODO: Accept Request*/ },
-                onRejectRequest = { /*TODO: Reject Request*/ },
+        itemsIndexed(items = receivedRequests(), key = { _, item -> item.nickname }) { index, friendRequestItem ->
+            ReceivedFriendRequestItem(
+                item = { friendRequestItem },
+                onClickAccept = { onClickAccept(index, friendRequestItem.nickname) },
+                onClickReject = { onClickReject(index, friendRequestItem.nickname) },
             )
         }
     }
@@ -125,23 +120,24 @@ fun ReceivedRequestScreen(
 
 @Composable
 fun SentRequestScreen(
-    sentRequests: () -> List<UserItem>,
+    sentRequests: () -> List<FriendRequestItem>,
     isSentListChanged: () -> Boolean,
     getSentRequests: () -> Unit,
+    onClickCancel: (Int, String) -> Unit,
 ) {
     LifecycleResumeEffect(RESUME_EFFECTS_KEY) {
-        if (isSentListChanged()) {
-            getSentRequests()
-            Log.d("Friend", "SentRequestScreen Resumed")
-        }
+        getSentRequests()
         onPauseOrDispose { }
     }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
-        items(items = sentRequests(), key = { it.id }) { userItem ->
-            FriendItem(item = { userItem })
+        itemsIndexed(items = sentRequests(), key = { _, item -> item.nickname }) { index, friendRequestItem ->
+            SentFriendRequestItem(
+                item = { friendRequestItem },
+                onClickCancel = { onClickCancel(index, friendRequestItem.nickname) },
+            )
         }
     }
 }

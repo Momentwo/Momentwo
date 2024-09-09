@@ -11,6 +11,19 @@ object MomentwoApi {
     // Login
     const val POST_LOGIN = "/signin"
 
+    // Album
+    const val POST_CREATE_ALBUM = "/albums/create"
+    /** Require @Path("id") */
+    const val DELETE_ALBUM = "/albums/delete/{id}"
+    const val PUT_ALBUM_IMAGE = "/albums/profile/image/upload"
+    /** Require @Path("albumId") */
+    const val DELETE_ALBUM_IMAGE = "/albums/profile/image/{albumId}"
+    const val PUT_ALBUM_SUBTITLE = "/albums/subtitle"
+    /** Require @Path("albumId") */
+    const val DELETE_ALBUM_SUBTITLE = "/albums/subtitle/{albumId}"
+    /** Require @Path("id") */
+    const val PUT_ALBUM_TITLE = "/albums/edit/{id}"
+
     // Friend
     const val POST_FRIEND_REQUEST = "/friendship/request"
     const val DELETE_FRIEND_REQUEST = "/friendship/request/cancel"

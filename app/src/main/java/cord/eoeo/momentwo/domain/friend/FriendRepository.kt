@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.data.friend
+package cord.eoeo.momentwo.domain.friend
 
 import cord.eoeo.momentwo.ui.model.FriendItem
 import cord.eoeo.momentwo.ui.model.FriendRequestItem

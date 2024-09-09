@@ -14,109 +14,141 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import cord.eoeo.momentwo.ui.model.FriendItem
 import cord.eoeo.momentwo.ui.model.UserItem
+
+@Composable
+fun InviteDialog(
+    friendItemList: () -> List<FriendItem>,
+    selectedFriendList: () -> List<FriendItem>,
+    getIsChecked: (String) -> Boolean,
+    onClickClear: (FriendItem) -> Unit,
+    onCheckedChange: (Boolean, FriendItem) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    var searchQuery: String by rememberSaveable { mutableStateOf("") }
+    val searchRegex = Regex(searchQuery, RegexOption.IGNORE_CASE)
+
+    InviteDialogScreen(
+        searchQuery = { searchQuery },
+        searchRegex = { searchRegex },
+        friendItemList = friendItemList,
+        selectedFriendList = selectedFriendList,
+        getIsChecked = getIsChecked,
+        onQueryChange = { searchQuery = it },
+        onSearch = { searchQuery = it },
+        onClickClear = onClickClear,
+        onCheckedChange = onCheckedChange,
+        onDismiss = onDismiss,
+        onConfirm = { onConfirm() },
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun InviteDialog(
-    onDismissRequest: () -> Unit
+fun InviteDialogScreen(
+    searchQuery: () -> String,
+    searchRegex: () -> Regex,
+    friendItemList: () -> List<FriendItem>,
+    selectedFriendList: () -> List<FriendItem>,
+    getIsChecked: (String) -> Boolean,
+    onQueryChange: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    onClickClear: (FriendItem) -> Unit,
+    onCheckedChange: (Boolean, FriendItem) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
 ) {
-    val fakeFriendItems = listOf(
-        UserItem(1, "User1"),
-        UserItem(2, "User22"),
-        UserItem(3, "User333"),
-        UserItem(4, "User4"),
-        UserItem(5, "User55"),
-        UserItem(6, "User6666"),
-        UserItem(7, "User77"),
-        UserItem(8, "User8"),
-        UserItem(9, "User9999"),
-        UserItem(10, "User10"),
-        UserItem(11, "User1111"),
-        UserItem(12, "User12"),
-    )
-
-    var str: String by remember { mutableStateOf("") }
-
     Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-        ),
+        onDismissRequest = onDismiss,
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth = false,
+            ),
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 48.dp),
+            modifier = Modifier.fillMaxSize(),
             shape = RoundedCornerShape(16.dp),
         ) {
             SearchBar(
-                query = str,
-                onQueryChange = { str = it },
-                onSearch = {},
+                query = searchQuery(),
+                onQueryChange = onQueryChange,
+                onSearch = onSearch,
                 active = true,
-                onActiveChange = {},
+                onActiveChange = { },
                 placeholder = { Text(text = "친구 검색") },
                 leadingIcon = {
-                    IconButton(onClick = onDismissRequest) {
+                    IconButton(onClick = onDismiss) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, "")
                     }
                 },
                 trailingIcon = {
-                    IconButton(onClick = { /*TODO: Search*/ }) {
-                        Icon(Icons.Default.Search, "")
+                    if (searchQuery().isNotEmpty()) {
+                        IconButton(onClick = { onQueryChange("") }) {
+                            Icon(Icons.Default.Clear, "")
+                        }
                     }
                 },
             ) {
-                LazyRow(
-                    modifier = Modifier
-                        .height(80.dp)
-                        .fillMaxWidth(),
-                ) {
-                    items(items = fakeFriendItems, key = { it.id }) { userItem ->
-                        UserItemBox(
-                            userItem = { userItem },
-                            onClickClear = { /*TODO*/ },
-                            modifier = Modifier
-                                .animateItemPlacement()
-                                .fillMaxHeight(),
-                        )
+                if (selectedFriendList().isNotEmpty()) {
+                    LazyRow(
+                        modifier =
+                            Modifier
+                                .height(80.dp)
+                                .fillMaxWidth(),
+                    ) {
+                        items(items = selectedFriendList(), key = { it.nickname }) { friendItem ->
+                            UserItemBox(
+                                userItem = { UserItem(0, friendItem.nickname) },
+                                onClickClear = { onCheckedChange(false, friendItem) },
+                                modifier =
+                                    Modifier
+                                        .animateItemPlacement()
+                                        .fillMaxHeight(),
+                            )
+                        }
                     }
+
+                    HorizontalDivider()
                 }
 
-                HorizontalDivider()
-
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                 ) {
-                    items(items = fakeFriendItems, key = { it.id }) { userItem ->
-                        ListItem(
-                            leadingContent = { Icon(Icons.Default.AccountCircle, "") },
-                            headlineContent = { Text(text = userItem.nickname) },
-                            trailingContent = { Checkbox(checked = true, onCheckedChange = { /**/ }) },
+                    items(
+                        items = friendItemList().filter { it.nickname.contains(searchRegex()) },
+                        key = { it.nickname },
+                    ) { friendItem ->
+                        CheckboxListItem(
+                            itemText = { friendItem.nickname },
+                            onCheckedChange = { onCheckedChange(it, friendItem) },
+                            isChecked = { getIsChecked(friendItem.nickname) },
+                            modifier =
+                                Modifier
+                                    .animateItemPlacement()
+                                    .fillMaxWidth(),
                         )
                     }
                 }
@@ -125,11 +157,12 @@ fun InviteDialog(
 
                 Row(
                     horizontalArrangement = Arrangement.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                 ) {
-                    TextButton(onClick = { /*TODO: Confirm Invite Dialog*/ }) {
+                    TextButton(onClick = onConfirm) {
                         Text(text = "완료")
                     }
                 }

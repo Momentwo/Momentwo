@@ -1,10 +1,11 @@
 package cord.eoeo.momentwo.di
 
 import cord.eoeo.momentwo.data.friend.FriendDataSource
-import cord.eoeo.momentwo.data.friend.FriendRepository
+import cord.eoeo.momentwo.domain.friend.FriendRepository
 import cord.eoeo.momentwo.data.friend.FriendRepositoryImpl
 import cord.eoeo.momentwo.data.friend.remote.FriendRemoteDataSource
 import cord.eoeo.momentwo.data.friend.remote.FriendService
+import cord.eoeo.momentwo.domain.friend.GetFriendListUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,4 +27,8 @@ object FriendModule {
     @Provides
     @Singleton
     fun provideFriendRepository(friendRemoteDataSource: FriendDataSource): FriendRepository = FriendRepositoryImpl(friendRemoteDataSource)
+
+    @Provides
+    @Singleton
+    fun provideGetFriendListUseCase(friendRepository: FriendRepository) = GetFriendListUseCase(friendRepository)
 }

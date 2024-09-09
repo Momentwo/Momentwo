@@ -34,7 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.InviteDialog
 import cord.eoeo.momentwo.ui.composable.UserItemBox
 import cord.eoeo.momentwo.ui.model.UserItem
@@ -47,59 +49,72 @@ import kotlinx.coroutines.flow.onEach
 @Composable
 fun CreateAlbumScreen(
     coroutineScope: CoroutineScope,
+    title: () -> String,
+    onTitleChange: (String) -> Unit,
     uiState: () -> CreateAlbumContract.State,
     effectFlow: () -> Flow<CreateAlbumContract.Effect>,
     onEvent: (event: CreateAlbumContract.Event) -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow().onEach { effect ->
-            when (effect) {
-                is CreateAlbumContract.Effect.PopBackStack -> {
-                    popBackStack()
-                }
+    LifecycleStartEffect(START_EFFECTS_KEY) {
+        onEvent(CreateAlbumContract.Event.OnGetFriendList)
+        onStopOrDispose { }
+    }
 
-                is CreateAlbumContract.Effect.ShowSnackbar -> {
-                    snackbarHostState().showSnackbar(
-                        message = effect.message,
-                    )
+    LaunchedEffect(SIDE_EFFECTS_KEY) {
+        effectFlow()
+            .onEach { effect ->
+                when (effect) {
+                    is CreateAlbumContract.Effect.PopBackStack -> {
+                        popBackStack()
+                    }
+
+                    is CreateAlbumContract.Effect.ShowSnackbar -> {
+                        snackbarHostState().showSnackbar(
+                            message = effect.message,
+                        )
+                    }
                 }
-            }
-        }.collect()
+            }.collect()
     }
 
     if (uiState().isInviteFriendOpened) {
-        InviteDialog {
-            onEvent(CreateAlbumContract.Event.OnDismissInviteFriend)
-        }
+        InviteDialog(
+            friendItemList = { uiState().friendList },
+            selectedFriendList = { uiState().tempSelectedFriendList },
+            onClickClear = { onEvent(CreateAlbumContract.Event.OnCheckedChange(false, it)) },
+            onCheckedChange = { isChecked, friendItem ->
+                onEvent(
+                    CreateAlbumContract.Event.OnCheckedChange(
+                        isChecked,
+                        friendItem,
+                    ),
+                )
+            },
+            getIsChecked = { uiState().tempSelectedFriendMap[it] ?: false },
+            onDismiss = { onEvent(CreateAlbumContract.Event.OnDismissInviteFriend) },
+            onConfirm = { onEvent(CreateAlbumContract.Event.OnConfirmInviteFriend) },
+        )
     }
-
-    val fakeUserItems = listOf(
-        UserItem(1, "User1"),
-        UserItem(2, "User22"),
-        UserItem(3, "User333"),
-        UserItem(4, "User44444444"),
-        UserItem(5, "User5555"),
-        UserItem(6, "User66"),
-    )
 
     Scaffold(
         topBar = { CreateAlbumTopAppBar(onClickNavigation = { onEvent(CreateAlbumContract.Event.OnBack) }) },
         modifier = Modifier.fillMaxSize(),
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(top = 8.dp)
-                .padding(horizontal = 24.dp),
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .padding(top = 8.dp)
+                    .padding(horizontal = 24.dp),
         ) {
             TitleText(text = { "앨범명" })
             CaptionText(text = { "앨범을 나타낼 수 있는 이름을 지어주세요" })
             OutlinedTextField(
-                value = "",
-                onValueChange = { /*TODO*/ },
+                value = title(),
+                onValueChange = onTitleChange,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -107,16 +122,18 @@ fun CreateAlbumScreen(
 
             Row {
                 Column(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier =
+                        Modifier
+                            .weight(1f),
                 ) {
                     TitleText(text = { "친구 초대" })
                     CaptionText(text = { "앨범을 같이 사용할 친구를 초대하세요" })
                 }
                 ElevatedButton(
                     onClick = { onEvent(CreateAlbumContract.Event.OnClickInviteFriend) },
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically),
+                    modifier =
+                        Modifier
+                            .align(Alignment.CenterVertically),
                 ) {
                     Icon(Icons.Default.Add, "")
                     Spacer(modifier = Modifier.width(4.dp))
@@ -125,27 +142,30 @@ fun CreateAlbumScreen(
             }
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(80.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .weight(1f),
             ) {
-                items(items = fakeUserItems, key = { it.id }) { userItem ->
+                items(items = uiState().selectedFriendList, key = { it.nickname }) { friendItem ->
                     UserItemBox(
-                        userItem = { userItem },
-                        onClickClear = { /*TODO*/ },
-                        modifier = Modifier
-                            .animateItemPlacement()
-                            .fillMaxWidth(),
+                        userItem = { UserItem(0, friendItem.nickname) },
+                        onClickClear = { onEvent(CreateAlbumContract.Event.OnClearFriendItem(it)) },
+                        modifier =
+                            Modifier
+                                .animateItemPlacement()
+                                .fillMaxWidth(),
                     )
                 }
             }
 
             ConfirmExtendedFAB(
                 onClick = { /*TODO: Create Album & Navigate to Album*/ },
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(vertical = 16.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.End)
+                        .padding(vertical = 16.dp),
             )
         }
     }
@@ -153,9 +173,7 @@ fun CreateAlbumScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAlbumTopAppBar(
-    onClickNavigation: () -> Unit
-) {
+fun CreateAlbumTopAppBar(onClickNavigation: () -> Unit) {
     TopAppBar(
         title = {
             Text(

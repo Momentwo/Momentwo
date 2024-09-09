@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.friend
 
-import android.util.Log
+import cord.eoeo.momentwo.domain.friend.FriendRepository
 import cord.eoeo.momentwo.ui.model.FriendItem
 import cord.eoeo.momentwo.ui.model.FriendRequestItem
 

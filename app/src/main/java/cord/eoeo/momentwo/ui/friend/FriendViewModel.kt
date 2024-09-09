@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.ui.friend
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import cord.eoeo.momentwo.data.friend.FriendRepository
+import cord.eoeo.momentwo.domain.friend.FriendRepository
 import cord.eoeo.momentwo.ui.BaseViewModel
 import cord.eoeo.momentwo.ui.model.FriendRequestItem
 import dagger.hilt.android.lifecycle.HiltViewModel

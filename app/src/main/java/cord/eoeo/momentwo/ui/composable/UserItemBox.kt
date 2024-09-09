@@ -26,7 +26,7 @@ import cord.eoeo.momentwo.ui.model.UserItem
 @Composable
 fun UserItemBox(
     userItem: () -> UserItem,
-    onClickClear: () -> Unit,
+    onClickClear: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -35,7 +35,7 @@ fun UserItemBox(
             .padding(8.dp),
     ) {
         IconButton(
-            onClick = onClickClear,
+            onClick = { onClickClear(userItem().nickname) },
             modifier = Modifier
                 .size(18.dp)
                 .align(Alignment.TopEnd),

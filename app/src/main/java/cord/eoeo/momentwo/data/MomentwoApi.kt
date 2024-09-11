@@ -24,6 +24,13 @@ object MomentwoApi {
     /** Require @Path("id") */
     const val PUT_ALBUM_TITLE = "/albums/edit/{id}"
 
+    // SubAlbum
+    const val POST_CREATE_SUBALBUM = "/album/sub/create"
+    /** Require @Path("albumId") */
+    const val GET_SUBALBUM_LIST = "/album/sub/{albumId}"
+    const val PUT_EDIT_SUBALBUM = "/album/sub/edit"
+    const val DELETE_SUBALBUMS = "/album/sub/delete"
+
     // Friend
     const val POST_FRIEND_REQUEST = "/friendship/request"
     const val DELETE_FRIEND_REQUEST = "/friendship/request/cancel"

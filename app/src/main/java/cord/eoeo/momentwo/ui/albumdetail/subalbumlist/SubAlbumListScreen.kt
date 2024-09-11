@@ -16,19 +16,19 @@ import cord.eoeo.momentwo.ui.model.SubAlbumItem
 fun SubAlbumListScreen() {
     val fakeItems =
         listOf(
-            SubAlbumItem(1, "Sub1"),
-            SubAlbumItem(2, "Sub2"),
-            SubAlbumItem(3, "Sub3"),
-            SubAlbumItem(4, "Sub4"),
-            SubAlbumItem(5, "Sub5"),
-            SubAlbumItem(6, "Sub6"),
-            SubAlbumItem(7, "Sub7"),
-            SubAlbumItem(8, "Sub8"),
-            SubAlbumItem(9, "Sub9"),
-            SubAlbumItem(10, "Sub10"),
-            SubAlbumItem(11, "Sub11"),
-            SubAlbumItem(12, "Sub12"),
-            SubAlbumItem(13, "Sub13"),
+            SubAlbumItem(1, "Sub1", emptyList()),
+            SubAlbumItem(2, "Sub2", emptyList()),
+            SubAlbumItem(3, "Sub3", emptyList()),
+            SubAlbumItem(4, "Sub4", emptyList()),
+            SubAlbumItem(5, "Sub5", emptyList()),
+            SubAlbumItem(6, "Sub6", emptyList()),
+            SubAlbumItem(7, "Sub7", emptyList()),
+            SubAlbumItem(8, "Sub8", emptyList()),
+            SubAlbumItem(9, "Sub9", emptyList()),
+            SubAlbumItem(10, "Sub10", emptyList()),
+            SubAlbumItem(11, "Sub11", emptyList()),
+            SubAlbumItem(12, "Sub12", emptyList()),
+            SubAlbumItem(13, "Sub13", emptyList()),
         )
 
     LazyVerticalGrid(

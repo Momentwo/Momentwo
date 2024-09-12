@@ -31,6 +31,20 @@ object MomentwoApi {
     const val PUT_EDIT_SUBALBUM = "/album/sub/edit"
     const val DELETE_SUBALBUMS = "/album/sub/delete"
 
+    // Member
+    /** Require @Path("albumId") */
+    const val DELETE_EXIT_MEMBER = "/{albumId}/members/out"
+    /** Require @Path("albumId") */
+    const val POST_INVITE_MEMBERS = "/{albumId}/members/invite"
+    /** Require @Path("albumId") */
+    const val GET_MEMBER_LIST = "/{albumId}/members"
+    /** Require @Path("albumId") */
+    const val DELETE_KICK_MEMBERS = "/{albumId}/members/kick"
+    /** Require @Path("albumId") */
+    const val PUT_MEMBER_ASSIGN_ADMIN = "/{albumId}/members/assign/admin"
+    /** Require @Path("albumId") */
+    const val PUT_EDIT_MEMBERS_PERMISSION = "/{albumId}/members/permission"
+
     // Friend
     const val POST_FRIEND_REQUEST = "/friendship/request"
     const val DELETE_FRIEND_REQUEST = "/friendship/request/cancel"

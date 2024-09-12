@@ -50,7 +50,7 @@ fun MemberListItem(memberItem: () -> MemberItem) {
             }
         }
         Text(
-            text = memberItem().user.nickname,
+            text = memberItem().nickname,
             fontSize = 18.sp,
             modifier =
                 Modifier

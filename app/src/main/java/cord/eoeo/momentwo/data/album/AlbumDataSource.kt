@@ -2,7 +2,6 @@ package cord.eoeo.momentwo.data.album
 
 import cord.eoeo.momentwo.data.model.AlbumImage
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
-import cord.eoeo.momentwo.data.model.AlbumTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 
 interface AlbumDataSource {
@@ -20,6 +19,6 @@ interface AlbumDataSource {
 
     suspend fun changeAlbumTitle(
         albumId: Int,
-        albumTitle: AlbumTitle,
+        editTitle: String,
     ): Result<Unit>
 }

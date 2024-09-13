@@ -24,8 +24,3 @@ data class AlbumSubTitle(
     val albumId: Int,
     val subTitle: String,
 )
-
-@JsonClass(generateAdapter = true)
-data class AlbumTitle(
-    val title: String,
-)

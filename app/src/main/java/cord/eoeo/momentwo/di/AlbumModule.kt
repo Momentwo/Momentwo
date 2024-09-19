@@ -5,6 +5,7 @@ import cord.eoeo.momentwo.data.album.AlbumRepositoryImpl
 import cord.eoeo.momentwo.data.album.remote.AlbumRemoteDataSource
 import cord.eoeo.momentwo.data.album.remote.AlbumService
 import cord.eoeo.momentwo.domain.album.AlbumRepository
+import cord.eoeo.momentwo.domain.album.GetAlbumListUseCase
 import cord.eoeo.momentwo.domain.album.RequestCreateAlbumUseCase
 import dagger.Module
 import dagger.Provides
@@ -30,6 +31,10 @@ object AlbumModule {
 
     @Provides
     @Singleton
-    fun provideGetFriendListUseCase(albumRepository: AlbumRepository): RequestCreateAlbumUseCase =
+    fun provideRequestCreateAlbumUseCase(albumRepository: AlbumRepository): RequestCreateAlbumUseCase =
         RequestCreateAlbumUseCase(albumRepository)
+
+    @Provides
+    @Singleton
+    fun provideGetAlbumListUseCase(albumRepository: AlbumRepository): GetAlbumListUseCase = GetAlbumListUseCase(albumRepository)
 }

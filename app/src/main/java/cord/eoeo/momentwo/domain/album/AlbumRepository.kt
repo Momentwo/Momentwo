@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.domain.album
 
+import cord.eoeo.momentwo.ui.model.AlbumItem
 import okhttp3.MultipartBody
 
 interface AlbumRepository {
@@ -28,4 +29,6 @@ interface AlbumRepository {
         albumId: Int,
         title: String,
     ): Result<Unit>
+
+    suspend fun getAlbumList(): Result<List<AlbumItem>>
 }

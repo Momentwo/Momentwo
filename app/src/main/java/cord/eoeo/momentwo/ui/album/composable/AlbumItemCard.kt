@@ -1,13 +1,11 @@
 package cord.eoeo.momentwo.ui.album.composable
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -40,7 +38,7 @@ fun AlbumItemCard(
             modifier = Modifier.fillMaxWidth(),
         ) {
             AsyncImage(
-                model = albumItem().image,
+                model = albumItem().imageUrl,
                 contentDescription = "대표 이미지",
                 imageLoader = imageLoader,
                 contentScale = ContentScale.Crop,

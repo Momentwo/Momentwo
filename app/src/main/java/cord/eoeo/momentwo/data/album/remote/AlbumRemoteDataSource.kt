@@ -2,6 +2,7 @@ package cord.eoeo.momentwo.data.album.remote
 
 import cord.eoeo.momentwo.data.album.AlbumDataSource
 import cord.eoeo.momentwo.data.model.AlbumImage
+import cord.eoeo.momentwo.data.model.AlbumInfoList
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 import kotlinx.coroutines.CoroutineDispatcher
@@ -61,6 +62,13 @@ class AlbumRemoteDataSource(
         runCatching {
             withContext(dispatcher) {
                 albumService.putAlbumTitle(albumId, editTitle)
+            }
+        }
+
+    override suspend fun getAlbumList(): Result<AlbumInfoList> =
+        runCatching {
+            withContext(dispatcher) {
+                albumService.getAlbumList()
             }
         }
 }

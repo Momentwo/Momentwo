@@ -1,6 +1,7 @@
 package cord.eoeo.momentwo.data.album
 
 import cord.eoeo.momentwo.data.model.AlbumImage
+import cord.eoeo.momentwo.data.model.AlbumInfoList
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 
@@ -21,4 +22,6 @@ interface AlbumDataSource {
         albumId: Int,
         editTitle: String,
     ): Result<Unit>
+
+    suspend fun getAlbumList(): Result<AlbumInfoList>
 }

@@ -4,6 +4,7 @@ import cord.eoeo.momentwo.data.model.AlbumImage
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 import cord.eoeo.momentwo.domain.album.AlbumRepository
+import cord.eoeo.momentwo.ui.model.AlbumItem
 import okhttp3.MultipartBody
 
 class AlbumRepositoryImpl(
@@ -34,4 +35,9 @@ class AlbumRepositoryImpl(
         albumId: Int,
         title: String,
     ): Result<Unit> = albumRemoteDataSource.changeAlbumTitle(albumId, title)
+
+    override suspend fun getAlbumList(): Result<List<AlbumItem>> =
+        albumRemoteDataSource.getAlbumList().map { albumItemList ->
+            albumItemList.albumList.map { it.mapToAlbumItem() }
+        }
 }

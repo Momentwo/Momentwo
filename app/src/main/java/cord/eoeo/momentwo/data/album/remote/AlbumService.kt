@@ -2,11 +2,13 @@ package cord.eoeo.momentwo.data.album.remote
 
 import cord.eoeo.momentwo.data.MomentwoApi
 import cord.eoeo.momentwo.data.model.AlbumImage
+import cord.eoeo.momentwo.data.model.AlbumInfoList
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -54,4 +56,7 @@ interface AlbumService {
         @Path("id") albumId: Int,
         @Body editTitle: String,
     )
+
+    @GET(MomentwoApi.GET_ALBUM_LIST)
+    suspend fun getAlbumList(): AlbumInfoList
 }

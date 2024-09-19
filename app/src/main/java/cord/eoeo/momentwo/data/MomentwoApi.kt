@@ -23,6 +23,7 @@ object MomentwoApi {
     const val DELETE_ALBUM_SUBTITLE = "/albums/subtitle/{albumId}"
     /** Require @Path("id") */
     const val PUT_ALBUM_TITLE = "/albums/edit/{id}"
+    const val GET_ALBUM_LIST = "/albums"
 
     // SubAlbum
     const val POST_CREATE_SUBALBUM = "/album/sub/create"

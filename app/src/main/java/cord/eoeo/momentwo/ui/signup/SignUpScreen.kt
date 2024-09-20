@@ -91,7 +91,7 @@ fun SignUpScreen(
             state = pagerState(),
             userScrollEnabled = false,
             modifier = Modifier.fillMaxWidth(),
-            beyondBoundsPageCount = 1,
+            beyondViewportPageCount = 1,
         ) { page ->
             if (page == 0) {
                 FirstSignUpPage(

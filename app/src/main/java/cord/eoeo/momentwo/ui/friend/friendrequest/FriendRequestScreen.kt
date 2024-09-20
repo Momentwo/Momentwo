@@ -62,7 +62,7 @@ fun FriendRequestScreen(
 
         HorizontalPager(
             state = pagerState(),
-            beyondBoundsPageCount = 1,
+            beyondViewportPageCount = 1,
             modifier =
                 Modifier
                     .fillMaxWidth()

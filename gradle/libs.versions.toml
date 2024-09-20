@@ -1,23 +1,24 @@
 [versions]
-agp = "8.2.2"
-kotlin = "1.9.0"
+agp = "8.5.2"
+kotlin = "2.0.20"
 core-ktx = "1.13.1"
-ksp = "1.9.0-1.0.13"
+ksp = "2.0.20-1.0.25"
 junit = "4.13.2"
-androidx-test-ext-junit = "1.1.5"
-espresso-core = "3.5.1"
-lifecycle = "2.7.0"
-activity-compose = "1.9.0"
-compose-bom = "2024.05.00"
-compose-version = "1.6.7"
-navigation-compose = "2.7.7"
+androidx-test-ext-junit = "1.2.1"
+espresso-core = "3.6.1"
+lifecycle = "2.8.6"
+activity-compose = "1.9.2"
+compose-bom = "2024.09.02"
+compose-version = "1.7.2"
+navigation-compose = "2.8.1"
 hilt-compose = "1.2.0"
-hilt = "2.51.1"
+hilt = "2.52"
 retrofit = "2.11.0"
 moshi = "1.15.1"
 coil = "2.7.0"
 datastore = "1.1.1"
 okhttp-bom = "4.12.0"
+kotlin-serialization = "1.7.3"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -44,6 +45,7 @@ coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp-bom" }
+kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlin-serialization" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -58,4 +60,6 @@ okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-i
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

@@ -1,14 +1,26 @@
 package cord.eoeo.momentwo.ui
 
 import androidx.navigation.NavHostController
+import kotlinx.serialization.Serializable
 
-object MomentwoDestination {
-    const val LOGIN_ROUTE = "login"
-    const val SIGNUP_ROUTE = "signup"
-    const val ALBUM_ROUTE = "album"
-    const val ALBUM_DETAIL_ROUTE = "album_detail"
-    const val CREATE_ALBUM_ROUTE = "create_album"
-    const val FRIEND_ROUTE = "friend"
+sealed interface MomentwoDestination {
+    @Serializable
+    data object Login : MomentwoDestination
+
+    @Serializable
+    data object SignUp : MomentwoDestination
+
+    @Serializable
+    data object Album : MomentwoDestination
+
+    @Serializable
+    data object AlbumDetail : MomentwoDestination
+
+    @Serializable
+    data object CreateAlbum : MomentwoDestination
+
+    @Serializable
+    data object Friend : MomentwoDestination
 }
 
 class MomentwoNavigationActions(navController: NavHostController) {
@@ -16,27 +28,27 @@ class MomentwoNavigationActions(navController: NavHostController) {
         navController.popBackStack()
     }
     val navigateToLogin: () -> Unit = {
-        navController.navigate(MomentwoDestination.LOGIN_ROUTE) {
+        navController.navigate(MomentwoDestination.Login) {
             launchSingleTop = true
             popUpTo(navController.graph.id)
         }
     }
     val navigateToSignUp: () -> Unit = {
-        navController.navigate(MomentwoDestination.SIGNUP_ROUTE)
+        navController.navigate(MomentwoDestination.SignUp)
     }
     val navigateToAlbum: () -> Unit = {
-        navController.navigate(MomentwoDestination.ALBUM_ROUTE) {
+        navController.navigate(MomentwoDestination.Album) {
             launchSingleTop = true
             popUpTo(navController.graph.id)
         }
     }
     val navigateToAlbumDetail: () -> Unit = {
-        navController.navigate(MomentwoDestination.ALBUM_DETAIL_ROUTE)
+        navController.navigate(MomentwoDestination.AlbumDetail)
     }
     val navigateToCreateAlbum: () -> Unit = {
-        navController.navigate(MomentwoDestination.CREATE_ALBUM_ROUTE)
+        navController.navigate(MomentwoDestination.CreateAlbum)
     }
     val navigateToFriend: () -> Unit = {
-        navController.navigate(MomentwoDestination.FRIEND_ROUTE)
+        navController.navigate(MomentwoDestination.Friend)
     }
 }

@@ -23,12 +23,10 @@ fun MomentwoNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = MomentwoDestination.LOGIN_ROUTE,
+        startDestination = MomentwoDestination.Login,
         modifier = Modifier,
     ) {
-        composable(
-            route = MomentwoDestination.LOGIN_ROUTE,
-        ) {
+        composable<MomentwoDestination.Login> {
             LoginRoute(
                 coroutineScope = coroutineScope,
                 navigateToAlbum = navActions.navigateToAlbum,
@@ -36,9 +34,7 @@ fun MomentwoNavGraph(
             )
         }
 
-        composable(
-            route = MomentwoDestination.SIGNUP_ROUTE,
-        ) {
+        composable<MomentwoDestination.SignUp> {
             SignUpRoute(
                 coroutineScope = coroutineScope,
                 popBackStack = navActions.popBackStack,
@@ -46,9 +42,7 @@ fun MomentwoNavGraph(
             )
         }
 
-        composable(
-            route = MomentwoDestination.ALBUM_ROUTE,
-        ) {
+        composable<MomentwoDestination.Album> {
             AlbumRoute(
                 coroutineScope = coroutineScope,
                 navigateToCreateAlbum = navActions.navigateToCreateAlbum,
@@ -58,9 +52,7 @@ fun MomentwoNavGraph(
             )
         }
 
-        composable(
-            route = MomentwoDestination.ALBUM_DETAIL_ROUTE,
-        ) {
+        composable<MomentwoDestination.AlbumDetail> {
             AlbumDetailRoute(
                 coroutineScope = coroutineScope,
                 imageLoader = imageLoader,
@@ -68,18 +60,14 @@ fun MomentwoNavGraph(
             )
         }
 
-        composable(
-            route = MomentwoDestination.CREATE_ALBUM_ROUTE,
-        ) {
+        composable<MomentwoDestination.CreateAlbum> {
             CreateAlbumRoute(
                 coroutineScope = coroutineScope,
                 popBackStack = navActions.popBackStack,
             )
         }
 
-        composable(
-            route = MomentwoDestination.FRIEND_ROUTE,
-        ) {
+        composable<MomentwoDestination.Friend> {
             FriendRoute(
                 coroutineScope = coroutineScope,
                 popBackStack = navActions.popBackStack,

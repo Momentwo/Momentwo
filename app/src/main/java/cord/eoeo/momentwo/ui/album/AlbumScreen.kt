@@ -55,10 +55,12 @@ fun AlbumScreen(
     onCloseDrawer: () -> Unit,
     navigateToCreateAlbum: () -> Unit,
     navigateToFriend: () -> Unit,
-    navigateToAlbumDetail: () -> Unit,
+    navigateToAlbumDetail: (AlbumItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
+        onEvent(AlbumContract.Event.OnGetAlbumList)
+
         effectFlow().onEach { effect ->
             when (effect) {
                 is AlbumContract.Effect.CloseDrawer -> {
@@ -110,8 +112,8 @@ fun AlbumScreen(
                     AlbumItemCard(
                         imageLoader = imageLoader,
                         albumItem = { albumItem },
-                        navigateToAlbumDetail = navigateToAlbumDetail,
-                        modifier = Modifier.animateItemPlacement(),
+                        navigateToAlbumDetail = { navigateToAlbumDetail(albumItem) },
+                        modifier = Modifier.animateItem(),
                     )
                 }
             }

@@ -1,6 +1,7 @@
 package cord.eoeo.momentwo.ui
 
 import androidx.navigation.NavHostController
+import cord.eoeo.momentwo.ui.model.AlbumItem
 import kotlinx.serialization.Serializable
 
 sealed interface MomentwoDestination {
@@ -14,7 +15,12 @@ sealed interface MomentwoDestination {
     data object Album : MomentwoDestination
 
     @Serializable
-    data object AlbumDetail : MomentwoDestination
+    data class AlbumDetail(
+        val id: Int,
+        val title: String,
+        val subTitle: String,
+        val imageUrl: String,
+    )
 
     @Serializable
     data object CreateAlbum : MomentwoDestination
@@ -42,8 +48,10 @@ class MomentwoNavigationActions(navController: NavHostController) {
             popUpTo(navController.graph.id)
         }
     }
-    val navigateToAlbumDetail: () -> Unit = {
-        navController.navigate(MomentwoDestination.AlbumDetail)
+    val navigateToAlbumDetail: (AlbumItem) -> Unit = { (id, title, subTitle, imageUrl) ->
+        navController.navigate(
+            route = MomentwoDestination.AlbumDetail(id, title, subTitle, imageUrl)
+        )
     }
     val navigateToCreateAlbum: () -> Unit = {
         navController.navigate(MomentwoDestination.CreateAlbum)

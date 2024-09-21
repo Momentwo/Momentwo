@@ -102,12 +102,8 @@ fun AlbumDetailScreen(
     Scaffold(
         topBar = {
             AlbumDetailTopAppBar(
-                title = {
-                    "Title" // TODO: 앨범 화면에서 AlbumItem 데이터 가져오기
-                },
-                subTitle = {
-                    "Sub Title" // TODO: 앨범 화면에서 AlbumItem 데이터 가져오기
-                },
+                title = { uiState().albumItem.title },
+                subTitle = { uiState().albumItem.subTitle },
                 onClickBack = { onEvent(AlbumDetailContract.Event.OnBack) },
                 onClickAdd = { /* TODO: Sub Album 추가 */ },
                 scrollBehavior = scrollBehavior,

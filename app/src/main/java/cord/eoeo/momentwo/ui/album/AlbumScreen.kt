@@ -113,7 +113,7 @@ fun AlbumScreen(
                         imageLoader = imageLoader,
                         albumItem = { albumItem },
                         navigateToAlbumDetail = { navigateToAlbumDetail(albumItem) },
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier.animateItem(),
                     )
                 }
             }

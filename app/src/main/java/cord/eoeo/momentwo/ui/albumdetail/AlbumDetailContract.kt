@@ -3,9 +3,11 @@ package cord.eoeo.momentwo.ui.albumdetail
 import cord.eoeo.momentwo.ui.UiEffect
 import cord.eoeo.momentwo.ui.UiEvent
 import cord.eoeo.momentwo.ui.UiState
+import cord.eoeo.momentwo.ui.model.AlbumItem
 
 class AlbumDetailContract {
     data class State(
+        val albumItem: AlbumItem = AlbumItem(-1, "", "", ""),
         val selectedNavIndex: Int = 0,
         val isLoading: Boolean = false,
         val isSuccess: Boolean = false,

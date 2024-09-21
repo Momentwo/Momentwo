@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
+import cord.eoeo.momentwo.ui.model.AlbumItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -20,7 +21,7 @@ fun AlbumRoute(
     imageLoader: ImageLoader,
     navigateToCreateAlbum: () -> Unit,
     navigateToFriend: () -> Unit,
-    navigateToAlbumDetail: () -> Unit,
+    navigateToAlbumDetail: (AlbumItem) -> Unit,
     modifier: Modifier = Modifier,
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },

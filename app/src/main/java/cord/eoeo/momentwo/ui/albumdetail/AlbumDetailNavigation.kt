@@ -1,32 +1,46 @@
 package cord.eoeo.momentwo.ui.albumdetail
 
 import androidx.navigation.NavHostController
+import kotlinx.serialization.Serializable
 
-object AlbumDetailDestination {
-    const val SUB_ALBUM_LIST_ROUTE = "sub_album_list"
-    const val MEMBER_ROUTE = "member"
-    const val ALBUM_SETTING_ROUTE = "album_setting"
+sealed interface AlbumDetailDestination {
+    @Serializable
+    data object SubAlbumList : AlbumDetailDestination
+
+    @Serializable
+    data object Member : AlbumDetailDestination
+
+    @Serializable
+    data object AlbumSetting : AlbumDetailDestination
+
+    @Serializable
+    data object ChangeImage : AlbumDetailDestination
 }
 
 class AlbumDetailNavigationActions(
     navController: NavHostController,
 ) {
+    val popBackStack: () -> Unit = {
+        navController.popBackStack()
+    }
     val navigateToSubAlbumList: () -> Unit = {
-        navController.navigate(AlbumDetailDestination.SUB_ALBUM_LIST_ROUTE) {
+        navController.navigate(AlbumDetailDestination.SubAlbumList) {
             launchSingleTop = true
-            popUpTo(navController.graph.id)
         }
     }
     val navigateToMember: () -> Unit = {
-        navController.navigate(AlbumDetailDestination.MEMBER_ROUTE) {
+        navController.navigate(AlbumDetailDestination.Member) {
             launchSingleTop = true
-            popUpTo(navController.graph.id)
         }
     }
     val navigateToAlbumSetting: () -> Unit = {
-        navController.navigate(AlbumDetailDestination.ALBUM_SETTING_ROUTE) {
+        navController.navigate(AlbumDetailDestination.AlbumSetting) {
             launchSingleTop = true
-            popUpTo(navController.graph.id)
+        }
+    }
+    val navigateToChangeImage: () -> Unit = {
+        navController.navigate(AlbumDetailDestination.ChangeImage) {
+            launchSingleTop = true
         }
     }
 }

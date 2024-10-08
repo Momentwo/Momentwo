@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.ui.albumdetail.subalbumlist
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,39 +10,45 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
+import coil.ImageLoader
+import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.model.SubAlbumItem
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SubAlbumListScreen() {
-    val fakeItems =
-        listOf(
-            SubAlbumItem(1, "Sub1", emptyList()),
-            SubAlbumItem(2, "Sub2", emptyList()),
-            SubAlbumItem(3, "Sub3", emptyList()),
-            SubAlbumItem(4, "Sub4", emptyList()),
-            SubAlbumItem(5, "Sub5", emptyList()),
-            SubAlbumItem(6, "Sub6", emptyList()),
-            SubAlbumItem(7, "Sub7", emptyList()),
-            SubAlbumItem(8, "Sub8", emptyList()),
-            SubAlbumItem(9, "Sub9", emptyList()),
-            SubAlbumItem(10, "Sub10", emptyList()),
-            SubAlbumItem(11, "Sub11", emptyList()),
-            SubAlbumItem(12, "Sub12", emptyList()),
-            SubAlbumItem(13, "Sub13", emptyList()),
-        )
+fun SubAlbumListScreen(
+    imageLoader: ImageLoader,
+    subAlbumList: () -> List<SubAlbumItem>,
+    isEditMode: () -> Boolean,
+    getSubAlbums: () -> Unit,
+    getIsSelected: (Int) -> Boolean,
+    onClickItem: () -> Unit,
+    onChangeSubAlbumSelected: (Boolean, Int) -> Unit,
+    onBack: () -> Unit,
+) {
+    LifecycleStartEffect(START_EFFECTS_KEY) {
+        getSubAlbums()
+        onStopOrDispose { }
+    }
+
+    BackHandler(onBack = onBack)
 
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 160.dp),
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(8.dp, 0.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp, 0.dp),
     ) {
-        items(items = fakeItems, key = { it.id }) { item ->
+        items(items = subAlbumList(), key = { it.id }) { item ->
             SubAlbumItemCard(
+                imageLoader = imageLoader,
                 subAlbumItem = { item },
-                modifier = Modifier.animateItemPlacement(),
+                isEditMode = isEditMode,
+                getIsSelected = getIsSelected,
+                onClick = onClickItem,
+                onChangeSubAlbumSelected = onChangeSubAlbumSelected,
+                modifier = Modifier.animateItem()
             )
         }
     }

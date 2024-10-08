@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -22,6 +24,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "BASE_URL", getLocalProperty("BASE_URL"))
     }
 
     buildTypes {
@@ -38,6 +42,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -46,6 +51,8 @@ android {
         }
     }
 }
+
+fun getLocalProperty(key: String): String = gradleLocalProperties(rootDir, providers).getProperty(key)
 
 kotlin {
     jvmToolchain(17)

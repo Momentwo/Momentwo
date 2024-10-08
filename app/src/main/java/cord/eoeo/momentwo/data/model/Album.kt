@@ -27,6 +27,12 @@ data class AlbumSubTitle(
 )
 
 @JsonClass(generateAdapter = true)
+data class EditAlbumTitle(
+    val albumId: Int,
+    val editTitle: String,
+)
+
+@JsonClass(generateAdapter = true)
 data class AlbumInfo(
     val id: Int,
     val title: String,

@@ -3,6 +3,7 @@ package cord.eoeo.momentwo.data.album
 import android.net.Uri
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
+import cord.eoeo.momentwo.data.model.EditAlbumTitle
 import cord.eoeo.momentwo.domain.album.AlbumRepository
 import cord.eoeo.momentwo.ui.model.AlbumItem
 import cord.eoeo.momentwo.ui.model.MemberAuth
@@ -39,7 +40,7 @@ class AlbumRepositoryImpl(
     override suspend fun changeAlbumTitle(
         albumId: Int,
         title: String,
-    ): Result<Unit> = albumRemoteDataSource.changeAlbumTitle(albumId, title)
+    ): Result<Unit> = albumRemoteDataSource.changeAlbumTitle(EditAlbumTitle(albumId, title))
 
     override suspend fun getAlbumList(): Result<List<AlbumItem>> =
         albumRemoteDataSource.getAlbumList().map { albumItemList ->

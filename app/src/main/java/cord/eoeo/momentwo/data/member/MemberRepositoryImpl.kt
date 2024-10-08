@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.data.member
 
+import cord.eoeo.momentwo.data.model.AssignAdminToMember
 import cord.eoeo.momentwo.data.model.EditMembers
 import cord.eoeo.momentwo.data.model.InviteMembers
 import cord.eoeo.momentwo.data.model.KickMembers
@@ -19,7 +20,7 @@ class MemberRepositoryImpl(
         inviteMembers: List<String>,
     ): Result<Unit> {
         // return Result.success(Unit)
-        return memberRemoteDataSource.requestInviteMembers(albumId, InviteMembers(inviteMembers))
+        return memberRemoteDataSource.requestInviteMembers(InviteMembers(albumId, inviteMembers))
     }
 
     override suspend fun getMemberList(albumId: Int): Result<List<MemberItem>> {
@@ -34,7 +35,7 @@ class MemberRepositoryImpl(
         kickMembers: List<String>,
     ): Result<Unit> {
         // return Result.success(Unit)
-        return memberRemoteDataSource.kickMembers(albumId, KickMembers(kickMembers))
+        return memberRemoteDataSource.kickMembers(KickMembers(albumId, kickMembers))
     }
 
     override suspend fun assignAdminToMember(
@@ -42,7 +43,7 @@ class MemberRepositoryImpl(
         nickname: String,
     ): Result<Unit> {
         // return Result.success(Unit)
-        return memberRemoteDataSource.assignAdminToMember(albumId, nickname)
+        return memberRemoteDataSource.assignAdminToMember(AssignAdminToMember(albumId, nickname))
     }
 
     override suspend fun editMembersPermission(
@@ -51,8 +52,7 @@ class MemberRepositoryImpl(
     ): Result<Unit> {
         // return Result.success(Unit)
         return memberRemoteDataSource.editMembersPermission(
-            albumId,
-            EditMembers(editMembers.associate { it.nickname to MemberRule.memberAuthToRule(it.auth) }),
+            EditMembers(albumId, editMembers.associate { it.nickname to MemberRule.memberAuthToRule(it.auth) }),
         )
     }
 }

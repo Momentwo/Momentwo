@@ -6,6 +6,7 @@ import cord.eoeo.momentwo.data.model.AlbumInfoList
 import cord.eoeo.momentwo.data.model.AlbumRole
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
+import cord.eoeo.momentwo.data.model.EditAlbumTitle
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.FormUrlEncoded
@@ -23,9 +24,10 @@ interface AlbumService {
         @Body createAlbumInfo: CreateAlbumInfo,
     )
 
+    @FormUrlEncoded
     @DELETE(MomentwoApi.DELETE_ALBUM)
     suspend fun deleteAlbum(
-        @Path("id") albumId: Int,
+        @Body albumId: Int,
     )
 
     @Multipart
@@ -35,9 +37,10 @@ interface AlbumService {
         @Body albumImage: AlbumImage,
     )
 
+    @FormUrlEncoded
     @DELETE(MomentwoApi.DELETE_ALBUM_IMAGE)
     suspend fun deleteAlbumImage(
-        @Path("albumId") albumId: Int,
+        @Body albumId: Int,
     )
 
     @Headers("content-type: application/json")
@@ -46,16 +49,16 @@ interface AlbumService {
         @Body albumSubTitle: AlbumSubTitle,
     )
 
+    @FormUrlEncoded
     @DELETE(MomentwoApi.DELETE_ALBUM_SUBTITLE)
     suspend fun deleteAlbumSubTitle(
-        @Path("albumId") albumId: Int,
+        @Body albumId: Int,
     )
 
-    @FormUrlEncoded
+    @Headers("content-type: application/json")
     @PUT(MomentwoApi.PUT_ALBUM_TITLE)
     suspend fun putAlbumTitle(
-        @Path("id") albumId: Int,
-        @Body editTitle: String,
+        @Body editTitle: EditAlbumTitle,
     )
 
     @GET(MomentwoApi.GET_ALBUM_LIST)

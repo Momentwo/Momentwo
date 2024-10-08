@@ -84,7 +84,6 @@ fun CreateAlbumScreen(
         InviteDialog(
             friendItemList = { uiState().friendList },
             selectedFriendList = { uiState().tempSelectedFriendList },
-            onClickClear = { onEvent(CreateAlbumContract.Event.OnCheckedChange(false, it)) },
             onCheckedChange = { isChecked, friendItem ->
                 onEvent(
                     CreateAlbumContract.Event.OnCheckedChange(
@@ -93,7 +92,7 @@ fun CreateAlbumScreen(
                     ),
                 )
             },
-            getIsChecked = { uiState().tempSelectedFriendMap[it] ?: false },
+            getIsChecked = { uiState().tempSelectedFriendMap[it.nickname] == true },
             onDismiss = { onEvent(CreateAlbumContract.Event.OnDismissInviteFriend) },
             onConfirm = { onEvent(CreateAlbumContract.Event.OnConfirmInviteFriend) },
         )
@@ -154,14 +153,14 @@ fun CreateAlbumScreen(
                         onClickClear = { onEvent(CreateAlbumContract.Event.OnClearFriendItem(it)) },
                         modifier =
                             Modifier
-                                .animateItemPlacement()
+                                .animateItem()
                                 .fillMaxWidth(),
                     )
                 }
             }
 
             ConfirmExtendedFAB(
-                onClick = { /*TODO: Create Album & Navigate to Album*/ },
+                onClick = { onEvent(CreateAlbumContract.Event.OnRequestCreateAlbum(title())) },
                 modifier =
                     Modifier
                         .align(Alignment.End)

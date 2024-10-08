@@ -21,6 +21,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,8 +40,7 @@ import cord.eoeo.momentwo.ui.model.UserItem
 fun InviteDialog(
     friendItemList: () -> List<FriendItem>,
     selectedFriendList: () -> List<FriendItem>,
-    getIsChecked: (String) -> Boolean,
-    onClickClear: (FriendItem) -> Unit,
+    getIsChecked: (FriendItem) -> Boolean,
     onCheckedChange: (Boolean, FriendItem) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
@@ -56,7 +56,6 @@ fun InviteDialog(
         getIsChecked = getIsChecked,
         onQueryChange = { searchQuery = it },
         onSearch = { searchQuery = it },
-        onClickClear = onClickClear,
         onCheckedChange = onCheckedChange,
         onDismiss = onDismiss,
         onConfirm = { onConfirm() },
@@ -70,10 +69,9 @@ fun InviteDialogScreen(
     searchRegex: () -> Regex,
     friendItemList: () -> List<FriendItem>,
     selectedFriendList: () -> List<FriendItem>,
-    getIsChecked: (String) -> Boolean,
+    getIsChecked: (FriendItem) -> Boolean,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
-    onClickClear: (FriendItem) -> Unit,
     onCheckedChange: (Boolean, FriendItem) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
@@ -81,49 +79,54 @@ fun InviteDialogScreen(
     Dialog(
         onDismissRequest = onDismiss,
         properties =
-            DialogProperties(
-                usePlatformDefaultWidth = false,
-            ),
+        DialogProperties(
+            usePlatformDefaultWidth = false,
+        ),
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),
             shape = RoundedCornerShape(16.dp),
         ) {
             SearchBar(
-                query = searchQuery(),
-                onQueryChange = onQueryChange,
-                onSearch = onSearch,
-                active = true,
-                onActiveChange = { },
-                placeholder = { Text(text = "친구 검색") },
-                leadingIcon = {
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, "")
-                    }
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = searchQuery(),
+                        onQueryChange = onQueryChange,
+                        onSearch = onSearch,
+                        expanded = false,
+                        onExpandedChange = { },
+                        placeholder = { Text(text = "친구 검색") },
+                        leadingIcon = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(Icons.AutoMirrored.Default.ArrowBack, "")
+                            }
+                        },
+                        trailingIcon = {
+                            if (searchQuery().isNotEmpty()) {
+                                IconButton(onClick = { onQueryChange("") }) {
+                                    Icon(Icons.Default.Clear, "")
+                                }
+                            }
+                        },
+                    )
                 },
-                trailingIcon = {
-                    if (searchQuery().isNotEmpty()) {
-                        IconButton(onClick = { onQueryChange("") }) {
-                            Icon(Icons.Default.Clear, "")
-                        }
-                    }
-                },
+                expanded = true,
+                onExpandedChange = { },
+                modifier = Modifier.fillMaxWidth()
             ) {
                 if (selectedFriendList().isNotEmpty()) {
                     LazyRow(
-                        modifier =
-                            Modifier
-                                .height(80.dp)
-                                .fillMaxWidth(),
+                        modifier = Modifier
+                            .height(80.dp)
+                            .fillMaxWidth(),
                     ) {
                         items(items = selectedFriendList(), key = { it.nickname }) { friendItem ->
                             UserItemBox(
                                 userItem = { UserItem(0, friendItem.nickname) },
                                 onClickClear = { onCheckedChange(false, friendItem) },
-                                modifier =
-                                    Modifier
-                                        .animateItemPlacement()
-                                        .fillMaxHeight(),
+                                modifier = Modifier
+                                    .animateItem()
+                                    .fillMaxHeight(),
                             )
                         }
                     }
@@ -133,9 +136,9 @@ fun InviteDialogScreen(
 
                 LazyColumn(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                 ) {
                     items(
                         items = friendItemList().filter { it.nickname.contains(searchRegex()) },
@@ -144,11 +147,10 @@ fun InviteDialogScreen(
                         CheckboxListItem(
                             itemText = { friendItem.nickname },
                             onCheckedChange = { onCheckedChange(it, friendItem) },
-                            isChecked = { getIsChecked(friendItem.nickname) },
-                            modifier =
-                                Modifier
-                                    .animateItemPlacement()
-                                    .fillMaxWidth(),
+                            isChecked = { getIsChecked(friendItem) },
+                            modifier = Modifier
+                                .animateItem()
+                                .fillMaxWidth(),
                         )
                     }
                 }
@@ -158,9 +160,9 @@ fun InviteDialogScreen(
                 Row(
                     horizontalArrangement = Arrangement.End,
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                 ) {
                     TextButton(onClick = onConfirm) {
                         Text(text = "완료")

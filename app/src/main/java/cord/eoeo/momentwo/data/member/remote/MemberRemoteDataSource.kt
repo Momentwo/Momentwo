@@ -1,6 +1,7 @@
 package cord.eoeo.momentwo.data.member.remote
 
 import cord.eoeo.momentwo.data.member.MemberDataSource
+import cord.eoeo.momentwo.data.model.AssignAdminToMember
 import cord.eoeo.momentwo.data.model.EditMembers
 import cord.eoeo.momentwo.data.model.InviteMembers
 import cord.eoeo.momentwo.data.model.KickMembers
@@ -20,13 +21,10 @@ class MemberRemoteDataSource(
             }
         }
 
-    override suspend fun requestInviteMembers(
-        albumId: Int,
-        inviteMembers: InviteMembers,
-    ): Result<Unit> =
+    override suspend fun requestInviteMembers(inviteMembers: InviteMembers): Result<Unit> =
         runCatching {
             withContext(dispatcher) {
-                memberService.postInviteMembers(albumId, inviteMembers)
+                memberService.postInviteMembers(inviteMembers)
             }
         }
 
@@ -37,33 +35,24 @@ class MemberRemoteDataSource(
             }
         }
 
-    override suspend fun kickMembers(
-        albumId: Int,
-        kickMembers: KickMembers,
-    ): Result<Unit> =
+    override suspend fun kickMembers(kickMembers: KickMembers): Result<Unit> =
         runCatching {
             withContext(dispatcher) {
-                memberService.deleteKickMembers(albumId, kickMembers)
+                memberService.deleteKickMembers(kickMembers)
             }
         }
 
-    override suspend fun assignAdminToMember(
-        albumId: Int,
-        nickname: String,
-    ): Result<Unit> =
+    override suspend fun assignAdminToMember(assignAdminToMember: AssignAdminToMember): Result<Unit> =
         runCatching {
             withContext(dispatcher) {
-                memberService.putMemberAssignAdmin(albumId, nickname)
+                memberService.putMemberAssignAdmin(assignAdminToMember)
             }
         }
 
-    override suspend fun editMembersPermission(
-        albumId: Int,
-        editMembers: EditMembers,
-    ): Result<Unit> =
+    override suspend fun editMembersPermission(editMembers: EditMembers): Result<Unit> =
         runCatching {
             withContext(dispatcher) {
-                memberService.putEditMembersPermission(albumId, editMembers)
+                memberService.putEditMembersPermission(editMembers)
             }
         }
 }

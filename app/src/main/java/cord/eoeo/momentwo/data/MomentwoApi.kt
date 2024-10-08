@@ -1,7 +1,9 @@
 package cord.eoeo.momentwo.data
 
+import cord.eoeo.momentwo.BuildConfig
+
 object MomentwoApi {
-    const val BASE_URL = "http://125.242.231.153:8080"
+    const val BASE_URL = BuildConfig.BASE_URL
 
     // Sign Up
     const val POST_SIGN_UP = "/signup"
@@ -13,16 +15,12 @@ object MomentwoApi {
 
     // Album
     const val POST_CREATE_ALBUM = "/albums/create"
-    /** Require @Path("id") */
-    const val DELETE_ALBUM = "/albums/delete/{id}"
+    const val DELETE_ALBUM = "/albums/delete"
     const val PUT_ALBUM_IMAGE = "/albums/profile/image/upload"
-    /** Require @Path("albumId") */
-    const val DELETE_ALBUM_IMAGE = "/albums/profile/image/{albumId}"
+    const val DELETE_ALBUM_IMAGE = "/albums/profile/image"
     const val PUT_ALBUM_SUBTITLE = "/albums/subtitle"
-    /** Require @Path("albumId") */
-    const val DELETE_ALBUM_SUBTITLE = "/albums/subtitle/{albumId}"
-    /** Require @Path("id") */
-    const val PUT_ALBUM_TITLE = "/albums/edit/{id}"
+    const val DELETE_ALBUM_SUBTITLE = "/albums/subtitle"
+    const val PUT_ALBUM_TITLE = "/albums/edit"
     const val GET_ALBUM_LIST = "/albums"
     /** Require @Path("albumId") */
     const val GET_ALBUM_ROLE = "/albums/rules/{albumId}"
@@ -35,18 +33,13 @@ object MomentwoApi {
     const val DELETE_SUBALBUMS = "/album/sub/delete"
 
     // Member
+    const val DELETE_EXIT_MEMBER = "/members/out"
+    const val POST_INVITE_MEMBERS = "/members/invite"
     /** Require @Path("albumId") */
-    const val DELETE_EXIT_MEMBER = "/{albumId}/members/out"
-    /** Require @Path("albumId") */
-    const val POST_INVITE_MEMBERS = "/{albumId}/members/invite"
-    /** Require @Path("albumId") */
-    const val GET_MEMBER_LIST = "/{albumId}/members"
-    /** Require @Path("albumId") */
-    const val DELETE_KICK_MEMBERS = "/{albumId}/members/kick"
-    /** Require @Path("albumId") */
-    const val PUT_MEMBER_ASSIGN_ADMIN = "/{albumId}/members/assign/admin"
-    /** Require @Path("albumId") */
-    const val PUT_EDIT_MEMBERS_PERMISSION = "/{albumId}/members/permission"
+    const val GET_MEMBER_LIST = "/members/{albumId}"
+    const val DELETE_KICK_MEMBERS = "/members/kick"
+    const val PUT_MEMBER_ASSIGN_ADMIN = "/members/assign/admin"
+    const val PUT_EDIT_MEMBERS_PERMISSION = "/members/permission"
 
     // Friend
     const val POST_FRIEND_REQUEST = "/friendship/request"

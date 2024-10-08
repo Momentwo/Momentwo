@@ -7,14 +7,22 @@ import cord.eoeo.momentwo.ui.model.MemberItem
 
 @JsonClass(generateAdapter = true)
 data class InviteMembers(
+    val albumId: Int,
     @Json(name = "inviteNicknames")
     val nicknameList: List<String>,
 )
 
 @JsonClass(generateAdapter = true)
 data class KickMembers(
+    val albumId: Int,
     @Json(name = "kickMemberList")
     val memberList: List<String>,
+)
+
+@JsonClass(generateAdapter = true)
+data class AssignAdminToMember(
+    val albumId: Int,
+    val nickname: String,
 )
 
 @JsonClass(generateAdapter = true)
@@ -61,6 +69,7 @@ data class MemberList(
 
 @JsonClass(generateAdapter = true)
 data class EditMembers(
+    val albumId: Int,
     @Json(name = "editMemberList")
     val memberMap: Map<String, MemberRule>,
 )

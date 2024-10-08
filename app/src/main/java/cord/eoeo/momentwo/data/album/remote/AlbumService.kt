@@ -3,6 +3,7 @@ package cord.eoeo.momentwo.data.album.remote
 import cord.eoeo.momentwo.data.MomentwoApi
 import cord.eoeo.momentwo.data.model.AlbumImage
 import cord.eoeo.momentwo.data.model.AlbumInfoList
+import cord.eoeo.momentwo.data.model.AlbumRole
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 import retrofit2.http.Body
@@ -59,4 +60,9 @@ interface AlbumService {
 
     @GET(MomentwoApi.GET_ALBUM_LIST)
     suspend fun getAlbumList(): AlbumInfoList
+
+    @GET(MomentwoApi.GET_ALBUM_ROLE)
+    suspend fun getAlbumRole(
+        @Path("albumId") albumId: Int,
+    ): AlbumRole
 }

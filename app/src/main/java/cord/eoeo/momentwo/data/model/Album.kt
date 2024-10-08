@@ -16,7 +16,7 @@ data class CreateAlbumInfo(
 
 @JsonClass(generateAdapter = true)
 data class AlbumImage(
-    val albumId: String,
+    val albumId: Int,
     @Part val profileImage: MultipartBody.Part,
 )
 
@@ -46,4 +46,10 @@ data class AlbumInfo(
 data class AlbumInfoList(
     @Json(name = "album")
     val albumList: List<AlbumInfo>,
+)
+
+@JsonClass(generateAdapter = true)
+data class AlbumRole(
+    val albumId: Int,
+    val rules: MemberRule,
 )

@@ -2,6 +2,7 @@ package cord.eoeo.momentwo.data.album
 
 import cord.eoeo.momentwo.data.model.AlbumImage
 import cord.eoeo.momentwo.data.model.AlbumInfoList
+import cord.eoeo.momentwo.data.model.AlbumRole
 import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 
@@ -24,4 +25,6 @@ interface AlbumDataSource {
     ): Result<Unit>
 
     suspend fun getAlbumList(): Result<AlbumInfoList>
+
+    suspend fun getAlbumRole(albumId: Int): Result<AlbumRole>
 }

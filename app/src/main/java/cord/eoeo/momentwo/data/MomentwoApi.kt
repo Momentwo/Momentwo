@@ -24,6 +24,8 @@ object MomentwoApi {
     /** Require @Path("id") */
     const val PUT_ALBUM_TITLE = "/albums/edit/{id}"
     const val GET_ALBUM_LIST = "/albums"
+    /** Require @Path("albumId") */
+    const val GET_ALBUM_ROLE = "/albums/rules/{albumId}"
 
     // SubAlbum
     const val POST_CREATE_SUBALBUM = "/album/sub/create"

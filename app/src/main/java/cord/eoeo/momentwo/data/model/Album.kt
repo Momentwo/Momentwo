@@ -36,21 +36,21 @@ data class EditAlbumTitle(
 data class AlbumInfo(
     val id: Int,
     val title: String,
-    val subtitle: String,
-    val imageUrl: String,
+    val subTitle: String,
+    val profileImage: String,
 ) {
     fun mapToAlbumItem(): AlbumItem =
         AlbumItem(
             id = id,
             title = title,
-            subTitle = subtitle,
-            imageUrl = imageUrl,
+            subTitle = subTitle,
+            imageUrl = profileImage,
         )
 }
 
 @JsonClass(generateAdapter = true)
 data class AlbumInfoList(
-    @Json(name = "album")
+    @Json(name = "albumInfoList")
     val albumList: List<AlbumInfo>,
 )
 

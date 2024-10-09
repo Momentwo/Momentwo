@@ -6,8 +6,8 @@ import cord.eoeo.momentwo.data.model.EditSubAlbumInfo
 import cord.eoeo.momentwo.data.model.SubAlbumIds
 import cord.eoeo.momentwo.data.model.SubAlbumList
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -33,7 +33,7 @@ interface SubAlbumService {
     )
 
     @Headers("content-type: application/json")
-    @DELETE(MomentwoApi.DELETE_SUBALBUMS)
+    @HTTP(method = "DELETE", path = MomentwoApi.DELETE_SUBALBUMS, hasBody = true)
     suspend fun deleteSubAlbums(
         @Body subAlbumIds: SubAlbumIds,
     )

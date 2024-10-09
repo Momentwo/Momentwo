@@ -1,7 +1,5 @@
 package cord.eoeo.momentwo.data.signup.remote
 
-import cord.eoeo.momentwo.data.model.Email
-import cord.eoeo.momentwo.data.model.Nickname
 import cord.eoeo.momentwo.data.model.User
 import cord.eoeo.momentwo.data.signup.SignUpDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,13 +16,13 @@ class SignUpRemoteDataSource(
         }
     }
 
-    override suspend fun checkEmail(email: Email): Result<Boolean> = runCatching {
+    override suspend fun checkEmail(email: String): Result<Unit> = runCatching {
         withContext(dispatcher) {
             signUpService.postCheckEmail(email).isSuccessful
         }
     }
 
-    override suspend fun checkNickname(nickname: Nickname): Result<Boolean> = runCatching {
+    override suspend fun checkNickname(nickname: String): Result<Unit> = runCatching {
         withContext(dispatcher) {
             signUpService.postCheckNickname(nickname).isSuccessful
         }

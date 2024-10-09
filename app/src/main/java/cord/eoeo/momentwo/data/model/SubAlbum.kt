@@ -36,7 +36,7 @@ data class SubAlbumInfo(
     val id: Int,
     @Json(name = "subAlbumTitle")
     val title: String,
-    @Json(name = "subAlbumImageList")
+    @Json(name = "subTitleImageList")
     val imageList: List<SubAlbumImage>,
 ) {
     fun mapToSubAlbumItem(): SubAlbumItem =

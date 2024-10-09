@@ -1,11 +1,11 @@
 package cord.eoeo.momentwo.data.signup.remote
 
 import cord.eoeo.momentwo.data.MomentwoApi
-import cord.eoeo.momentwo.data.model.Email
-import cord.eoeo.momentwo.data.model.Nickname
 import cord.eoeo.momentwo.data.model.User
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
@@ -16,15 +16,15 @@ interface SignUpService {
         @Body user: User,
     )
 
-    @Headers("content-type: application/json")
+    @FormUrlEncoded
     @POST(MomentwoApi.POST_CHECK_EMAIL)
     suspend fun postCheckEmail(
-        @Body email: Email,
+        @Field("email") email: String,
     ): Response<Unit>
 
-    @Headers("content-type: application/json")
+    @FormUrlEncoded
     @POST(MomentwoApi.POST_CHECK_NICKNAME)
     suspend fun postCheckNickname(
-        @Body nickname: Nickname,
+        @Field("nickname") nickname: String,
     ): Response<Unit>
 }

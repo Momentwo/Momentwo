@@ -8,9 +8,10 @@ import cord.eoeo.momentwo.data.model.AlbumSubTitle
 import cord.eoeo.momentwo.data.model.CreateAlbumInfo
 import cord.eoeo.momentwo.data.model.EditAlbumTitle
 import retrofit2.http.Body
-import retrofit2.http.DELETE
+import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -25,9 +26,9 @@ interface AlbumService {
     )
 
     @FormUrlEncoded
-    @DELETE(MomentwoApi.DELETE_ALBUM)
+    @HTTP(method = "DELETE", path = MomentwoApi.DELETE_ALBUM, hasBody = true)
     suspend fun deleteAlbum(
-        @Body albumId: Int,
+        @Field("albumId") albumId: Int,
     )
 
     @Multipart
@@ -38,9 +39,9 @@ interface AlbumService {
     )
 
     @FormUrlEncoded
-    @DELETE(MomentwoApi.DELETE_ALBUM_IMAGE)
+    @HTTP(method = "DELETE", path = MomentwoApi.DELETE_ALBUM_IMAGE, hasBody = true)
     suspend fun deleteAlbumImage(
-        @Body albumId: Int,
+        @Field("albumId") albumId: Int,
     )
 
     @Headers("content-type: application/json")
@@ -50,9 +51,9 @@ interface AlbumService {
     )
 
     @FormUrlEncoded
-    @DELETE(MomentwoApi.DELETE_ALBUM_SUBTITLE)
+    @HTTP(method = "DELETE", path = MomentwoApi.DELETE_ALBUM_SUBTITLE, hasBody = true)
     suspend fun deleteAlbumSubTitle(
-        @Body albumId: Int,
+        @Field("albumId") albumId: Int,
     )
 
     @Headers("content-type: application/json")

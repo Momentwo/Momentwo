@@ -7,9 +7,10 @@ import cord.eoeo.momentwo.data.model.InviteMembers
 import cord.eoeo.momentwo.data.model.KickMembers
 import cord.eoeo.momentwo.data.model.MemberList
 import retrofit2.http.Body
-import retrofit2.http.DELETE
+import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -17,9 +18,9 @@ import retrofit2.http.Path
 
 interface MemberService {
     @FormUrlEncoded
-    @DELETE(MomentwoApi.DELETE_EXIT_MEMBER)
+    @HTTP(method = "DELETE", path = MomentwoApi.DELETE_EXIT_MEMBER, hasBody = true)
     suspend fun deleteExitMember(
-        @Body albumId: Int,
+        @Field("albumId") albumId: Int,
     )
 
     @Headers("content-type: application/json")
@@ -34,7 +35,7 @@ interface MemberService {
     ): MemberList
 
     @Headers("content-type: application/json")
-    @DELETE(MomentwoApi.DELETE_KICK_MEMBERS)
+    @HTTP(method = "DELETE", path = MomentwoApi.DELETE_KICK_MEMBERS, hasBody = true)
     suspend fun deleteKickMembers(
         @Body kickMembers: KickMembers,
     )

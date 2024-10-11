@@ -65,6 +65,7 @@ fun AlbumDetailScreen(
     onEvent: (event: AlbumDetailContract.Event) -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
+    navigateToPhotoList: (Int, Int, String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
@@ -141,7 +142,7 @@ fun AlbumDetailScreen(
                         )
                     )
                 },
-                initialText = uiState().albumItem.title,
+                placeholder = uiState().albumItem.title,
             ),
             TextFieldDialogItem(
                 titleText = "부제목 변경",
@@ -155,7 +156,7 @@ fun AlbumDetailScreen(
                         )
                     )
                 },
-                initialText = uiState().albumItem.subTitle,
+                placeholder = uiState().albumItem.subTitle,
             ),
         )
 
@@ -185,6 +186,7 @@ fun AlbumDetailScreen(
             description = { item.description },
             onDismiss = { onEvent(AlbumDetailContract.Event.OnDismissTextFieldDialog) },
             onConfirm = item.onConfirm,
+            placeholder = { item.placeholder }
         )
     }
 
@@ -236,7 +238,14 @@ fun AlbumDetailScreen(
                     isEditMode = { uiState().isEditMode },
                     getSubAlbums = { onEvent(AlbumDetailContract.Event.OnSubAlbumEvents(AlbumDetailContract.SubAlbumEvents.GetSubAlbums)) },
                     getIsSelected = { uiState().selectedSubAlbumIds.contains(it) },
-                    onClickItem = { /*TODO: Navigate to PhotoList*/ },
+                    onClickItem = { subAlbumId, subAlbumTitle ->
+                        navigateToPhotoList(
+                            uiState().albumItem.id,
+                            subAlbumId,
+                            uiState().albumItem.title,
+                            subAlbumTitle,
+                        )
+                    },
                     onChangeSubAlbumSelected = { isSelected, subAlbumId ->
                         onEvent(
                             AlbumDetailContract.Event.OnChangeSubAlbumSelected(

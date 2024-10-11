@@ -23,6 +23,14 @@ sealed interface MomentwoDestination {
     )
 
     @Serializable
+    data class PhotoList(
+        val albumId: Int,
+        val subAlbumId: Int,
+        val albumTitle: String,
+        val subAlbumTitle: String,
+    ) : MomentwoDestination
+
+    @Serializable
     data object CreateAlbum : MomentwoDestination
 
     @Serializable
@@ -49,9 +57,10 @@ class MomentwoNavigationActions(navController: NavHostController) {
         }
     }
     val navigateToAlbumDetail: (AlbumItem) -> Unit = { (id, title, subTitle, imageUrl) ->
-        navController.navigate(
-            route = MomentwoDestination.AlbumDetail(id, title, subTitle, imageUrl)
-        )
+        navController.navigate(MomentwoDestination.AlbumDetail(id, title, subTitle, imageUrl))
+    }
+    val navigeteToPhotoList: (Int, Int, String, String) -> Unit = { albumId, subAlbumId, albumTitle, subAlbumTitle ->
+        navController.navigate(MomentwoDestination.PhotoList(albumId, subAlbumId, albumTitle, subAlbumTitle))
     }
     val navigateToCreateAlbum: () -> Unit = {
         navController.navigate(MomentwoDestination.CreateAlbum)

@@ -37,7 +37,7 @@ fun SubAlbumItemCard(
     subAlbumItem: () -> SubAlbumItem,
     isEditMode: () -> Boolean,
     getIsSelected: (Int) -> Boolean,
-    onClick: () -> Unit,
+    onClick: (Int, String) -> Unit,
     onChangeSubAlbumSelected: (Boolean, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -67,7 +67,7 @@ fun SubAlbumItemCardScreen(
     isSelected: () -> Boolean,
     cardColors: () -> CardColors,
     isEditMode: () -> Boolean,
-    onClick: () -> Unit,
+    onClick: (Int, String) -> Unit,
     onSelectedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -80,7 +80,7 @@ fun SubAlbumItemCardScreen(
             ElevatedCard(
                 onClick = {
                     if (isEditMode().not()) {
-                        onClick()
+                        onClick(subAlbumItem().id, subAlbumItem().title)
                     } else {
                         onSelectedChange(isSelected().not())
                     }

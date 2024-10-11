@@ -20,6 +20,7 @@ fun AlbumDetailRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     popBackStack: () -> Unit,
+    navigateToPhotoList: (Int, Int, String, String) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: AlbumDetailViewModel = hiltViewModel(),
@@ -40,5 +41,6 @@ fun AlbumDetailRoute(
         onEvent = { event -> viewModel.setEvent(event) },
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
+        navigateToPhotoList = navigateToPhotoList,
     )
 }

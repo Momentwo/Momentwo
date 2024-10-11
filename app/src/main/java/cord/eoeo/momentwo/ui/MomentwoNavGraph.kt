@@ -11,6 +11,7 @@ import cord.eoeo.momentwo.ui.albumdetail.AlbumDetailRoute
 import cord.eoeo.momentwo.ui.createalbum.CreateAlbumRoute
 import cord.eoeo.momentwo.ui.friend.FriendRoute
 import cord.eoeo.momentwo.ui.login.LoginRoute
+import cord.eoeo.momentwo.ui.photolist.PhotoListRoute
 import cord.eoeo.momentwo.ui.signup.SignUpRoute
 import kotlinx.coroutines.CoroutineScope
 
@@ -54,6 +55,15 @@ fun MomentwoNavGraph(
 
         composable<MomentwoDestination.AlbumDetail> {
             AlbumDetailRoute(
+                coroutineScope = coroutineScope,
+                imageLoader = imageLoader,
+                popBackStack = navActions.popBackStack,
+                navigateToPhotoList = navActions.navigeteToPhotoList
+            )
+        }
+
+        composable<MomentwoDestination.PhotoList> {
+            PhotoListRoute(
                 coroutineScope = coroutineScope,
                 imageLoader = imageLoader,
                 popBackStack = navActions.popBackStack,

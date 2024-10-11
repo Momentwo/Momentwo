@@ -23,7 +23,7 @@ fun SubAlbumListScreen(
     isEditMode: () -> Boolean,
     getSubAlbums: () -> Unit,
     getIsSelected: (Int) -> Boolean,
-    onClickItem: () -> Unit,
+    onClickItem: (Int, String) -> Unit,
     onChangeSubAlbumSelected: (Boolean, Int) -> Unit,
     onBack: () -> Unit,
 ) {

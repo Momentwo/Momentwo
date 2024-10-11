@@ -96,12 +96,8 @@ class SignUpViewModel @Inject constructor(
     private fun checkEmail(email: String) {
         viewModelScope.launch {
             signUpRepository.checkEmail(email)
-                .onSuccess { result ->
-                    if (result) {
-                        // TODO: 중복 확인 성공 메시지 출력
-                    } else {
-                        // TODO: 중복 메시지 출력
-                    }
+                .onSuccess {
+                    // TODO: 중복 확인 성공, 실패 메시지 출력
                 }
                 .onFailure {
                     Log.e("SignUpFailure", "Check Email Failure", it) // TODO: 테스트 후 삭제
@@ -115,11 +111,7 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             signUpRepository.checkNickname(nickname)
                 .onSuccess { result ->
-                    if (result) {
-                        // TODO: 중복 확인 성공 메시지 출력
-                    } else {
-                        // TODO: 중복 메시지 출력
-                    }
+                    // TODO: 중복 확인 성공, 실패 메시지 출력
                 }
                 .onFailure {
                     Log.e("SignUpFailure", "Check Nickname Failure", it) // TODO: 테스트 후 삭제

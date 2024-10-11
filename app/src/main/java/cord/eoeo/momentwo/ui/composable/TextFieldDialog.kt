@@ -31,14 +31,15 @@ fun TextFieldDialog(
     description: () -> String,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
-    initialText: () -> String = { "" },
+    placeholder: () -> String = { "" },
 ) {
-    var text: String by rememberSaveable { mutableStateOf(initialText()) }
+    var text: String by rememberSaveable { mutableStateOf("") }
 
     TextFieldDialogScreen(
         titleText = titleText,
         description = description,
         text = { text },
+        placeholder = placeholder,
         onTextChange = { text = it },
         onDismiss = onDismiss,
         onConfirm = onConfirm,
@@ -50,6 +51,7 @@ fun TextFieldDialogScreen(
     titleText: () -> String,
     description: () -> String,
     text: () -> String,
+    placeholder: () -> String,
     onTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
@@ -87,6 +89,7 @@ fun TextFieldDialogScreen(
                     value = text(),
                     onValueChange = onTextChange,
                     singleLine = true,
+                    placeholder = { Text(placeholder()) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
@@ -115,7 +118,7 @@ fun TextFieldDialogPreview() {
         TextFieldDialog(
             titleText = { "Title" },
             description = { "desc" },
-            initialText = { "init" },
+            placeholder = { "init" },
             onDismiss = {},
             onConfirm = {},
         )

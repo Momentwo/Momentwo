@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -35,10 +34,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.TextFieldDialog
+import cord.eoeo.momentwo.ui.model.ImageItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -51,6 +52,7 @@ fun PhotoListScreen(
     uiState: () -> PhotoListContract.State,
     effectFlow: () -> Flow<PhotoListContract.Effect>,
     onEvent: (event: PhotoListContract.Event) -> Unit,
+    photoPagingData: () -> LazyPagingItems<ImageItem>,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -114,8 +116,21 @@ fun PhotoListScreen(
                 .fillMaxSize()
                 .padding(horizontal = 8.dp),
         ) {
-            items(items = uiState().photoList, key = { it.id }) { imageItem ->
-                // TODO: collectAsLazyPagingItems() -> LazyPagingItems -> AsyncImage
+            items(count = photoPagingData().itemCount, key = { photoPagingData()[it]?.id ?: it }) { index ->
+                AsyncImage(
+                    model = photoPagingData()[index]?.imageUrl,
+                    contentDescription = "사진",
+                    imageLoader = imageLoader,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(4.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                )
+            }
+            /*items(items = uiState().photoList, key = { it.id }) { imageItem ->
+                // 테스트용 (Paging X)
                 AsyncImage(
                     model = imageItem.imageUrl,
                     contentDescription = "사진",
@@ -127,7 +142,7 @@ fun PhotoListScreen(
                         .padding(4.dp)
                         .clip(RoundedCornerShape(4.dp)),
                 )
-            }
+            }*/
         }
     }
 }

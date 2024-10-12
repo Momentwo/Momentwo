@@ -1,25 +1,35 @@
 package cord.eoeo.momentwo.ui.photolist
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import cord.eoeo.momentwo.data.photo.PhotoRepository
 import cord.eoeo.momentwo.ui.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination
-import cord.eoeo.momentwo.ui.photolist.PhotoListContract.Effect.*
+import cord.eoeo.momentwo.ui.photolist.PhotoListContract.Effect.ShowSnackbar
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class PhotoListViewModel @Inject constructor(
+    private val photoRepository: PhotoRepository,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<PhotoListContract.State, PhotoListContract.Event, PhotoListContract.Effect>() {
     init {
         val (albumId, subAlbumId, albumTitle, subAlbumTitle) = savedStateHandle.toRoute<MomentwoDestination.PhotoList>()
-        setState(
-            uiState.value.copy(
-                albumId = albumId,
-                subAlbumId = subAlbumId,
-                albumTitle = albumTitle,
-                subAlbumTitle = subAlbumTitle,
+
+        viewModelScope.launch {
+            setState(
+                uiState.value.copy(
+                    albumId = albumId,
+                    subAlbumId = subAlbumId,
+                    albumTitle = albumTitle,
+                    subAlbumTitle = subAlbumTitle,
+                    photoPagingData = photoRepository.getPhotoPagingData(50, albumId, subAlbumId),
+                )
             )
-        )
+        }
     }
 
     override fun createInitialState(): PhotoListContract.State = PhotoListContract.State()

@@ -7,7 +7,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.ImageLoader
+import cord.eoeo.momentwo.ui.model.ImageItem
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -20,6 +23,7 @@ fun PhotoListRoute(
     viewModel: PhotoListViewModel = hiltViewModel(),
 ) {
     val uiState: PhotoListContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val photoPagingData: LazyPagingItems<ImageItem> = uiState.photoPagingData.collectAsLazyPagingItems()
 
     PhotoListScreen(
         coroutineScope = coroutineScope,
@@ -27,6 +31,7 @@ fun PhotoListRoute(
         uiState = { uiState },
         effectFlow = { viewModel.effect },
         onEvent = { event -> viewModel.setEvent(event) },
+        photoPagingData = { photoPagingData },
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
     )

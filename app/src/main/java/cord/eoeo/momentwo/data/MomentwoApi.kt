@@ -41,6 +41,11 @@ object MomentwoApi {
     const val PUT_MEMBER_ASSIGN_ADMIN = "/members/assign/admin"
     const val PUT_EDIT_MEMBERS_PERMISSION = "/members/permission"
 
+    // Photo
+    const val DELETE_PHOTOS = "/photos/delete"
+    /** Require @Path("albumId"), @Path("subAlbumId"), @Query("cursor") */
+    const val GET_PHOTO_PAGE = "/photos/view/{albumId}/{subAlbumId}"
+
     // Friend
     const val POST_FRIEND_REQUEST = "/friendship/request"
     const val DELETE_FRIEND_REQUEST = "/friendship/request/cancel"

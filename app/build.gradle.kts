@@ -106,6 +106,17 @@ dependencies {
     // Kotlin Serialization
     implementation(libs.kotlin.serialization)
 
+    // Paging3
+    implementation(libs.paging)
+    implementation(libs.paging.compose)
+
+    // RoomDB
+    implementation(libs.room)
+    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -21,5 +21,6 @@ object DatabaseModule {
         applicationContext,
         MomentwoDatabase::class.java,
         "momentwo-database"
-    ).build()
+    ).fallbackToDestructiveMigration()
+        .build()
 }

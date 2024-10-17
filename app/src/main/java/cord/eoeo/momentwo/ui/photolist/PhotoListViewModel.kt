@@ -36,6 +36,10 @@ class PhotoListViewModel @Inject constructor(
 
     override fun handleEvent(newEvent: PhotoListContract.Event) {
         when (newEvent) {
+            is PhotoListContract.Event.OnChangeIsRefreshing -> {
+                with(uiState.value) { setState(copy(isRefreshing = newEvent.isRefreshing)) }
+            }
+
             is PhotoListContract.Event.OnChangeIsMenuExpended -> {
                 with(uiState.value) { setState(copy(isMenuExpended = newEvent.isMenuExpended)) }
             }

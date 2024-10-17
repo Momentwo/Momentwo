@@ -26,6 +26,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -41,10 +43,13 @@ import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.TextFieldDialog
 import cord.eoeo.momentwo.ui.model.ImageItem
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoListScreen(
     coroutineScope: CoroutineScope,
@@ -52,6 +57,7 @@ fun PhotoListScreen(
     uiState: () -> PhotoListContract.State,
     effectFlow: () -> Flow<PhotoListContract.Effect>,
     onEvent: (event: PhotoListContract.Event) -> Unit,
+    refreshState: () -> PullToRefreshState,
     photoPagingData: () -> LazyPagingItems<ImageItem>,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
@@ -109,40 +115,39 @@ fun PhotoListScreen(
         },
         modifier = Modifier.fillMaxSize(),
     ) { paddingValue ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(100.dp),
-            contentPadding = paddingValue,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp),
+        PullToRefreshBox(
+            isRefreshing = uiState().isRefreshing,
+            state = refreshState(),
+            onRefresh = {
+                onEvent(PhotoListContract.Event.OnChangeIsRefreshing(true))
+                coroutineScope.launch {
+                    photoPagingData().refresh()
+                    delay(500)
+                    onEvent(PhotoListContract.Event.OnChangeIsRefreshing(false))
+                }
+            },
+            modifier = Modifier.fillMaxSize().padding(paddingValue),
         ) {
-            items(count = photoPagingData().itemCount, key = { photoPagingData()[it]?.id ?: it }) { index ->
-                AsyncImage(
-                    model = photoPagingData()[index]?.imageUrl,
-                    contentDescription = "사진",
-                    imageLoader = imageLoader,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                )
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(100.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
+            ) {
+                items(count = photoPagingData().itemCount, key = { photoPagingData()[it]?.id ?: it }) { index ->
+                    AsyncImage(
+                        model = photoPagingData()[index]?.imageUrl,
+                        contentDescription = "사진",
+                        imageLoader = imageLoader,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .padding(4.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                    )
+                }
             }
-            /*items(items = uiState().photoList, key = { it.id }) { imageItem ->
-                // 테스트용 (Paging X)
-                AsyncImage(
-                    model = imageItem.imageUrl,
-                    contentDescription = "사진",
-                    imageLoader = imageLoader,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                )
-            }*/
         }
     }
 }

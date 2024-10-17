@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 class PhotoRemoteDataSource(
     private val photoService: PhotoService,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
-) : PhotoDataSource {
+) : PhotoDataSource.Remote {
     override suspend fun getPhotoPage(albumId: Int, subAlbumId: Int, cursor: Int): Result<PhotoPage> =
         runCatching {
             withContext(dispatcher) {

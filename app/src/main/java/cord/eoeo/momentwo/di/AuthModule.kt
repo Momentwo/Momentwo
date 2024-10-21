@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import cord.eoeo.momentwo.data.authentication.AuthAuthenticator
 import cord.eoeo.momentwo.data.authentication.AuthInterceptor
 import cord.eoeo.momentwo.data.authentication.PreferenceRepository
 import cord.eoeo.momentwo.data.authentication.PreferenceRepositoryImpl
@@ -32,4 +33,8 @@ object AuthModule {
     @Provides
     @Singleton
     fun provideAuthInterceptor(preferenceRepository: PreferenceRepository): AuthInterceptor = AuthInterceptor(preferenceRepository)
+
+    @Provides
+    @Singleton
+    fun provideAuthAuthenticator(preferenceRepository: PreferenceRepository): AuthAuthenticator = AuthAuthenticator(preferenceRepository)
 }

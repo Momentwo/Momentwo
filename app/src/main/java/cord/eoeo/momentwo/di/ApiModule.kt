@@ -3,6 +3,7 @@ package cord.eoeo.momentwo.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.data.authentication.AuthAuthenticator
 import cord.eoeo.momentwo.data.authentication.AuthInterceptor
 import dagger.Module
 import dagger.Provides
@@ -27,9 +28,13 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient =
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        authAuthenticator: AuthAuthenticator,
+    ): OkHttpClient =
         OkHttpClient
             .Builder()
+            .authenticator(authAuthenticator)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY

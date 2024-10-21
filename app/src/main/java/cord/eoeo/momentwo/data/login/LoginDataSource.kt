@@ -1,8 +1,8 @@
 package cord.eoeo.momentwo.data.login
 
 import cord.eoeo.momentwo.data.model.LoginRequest
-import cord.eoeo.momentwo.data.model.LoginResponse
+import retrofit2.Response
 
 interface LoginDataSource {
-    suspend fun requestLogin(loginData: LoginRequest): Result<LoginResponse>
+    suspend fun requestLogin(loginData: LoginRequest): Response<Unit>
 }

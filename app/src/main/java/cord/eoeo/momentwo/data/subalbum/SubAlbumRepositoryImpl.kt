@@ -3,6 +3,7 @@ package cord.eoeo.momentwo.data.subalbum
 import cord.eoeo.momentwo.data.model.CreateSubAlbumInfo
 import cord.eoeo.momentwo.data.model.EditSubAlbumInfo
 import cord.eoeo.momentwo.data.model.SubAlbumIds
+import cord.eoeo.momentwo.domain.subalbum.SubAlbumRepository
 import cord.eoeo.momentwo.ui.model.SubAlbumItem
 
 class SubAlbumRepositoryImpl(

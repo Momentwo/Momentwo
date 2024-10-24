@@ -2,13 +2,10 @@ package cord.eoeo.momentwo.ui.photolist
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -31,14 +28,11 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
-import coil.compose.AsyncImage
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.TextFieldDialog
 import cord.eoeo.momentwo.ui.model.ImageItem
@@ -59,6 +53,7 @@ fun PhotoListScreen(
     onEvent: (event: PhotoListContract.Event) -> Unit,
     refreshState: () -> PullToRefreshState,
     photoPagingData: () -> LazyPagingItems<ImageItem>,
+    launchGallery: () -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -98,7 +93,7 @@ fun PhotoListScreen(
                 isMenuExpended = { uiState().isMenuExpended },
                 isEditMode = { uiState().isEditMode },
                 onClickBack = { onEvent(PhotoListContract.Event.OnBack) },
-                onClickAdd = { /* TODO: 사진 여러개 선택, 업로드 */ },
+                onClickAdd = launchGallery,
                 onClickMenu = { onEvent(PhotoListContract.Event.OnChangeIsMenuExpended(true)) },
                 onDismissMenu = { onEvent(PhotoListContract.Event.OnChangeIsMenuExpended(false)) },
                 onClickEditTitle = {
@@ -109,8 +104,8 @@ fun PhotoListScreen(
                     onEvent(PhotoListContract.Event.OnChangeIsEditMode(true))
                     onEvent(PhotoListContract.Event.OnChangeIsMenuExpended(false))
                 },
-                onClickCancel = { onEvent(PhotoListContract.Event.OnChangeIsEditMode(false)) },
-                onClickDelete = { /* TODO: 선택한 사진 삭제 */ onEvent(PhotoListContract.Event.OnChangeIsEditMode(false)) },
+                onClickCancel = { onEvent(PhotoListContract.Event.OnClickCancelEdit) },
+                onClickDelete = { onEvent(PhotoListContract.Event.OnClickConfirmEdit) },
             )
         },
         modifier = Modifier.fillMaxSize(),
@@ -126,7 +121,9 @@ fun PhotoListScreen(
                     onEvent(PhotoListContract.Event.OnChangeIsRefreshing(false))
                 }
             },
-            modifier = Modifier.fillMaxSize().padding(paddingValue),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValue),
         ) {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(100.dp),
@@ -135,17 +132,18 @@ fun PhotoListScreen(
                     .padding(horizontal = 8.dp),
             ) {
                 items(count = photoPagingData().itemCount, key = { photoPagingData()[it]?.id ?: it }) { index ->
-                    AsyncImage(
-                        model = photoPagingData()[index]?.imageUrl,
-                        contentDescription = "사진",
-                        imageLoader = imageLoader,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .padding(4.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                    )
+                    photoPagingData()[index]?.let { imageItem ->
+                        PhotoListItemBox(
+                            imageLoader = imageLoader,
+                            imageItem = { imageItem },
+                            isEditMode = { uiState().isEditMode },
+                            isSelected = { uiState().selectedPhotoIds.contains(imageItem.id) },
+                            onChangeSelected = { isSelected ->
+                                onEvent(PhotoListContract.Event.OnChangeIsSelected(isSelected, imageItem))
+                            },
+                            onClick = { /* TODO: 사진 디테일 화면 이동 */ },
+                        )
+                    }
                 }
             }
         }
@@ -204,7 +202,7 @@ fun PhotoListTopAppBar(
                         leadingIcon = { Icon(Icons.Default.Edit, "서브 앨범 제목 수정") }
                     )
                     DropdownMenuItem(
-                        text = { Text("사진 목록 편집") },
+                        text = { Text("사진 삭제") },
                         onClick = onClickEditPhoto,
                         leadingIcon = { Icon(Icons.Default.HideImage, "사진 목록 편집") }
                     )

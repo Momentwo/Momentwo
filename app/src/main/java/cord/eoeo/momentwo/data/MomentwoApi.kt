@@ -45,6 +45,8 @@ object MomentwoApi {
     const val DELETE_PHOTOS = "/photos/delete"
     /** Require @Path("albumId"), @Path("subAlbumId"), @Query("cursor") */
     const val GET_PHOTO_PAGE = "/photos/view/{albumId}/{subAlbumId}"
+    const val POST_PHOTO_PRESIGNED = "/images/photos/presigned"
+    const val POST_PHOTO_UPLOAD = "/photos/upload"
 
     // Friend
     const val POST_FRIEND_REQUEST = "/friendship/request"

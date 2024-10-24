@@ -12,7 +12,7 @@ class AuthInterceptor @Inject constructor(
         runBlocking {
             val accessToken = preferenceRepository.getAccessToken().getOrDefault("")
 
-            if (accessToken.isEmpty()) {
+            if (accessToken.isEmpty() || chain.request().headers["isAuthorizable"] == "false") {
                 return@runBlocking chain.proceed(chain.request())
             }
 

@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import cord.eoeo.momentwo.data.member.MemberRepository
-import cord.eoeo.momentwo.data.subalbum.SubAlbumRepository
+import cord.eoeo.momentwo.domain.subalbum.SubAlbumRepository
 import cord.eoeo.momentwo.domain.album.AlbumRepository
 import cord.eoeo.momentwo.domain.friend.GetFriendListUseCase
 import cord.eoeo.momentwo.ui.BaseViewModel

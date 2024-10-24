@@ -3,10 +3,14 @@ package cord.eoeo.momentwo.data.photo.remote
 import cord.eoeo.momentwo.data.MomentwoApi
 import cord.eoeo.momentwo.data.model.DeletePhotos
 import cord.eoeo.momentwo.data.model.PhotoPage
+import cord.eoeo.momentwo.data.model.PresignedRequest
+import cord.eoeo.momentwo.data.model.PresignedUrl
+import cord.eoeo.momentwo.data.model.UploadPhoto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.HTTP
 import retrofit2.http.Headers
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -23,4 +27,16 @@ interface PhotoService {
         @Path("subAlbumId") subAlbumId: Int,
         @Query("cursor") cursor: Int,
     ): PhotoPage
+
+    @Headers("content-type: application/json")
+    @POST(MomentwoApi.POST_PHOTO_PRESIGNED)
+    suspend fun postPhotoPresigned(
+        @Body presignedRequest: PresignedRequest
+    ): PresignedUrl
+
+    @Headers("content-type: application/json")
+    @POST(MomentwoApi.POST_PHOTO_UPLOAD)
+    suspend fun postPhotoUpload(
+        @Body uploadPhoto: UploadPhoto
+    )
 }

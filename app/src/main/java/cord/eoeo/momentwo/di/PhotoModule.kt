@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.di
 
+import android.content.Context
 import cord.eoeo.momentwo.data.MomentwoDatabase
 import cord.eoeo.momentwo.data.photo.PhotoDataSource
 import cord.eoeo.momentwo.data.photo.PhotoRemoteMediator
@@ -10,9 +11,11 @@ import cord.eoeo.momentwo.data.photo.local.PhotoLocalDataSource
 import cord.eoeo.momentwo.data.photo.local.PhotoRemoteKeyDao
 import cord.eoeo.momentwo.data.photo.remote.PhotoRemoteDataSource
 import cord.eoeo.momentwo.data.photo.remote.PhotoService
+import cord.eoeo.momentwo.data.presigned.PresignedDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -58,6 +61,8 @@ object PhotoModule {
     fun providePhotoRepository(
         @QualifierModule.RemoteDataSource photoRemoteDataSource: PhotoDataSource.Remote,
         @QualifierModule.LocalDataSource photoLocalDataSource: PhotoDataSource.Local,
+        presignedRemoteDataSource: PresignedDataSource,
         photoRemoteMediator: PhotoRemoteMediator,
-    ): PhotoRepository = PhotoRepositoryImpl(photoRemoteDataSource, photoLocalDataSource, photoRemoteMediator)
+        @ApplicationContext applicationContext: Context,
+    ): PhotoRepository = PhotoRepositoryImpl(photoRemoteDataSource, photoLocalDataSource, presignedRemoteDataSource, photoRemoteMediator, applicationContext)
 }

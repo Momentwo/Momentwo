@@ -64,10 +64,32 @@ material3 = { group = "androidx.compose.material3", name = "material3" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor" }
 
+# build-logic 에서 사용하는 Gradle plugin 아티팩트
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
+hilt-gradlePlugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
+room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+androidRoom = { id = "androidx.room", version.ref = "room" }
+
+# Momentwo convention plugins (build-logic)
+momentwo-android-application = { id = "momentwo.android.application", version = "unspecified" }
+momentwo-android-application-compose = { id = "momentwo.android.application.compose", version = "unspecified" }
+momentwo-android-library = { id = "momentwo.android.library", version = "unspecified" }
+momentwo-android-library-compose = { id = "momentwo.android.library.compose", version = "unspecified" }
+momentwo-android-feature = { id = "momentwo.android.feature", version = "unspecified" }
+momentwo-android-hilt = { id = "momentwo.android.hilt", version = "unspecified" }
+momentwo-android-room = { id = "momentwo.android.room", version = "unspecified" }
+momentwo-android-network = { id = "momentwo.android.network", version = "unspecified" }
+momentwo-jvm-library = { id = "momentwo.jvm.library", version = "unspecified" }

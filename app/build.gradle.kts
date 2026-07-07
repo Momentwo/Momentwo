@@ -1,22 +1,18 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.momentwo.android.application)
+    alias(libs.plugins.momentwo.android.application.compose)
+    alias(libs.plugins.momentwo.android.hilt)
+    alias(libs.plugins.momentwo.android.room)
     alias(libs.plugins.kotlinSerialization)
 }
 
 android {
     namespace = "cord.eoeo.momentwo"
-    compileSdk = 34
 
     defaultConfig {
         applicationId = "cord.eoeo.momentwo"
-        minSdk = 29
-        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -34,18 +30,8 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-    
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 
     buildFeatures {
-        compose = true
         buildConfig = true
     }
 
@@ -61,11 +47,6 @@ fun getLocalProperty(key: String): String = gradleLocalProperties(rootDir, provi
 dependencies {
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)
-    implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
     implementation(libs.icons)
     implementation(libs.icons.extended)
 
@@ -79,24 +60,18 @@ dependencies {
     // Navigation Compose
     implementation(libs.navigation.compose)
 
-    // Hilt
+    // Hilt navigation compose (hilt-android / compiler 는 momentwo.android.hilt 가 추가)
     implementation(libs.hilt.compose)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
-    // retrofit
+    // Retrofit / OkHttp / Moshi
     implementation(libs.retrofit)
-
-    // okhttp
+    implementation(libs.moshi)
+    implementation(libs.moshi.converter)
     implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
 
-    // moshi
-    implementation(libs.moshi)
-    implementation(libs.moshi.converter)
-
-    // coil
+    // Coil
     implementation(libs.coil)
     implementation(libs.coil.compose)
 
@@ -106,22 +81,13 @@ dependencies {
     // Kotlin Serialization
     implementation(libs.kotlin.serialization)
 
-    // Paging3
+    // Paging3 (room-paging 은 momentwo.android.room 이 추가)
     implementation(libs.paging)
     implementation(libs.paging.compose)
-
-    // RoomDB
-    implementation(libs.room)
-    annotationProcessor(libs.room.compiler)
-    ksp(libs.room.compiler)
-    implementation(libs.room.ktx)
-    implementation(libs.room.paging)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 }

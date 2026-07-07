@@ -136,4 +136,7 @@ fabric.properties
 # Google-services
 google-services.json
 
+# Room schema export directory
+**/schemas/
+
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio,kotlin

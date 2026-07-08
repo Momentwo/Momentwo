@@ -42,9 +42,9 @@ import cord.eoeo.momentwo.ui.albumdetail.albumsetting.AlbumSettingRoute
 import cord.eoeo.momentwo.ui.albumdetail.albumsetting.ChangeImageRoute
 import cord.eoeo.momentwo.ui.albumdetail.member.MemberScreen
 import cord.eoeo.momentwo.ui.albumdetail.subalbumlist.SubAlbumListScreen
-import cord.eoeo.momentwo.ui.composable.InviteDialog
-import cord.eoeo.momentwo.ui.composable.TextFieldDialog
-import cord.eoeo.momentwo.ui.model.BottomNavigationItem
+import cord.eoeo.momentwo.core.ui.InviteDialog
+import cord.eoeo.momentwo.core.ui.TextFieldDialog
+import cord.eoeo.momentwo.core.ui.BottomNavigationItem
 import cord.eoeo.momentwo.core.model.MemberAuth
 import cord.eoeo.momentwo.core.model.TextFieldDialogItem
 import kotlinx.coroutines.CoroutineScope

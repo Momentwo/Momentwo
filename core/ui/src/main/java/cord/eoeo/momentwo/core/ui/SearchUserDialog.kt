@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.composable
+package cord.eoeo.momentwo.core.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight

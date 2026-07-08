@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.composable.CircleAsyncImage
+import cord.eoeo.momentwo.core.ui.CircleAsyncImage
 import cord.eoeo.momentwo.core.model.FriendRequestItem
 
 @Composable

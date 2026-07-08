@@ -15,4 +15,6 @@ dependencies {
     implementation(libs.icons.extended)
     implementation(libs.coil)
     implementation(libs.coil.compose)
+    implementation(libs.paging)
+    implementation(libs.paging.compose)
 }

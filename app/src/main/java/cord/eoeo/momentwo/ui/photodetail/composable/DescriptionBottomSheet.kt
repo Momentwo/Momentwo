@@ -63,7 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.composable.CircleAsyncImage
+import cord.eoeo.momentwo.core.ui.CircleAsyncImage
 import cord.eoeo.momentwo.core.model.DescriptionItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

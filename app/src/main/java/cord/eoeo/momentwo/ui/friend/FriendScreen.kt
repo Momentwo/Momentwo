@@ -28,10 +28,10 @@ import androidx.navigation.compose.composable
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.composable.SearchUserDialog
+import cord.eoeo.momentwo.core.ui.SearchUserDialog
 import cord.eoeo.momentwo.ui.friend.friendlist.FriendListScreen
 import cord.eoeo.momentwo.ui.friend.friendrequest.FriendRequestRoute
-import cord.eoeo.momentwo.ui.model.BottomNavigationItem
+import cord.eoeo.momentwo.core.ui.BottomNavigationItem
 import cord.eoeo.momentwo.core.model.FriendItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

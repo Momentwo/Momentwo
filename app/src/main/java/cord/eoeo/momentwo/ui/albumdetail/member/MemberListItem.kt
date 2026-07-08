@@ -24,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cord.eoeo.momentwo.ui.model.MemberAuth
-import cord.eoeo.momentwo.ui.model.MemberItem
+import cord.eoeo.momentwo.core.model.MemberAuth
+import cord.eoeo.momentwo.core.model.MemberItem
 import cord.eoeo.momentwo.core.designsystem.theme.starYellow
 
 @Composable

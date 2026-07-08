@@ -4,7 +4,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.model.FriendRequestItem
+import cord.eoeo.momentwo.core.model.FriendRequestItem
 import kotlinx.coroutines.CoroutineScope
 
 @Composable

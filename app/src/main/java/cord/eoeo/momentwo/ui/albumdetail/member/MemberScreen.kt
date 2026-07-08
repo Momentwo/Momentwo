@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
 import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.model.MemberItem
+import cord.eoeo.momentwo.core.model.MemberItem
 
 @Composable
 fun MemberScreen(

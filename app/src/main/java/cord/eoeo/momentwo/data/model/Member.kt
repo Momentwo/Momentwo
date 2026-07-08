@@ -2,8 +2,8 @@ package cord.eoeo.momentwo.data.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import cord.eoeo.momentwo.ui.model.MemberAuth
-import cord.eoeo.momentwo.ui.model.MemberItem
+import cord.eoeo.momentwo.core.model.MemberAuth
+import cord.eoeo.momentwo.core.model.MemberItem
 
 @JsonClass(generateAdapter = true)
 data class InviteMembers(

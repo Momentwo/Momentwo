@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.model
+package cord.eoeo.momentwo.core.model
 
 data class TextFieldDialogItem(
     val titleText: String,

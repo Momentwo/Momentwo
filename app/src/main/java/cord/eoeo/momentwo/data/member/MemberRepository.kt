@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.member
 
-import cord.eoeo.momentwo.ui.model.MemberItem
+import cord.eoeo.momentwo.core.model.MemberItem
 
 interface MemberRepository {
     suspend fun exitFromAlbum(albumId: Int): Result<Unit>

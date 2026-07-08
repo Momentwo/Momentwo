@@ -19,7 +19,7 @@ import cord.eoeo.momentwo.data.model.UploadPhoto
 import cord.eoeo.momentwo.data.model.UriRequestBody
 import cord.eoeo.momentwo.data.presigned.PresignedDataSource
 import cord.eoeo.momentwo.domain.photo.PhotoRepository
-import cord.eoeo.momentwo.ui.model.PhotoItem
+import cord.eoeo.momentwo.core.model.PhotoItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

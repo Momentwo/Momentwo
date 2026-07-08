@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.model.FriendItem
+import cord.eoeo.momentwo.core.model.FriendItem
 
 @Composable
 fun FriendListScreen(

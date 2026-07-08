@@ -11,7 +11,7 @@ import cord.eoeo.momentwo.domain.photo.DownloadPhotoUseCase
 import cord.eoeo.momentwo.domain.photo.UpdateIsLikedUseCase
 import cord.eoeo.momentwo.ui.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination
-import cord.eoeo.momentwo.ui.model.DescriptionItem
+import cord.eoeo.momentwo.core.model.DescriptionItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

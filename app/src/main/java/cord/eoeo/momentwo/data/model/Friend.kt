@@ -2,8 +2,8 @@ package cord.eoeo.momentwo.data.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import cord.eoeo.momentwo.ui.model.FriendRequestItem
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.core.model.FriendRequestItem
+import cord.eoeo.momentwo.core.model.UserItem
 
 @JsonClass(generateAdapter = true)
 data class FriendRequestResponse(

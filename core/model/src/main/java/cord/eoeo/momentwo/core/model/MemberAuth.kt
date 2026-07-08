@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.model
+package cord.eoeo.momentwo.core.model
 
 enum class MemberAuth(
     val roleString: String,

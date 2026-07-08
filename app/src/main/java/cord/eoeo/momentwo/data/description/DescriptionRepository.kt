@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.description
 
-import cord.eoeo.momentwo.ui.model.DescriptionItem
+import cord.eoeo.momentwo.core.model.DescriptionItem
 
 interface DescriptionRepository {
     suspend fun writeDescription(

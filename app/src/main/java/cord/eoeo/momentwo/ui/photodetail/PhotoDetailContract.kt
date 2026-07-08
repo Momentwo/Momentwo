@@ -4,8 +4,8 @@ import androidx.paging.PagingData
 import cord.eoeo.momentwo.ui.UiEffect
 import cord.eoeo.momentwo.ui.UiEvent
 import cord.eoeo.momentwo.ui.UiState
-import cord.eoeo.momentwo.ui.model.CommentItem
-import cord.eoeo.momentwo.ui.model.DescriptionItem
+import cord.eoeo.momentwo.core.model.CommentItem
+import cord.eoeo.momentwo.core.model.DescriptionItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 

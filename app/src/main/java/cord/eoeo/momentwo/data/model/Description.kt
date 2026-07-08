@@ -1,7 +1,7 @@
 package cord.eoeo.momentwo.data.model
 
 import com.squareup.moshi.JsonClass
-import cord.eoeo.momentwo.ui.model.DescriptionItem
+import cord.eoeo.momentwo.core.model.DescriptionItem
 
 @JsonClass(generateAdapter = true)
 data class CreateDescription(

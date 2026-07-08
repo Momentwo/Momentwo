@@ -5,7 +5,7 @@ import androidx.paging.PagingData
 import cord.eoeo.momentwo.ui.UiEffect
 import cord.eoeo.momentwo.ui.UiEvent
 import cord.eoeo.momentwo.ui.UiState
-import cord.eoeo.momentwo.ui.model.PhotoItem
+import cord.eoeo.momentwo.core.model.PhotoItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 

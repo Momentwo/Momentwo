@@ -1,9 +1,9 @@
 package cord.eoeo.momentwo.domain.friend
 
 import androidx.paging.PagingData
-import cord.eoeo.momentwo.ui.model.FriendItem
-import cord.eoeo.momentwo.ui.model.FriendRequestItem
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.core.model.FriendItem
+import cord.eoeo.momentwo.core.model.FriendRequestItem
+import cord.eoeo.momentwo.core.model.UserItem
 import kotlinx.coroutines.flow.Flow
 
 interface FriendRepository {

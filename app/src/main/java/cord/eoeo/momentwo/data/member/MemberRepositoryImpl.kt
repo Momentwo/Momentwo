@@ -3,7 +3,7 @@ package cord.eoeo.momentwo.data.member
 import cord.eoeo.momentwo.data.model.AssignAdminToMember
 import cord.eoeo.momentwo.data.model.EditMembers
 import cord.eoeo.momentwo.data.model.InviteMembers
-import cord.eoeo.momentwo.ui.model.MemberItem
+import cord.eoeo.momentwo.core.model.MemberItem
 
 class MemberRepositoryImpl(
     private val memberRemoteDataSource: MemberDataSource,

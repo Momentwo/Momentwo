@@ -3,7 +3,7 @@ package cord.eoeo.momentwo.data.photo.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import cord.eoeo.momentwo.ui.model.PhotoItem
+import cord.eoeo.momentwo.core.model.PhotoItem
 
 @Entity(tableName = "photo")
 data class PhotoEntity(

@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.data.description
 
 import cord.eoeo.momentwo.data.model.CreateDescription
 import cord.eoeo.momentwo.data.model.EditDescription
-import cord.eoeo.momentwo.ui.model.DescriptionItem
+import cord.eoeo.momentwo.core.model.DescriptionItem
 
 class DescriptionRepositoryImpl(
     private val descriptionRemoteDataSource: DescriptionDataSource,

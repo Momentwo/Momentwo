@@ -4,7 +4,7 @@ import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import cord.eoeo.momentwo.ui.model.MemberAuth
+import cord.eoeo.momentwo.core.model.MemberAuth
 
 @Composable
 fun AlbumSettingRoute(

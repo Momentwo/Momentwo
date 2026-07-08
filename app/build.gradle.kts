@@ -46,6 +46,7 @@ fun getLocalProperty(key: String): String = gradleLocalProperties(rootDir, provi
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":core:model"))
 
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)

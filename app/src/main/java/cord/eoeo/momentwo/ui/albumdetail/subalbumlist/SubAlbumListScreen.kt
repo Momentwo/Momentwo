@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import coil.ImageLoader
 import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.model.SubAlbumItem
+import cord.eoeo.momentwo.core.model.SubAlbumItem
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

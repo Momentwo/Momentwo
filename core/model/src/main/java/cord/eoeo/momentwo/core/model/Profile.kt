@@ -1,6 +1,6 @@
-package cord.eoeo.momentwo.ui.model
+package cord.eoeo.momentwo.core.model
 
-data class ProfileItem(
+data class Profile(
     val name: String,
     val email: String,
     val nickname: String,

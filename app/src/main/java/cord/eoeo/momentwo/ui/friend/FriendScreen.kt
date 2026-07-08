@@ -32,7 +32,7 @@ import cord.eoeo.momentwo.ui.composable.SearchUserDialog
 import cord.eoeo.momentwo.ui.friend.friendlist.FriendListScreen
 import cord.eoeo.momentwo.ui.friend.friendrequest.FriendRequestRoute
 import cord.eoeo.momentwo.ui.model.BottomNavigationItem
-import cord.eoeo.momentwo.ui.model.FriendItem
+import cord.eoeo.momentwo.core.model.FriendItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect

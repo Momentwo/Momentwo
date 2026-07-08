@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.domain.album
 
-import cord.eoeo.momentwo.ui.model.AlbumItem
+import cord.eoeo.momentwo.core.model.AlbumItem
 
 class GetAlbumListUseCase(
     private val albumRepository: AlbumRepository,

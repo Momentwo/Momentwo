@@ -21,4 +21,5 @@ include(":core:model")
 include(":core:common")
 include(":core:ui")
 include(":core:datastore")
+include(":core:network")
  

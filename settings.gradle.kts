@@ -18,4 +18,5 @@ rootProject.name = "Momentwo"
 include(":app")
 include(":core:designsystem")
 include(":core:model")
+include(":core:common")
  

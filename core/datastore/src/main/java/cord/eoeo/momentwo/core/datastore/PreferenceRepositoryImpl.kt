@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.data.authentication
+package cord.eoeo.momentwo.core.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException

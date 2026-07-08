@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.domain.login
 
-import cord.eoeo.momentwo.data.authentication.PreferenceRepository
+import cord.eoeo.momentwo.core.datastore.PreferenceRepository
 import cord.eoeo.momentwo.domain.profile.ProfileRepository
 
 class RequestLoginUseCase(

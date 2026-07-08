@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.di
 
-import cord.eoeo.momentwo.data.authentication.PreferenceRepository
+import cord.eoeo.momentwo.core.datastore.PreferenceRepository
 import cord.eoeo.momentwo.data.login.LoginDataSource
 import cord.eoeo.momentwo.data.login.LoginRepositoryImpl
 import cord.eoeo.momentwo.data.login.remote.LoginRemoteDataSource

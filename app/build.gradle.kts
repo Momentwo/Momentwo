@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:datastore"))
     implementation(project(":core:network"))
+    implementation(project(":core:database"))
 
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)

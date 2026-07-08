@@ -1,8 +1,8 @@
 package cord.eoeo.momentwo.data.friend
 
 import androidx.paging.PagingSource
-import cord.eoeo.momentwo.data.friend.local.entity.FriendEntity
-import cord.eoeo.momentwo.data.friend.local.entity.FriendRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.FriendEntity
+import cord.eoeo.momentwo.core.database.FriendRemoteKeyEntity
 import cord.eoeo.momentwo.data.model.FriendPage
 import cord.eoeo.momentwo.data.model.ReceivedFriendRequestList
 import cord.eoeo.momentwo.data.model.SearchUser

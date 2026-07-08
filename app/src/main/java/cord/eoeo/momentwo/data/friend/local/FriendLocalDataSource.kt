@@ -2,8 +2,10 @@ package cord.eoeo.momentwo.data.friend.local
 
 import androidx.paging.PagingSource
 import cord.eoeo.momentwo.data.friend.FriendDataSource
-import cord.eoeo.momentwo.data.friend.local.entity.FriendEntity
-import cord.eoeo.momentwo.data.friend.local.entity.FriendRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.FriendDao
+import cord.eoeo.momentwo.core.database.FriendRemoteKeyDao
+import cord.eoeo.momentwo.core.database.FriendEntity
+import cord.eoeo.momentwo.core.database.FriendRemoteKeyEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

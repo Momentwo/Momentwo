@@ -1,9 +1,9 @@
 package cord.eoeo.momentwo.di
 
-import cord.eoeo.momentwo.data.MomentwoDatabase
+import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import cord.eoeo.momentwo.data.profile.ProfileDataSource
 import cord.eoeo.momentwo.data.profile.ProfileRepositoryImpl
-import cord.eoeo.momentwo.data.profile.local.ProfileDao
+import cord.eoeo.momentwo.core.database.ProfileDao
 import cord.eoeo.momentwo.data.profile.local.ProfileLocalDataSource
 import cord.eoeo.momentwo.data.profile.remote.ProfileRemoteDataSource
 import cord.eoeo.momentwo.data.profile.remote.ProfileService

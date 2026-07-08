@@ -1,7 +1,8 @@
 package cord.eoeo.momentwo.data.profile.local
 
 import cord.eoeo.momentwo.data.profile.ProfileDataSource
-import cord.eoeo.momentwo.data.profile.local.entity.ProfileEntity
+import cord.eoeo.momentwo.core.database.ProfileDao
+import cord.eoeo.momentwo.core.database.ProfileEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

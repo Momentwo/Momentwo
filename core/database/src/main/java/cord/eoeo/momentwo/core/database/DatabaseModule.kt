@@ -1,8 +1,8 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.database
 
 import android.content.Context
 import androidx.room.Room
-import cord.eoeo.momentwo.data.MomentwoDatabase
+import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

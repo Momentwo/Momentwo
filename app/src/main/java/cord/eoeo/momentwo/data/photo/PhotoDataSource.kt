@@ -7,8 +7,8 @@ import cord.eoeo.momentwo.data.model.PhotoPage
 import cord.eoeo.momentwo.data.model.PresignedRequest
 import cord.eoeo.momentwo.data.model.PresignedUrl
 import cord.eoeo.momentwo.data.model.UploadPhoto
-import cord.eoeo.momentwo.data.photo.local.entity.PhotoEntity
-import cord.eoeo.momentwo.data.photo.local.entity.PhotoRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.PhotoEntity
+import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
 import java.io.OutputStream
 
 interface PhotoDataSource {

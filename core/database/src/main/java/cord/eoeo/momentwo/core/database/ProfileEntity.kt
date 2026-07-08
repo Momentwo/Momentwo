@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.data.profile.local.entity
+package cord.eoeo.momentwo.core.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

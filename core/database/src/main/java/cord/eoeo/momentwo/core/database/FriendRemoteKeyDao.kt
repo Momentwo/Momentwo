@@ -1,10 +1,10 @@
-package cord.eoeo.momentwo.data.friend.local
+package cord.eoeo.momentwo.core.database
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import cord.eoeo.momentwo.data.friend.local.entity.FriendRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.FriendRemoteKeyEntity
 
 @Dao
 interface FriendRemoteKeyDao {

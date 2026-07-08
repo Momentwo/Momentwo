@@ -30,7 +30,13 @@ class AlbumDetailViewModel
             val albumDetailItem = savedStateHandle.toRoute<MomentwoDestination.AlbumDetail>()
             setState(
                 uiState.value.copy(
-                    albumItem = AlbumItem.newInstance(albumDetailItem),
+                    albumItem = AlbumItem(
+                        id = albumDetailItem.id,
+                        title = albumDetailItem.title,
+                        subTitle = albumDetailItem.subTitle,
+                        imageUrl = albumDetailItem.imageUrl,
+                        subAlbumCount = 0, // TODO
+                    ),
                     imageUri = Uri.parse(albumDetailItem.imageUrl),
                 ),
             )

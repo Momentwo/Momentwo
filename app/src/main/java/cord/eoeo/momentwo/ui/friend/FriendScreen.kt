@@ -27,7 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.SearchUserDialog
 import cord.eoeo.momentwo.ui.friend.friendlist.FriendListScreen
 import cord.eoeo.momentwo.ui.friend.friendrequest.FriendRequestRoute

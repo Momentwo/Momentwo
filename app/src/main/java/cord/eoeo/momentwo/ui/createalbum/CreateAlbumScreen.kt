@@ -34,8 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleStartEffect
-import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.START_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.InviteDialog
 import cord.eoeo.momentwo.ui.composable.UserItemBox
 import cord.eoeo.momentwo.core.model.UserItem

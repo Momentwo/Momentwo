@@ -1,9 +1,9 @@
 package cord.eoeo.momentwo.ui.albumdetail
 
 import android.net.Uri
-import cord.eoeo.momentwo.ui.UiEffect
-import cord.eoeo.momentwo.ui.UiEvent
-import cord.eoeo.momentwo.ui.UiState
+import cord.eoeo.momentwo.core.common.UiEffect
+import cord.eoeo.momentwo.core.common.UiEvent
+import cord.eoeo.momentwo.core.common.UiState
 import cord.eoeo.momentwo.core.model.AlbumItem
 import cord.eoeo.momentwo.core.model.FriendItem
 import cord.eoeo.momentwo.core.model.MemberAuth

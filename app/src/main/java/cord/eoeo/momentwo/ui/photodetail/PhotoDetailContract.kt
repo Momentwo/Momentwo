@@ -1,9 +1,9 @@
 package cord.eoeo.momentwo.ui.photodetail
 
 import androidx.paging.PagingData
-import cord.eoeo.momentwo.ui.UiEffect
-import cord.eoeo.momentwo.ui.UiEvent
-import cord.eoeo.momentwo.ui.UiState
+import cord.eoeo.momentwo.core.common.UiEffect
+import cord.eoeo.momentwo.core.common.UiEvent
+import cord.eoeo.momentwo.core.common.UiState
 import cord.eoeo.momentwo.core.model.CommentItem
 import cord.eoeo.momentwo.core.model.DescriptionItem
 import kotlinx.coroutines.flow.Flow

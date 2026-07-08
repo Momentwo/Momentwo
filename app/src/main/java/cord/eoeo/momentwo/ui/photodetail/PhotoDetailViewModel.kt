@@ -9,7 +9,7 @@ import cord.eoeo.momentwo.data.description.DescriptionRepository
 import cord.eoeo.momentwo.data.like.LikeRepository
 import cord.eoeo.momentwo.domain.photo.DownloadPhotoUseCase
 import cord.eoeo.momentwo.domain.photo.UpdateIsLikedUseCase
-import cord.eoeo.momentwo.ui.BaseViewModel
+import cord.eoeo.momentwo.core.common.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination
 import cord.eoeo.momentwo.core.model.DescriptionItem
 import dagger.hilt.android.lifecycle.HiltViewModel

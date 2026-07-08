@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import cord.eoeo.momentwo.domain.login.RequestLoginUseCase
 import cord.eoeo.momentwo.domain.login.TryAutoLoginUseCase
-import cord.eoeo.momentwo.ui.BaseViewModel
+import cord.eoeo.momentwo.core.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

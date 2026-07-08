@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.like.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.LikeCount
 import cord.eoeo.momentwo.data.model.LikeRequest
 import retrofit2.http.Body

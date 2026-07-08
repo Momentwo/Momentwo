@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.subalbum.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.CreateSubAlbumInfo
 import cord.eoeo.momentwo.data.model.EditSubAlbumInfo
 import cord.eoeo.momentwo.data.model.SubAlbumList

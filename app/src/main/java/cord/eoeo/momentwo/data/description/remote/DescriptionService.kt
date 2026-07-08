@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.description.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.CreateDescription
 import cord.eoeo.momentwo.data.model.Description
 import cord.eoeo.momentwo.data.model.EditDescription

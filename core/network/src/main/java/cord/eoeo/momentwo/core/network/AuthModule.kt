@@ -1,8 +1,8 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.network
 
 import cord.eoeo.momentwo.core.datastore.PreferenceRepository
-import cord.eoeo.momentwo.data.authentication.AuthAuthenticator
-import cord.eoeo.momentwo.data.authentication.AuthInterceptor
+import cord.eoeo.momentwo.core.network.AuthAuthenticator
+import cord.eoeo.momentwo.core.network.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

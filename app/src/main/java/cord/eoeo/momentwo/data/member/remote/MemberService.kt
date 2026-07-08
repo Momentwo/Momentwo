@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.member.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.AssignAdminToMember
 import cord.eoeo.momentwo.data.model.EditMembers
 import cord.eoeo.momentwo.data.model.InviteMembers

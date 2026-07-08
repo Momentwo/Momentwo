@@ -1,6 +1,6 @@
-package cord.eoeo.momentwo.data
+package cord.eoeo.momentwo.core.network
 
-import cord.eoeo.momentwo.BuildConfig
+import cord.eoeo.momentwo.core.network.BuildConfig
 
 object MomentwoApi {
     const val BASE_URL = BuildConfig.BASE_URL

@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.album.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.AlbumImage
 import cord.eoeo.momentwo.data.model.AlbumInfoList
 import cord.eoeo.momentwo.data.model.AlbumRole

@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.signup.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.User
 import retrofit2.Response
 import retrofit2.http.Body

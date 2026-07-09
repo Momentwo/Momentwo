@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.data.di
 
 import dagger.Module
 import dagger.hilt.InstallIn

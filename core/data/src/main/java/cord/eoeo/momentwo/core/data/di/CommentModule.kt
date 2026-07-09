@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.data.di
 
 import cord.eoeo.momentwo.core.data.comment.CommentDataSource
 import cord.eoeo.momentwo.core.data.comment.CommentRepository

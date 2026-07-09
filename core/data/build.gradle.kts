@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
 
+    implementation(libs.room)
     implementation(libs.retrofit)
     implementation(libs.moshi)
     implementation(platform(libs.okhttp.bom))

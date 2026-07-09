@@ -1,4 +1,5 @@
 package cord.eoeo.momentwo.di
+import cord.eoeo.momentwo.core.data.di.QualifierModule
 
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import cord.eoeo.momentwo.core.data.friend.FriendDataSource

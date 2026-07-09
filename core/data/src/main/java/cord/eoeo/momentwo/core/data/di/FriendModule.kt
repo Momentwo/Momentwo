@@ -1,6 +1,5 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.data.di
 
-import cord.eoeo.momentwo.core.data.di.QualifierModule
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import cord.eoeo.momentwo.core.data.friend.FriendDataSource
 import cord.eoeo.momentwo.core.data.friend.FriendRemoteMediator

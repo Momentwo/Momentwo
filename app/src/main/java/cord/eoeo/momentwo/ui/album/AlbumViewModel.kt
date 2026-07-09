@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.ui.album
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import cord.eoeo.momentwo.domain.album.GetAlbumListUseCase
+import cord.eoeo.momentwo.core.domain.album.GetAlbumListUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

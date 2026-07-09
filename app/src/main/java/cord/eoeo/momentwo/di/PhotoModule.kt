@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.di
-import cord.eoeo.momentwo.core.data.di.QualifierModule
 
+import cord.eoeo.momentwo.core.data.di.QualifierModule
 import android.content.Context
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import cord.eoeo.momentwo.core.data.photo.PhotoDataSource
@@ -12,9 +12,7 @@ import cord.eoeo.momentwo.core.database.PhotoRemoteKeyDao
 import cord.eoeo.momentwo.core.data.photo.remote.PhotoRemoteDataSource
 import cord.eoeo.momentwo.core.data.photo.remote.PhotoService
 import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
-import cord.eoeo.momentwo.domain.photo.DownloadPhotoUseCase
 import cord.eoeo.momentwo.core.data.photo.PhotoRepository
-import cord.eoeo.momentwo.domain.photo.UpdateIsLikedUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -74,14 +72,4 @@ object PhotoModule {
         photoRemoteMediator,
         applicationContext,
     )
-
-    @Provides
-    @Singleton
-    fun provideDownloadPhotoUseCase(photoRepository: PhotoRepository): DownloadPhotoUseCase =
-        DownloadPhotoUseCase(photoRepository)
-
-    @Provides
-    @Singleton
-    fun provideUpdateIsLikedUseCase(photoRepository: PhotoRepository): UpdateIsLikedUseCase =
-        UpdateIsLikedUseCase(photoRepository)
 }

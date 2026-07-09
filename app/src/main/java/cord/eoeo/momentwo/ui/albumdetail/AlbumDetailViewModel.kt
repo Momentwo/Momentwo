@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import cord.eoeo.momentwo.core.data.member.MemberRepository
 import cord.eoeo.momentwo.core.data.album.AlbumRepository
-import cord.eoeo.momentwo.domain.friend.GetFriendListUseCase
+import cord.eoeo.momentwo.core.domain.friend.GetFriendListUseCase
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination

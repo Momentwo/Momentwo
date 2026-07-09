@@ -7,8 +7,8 @@ import androidx.navigation.toRoute
 import cord.eoeo.momentwo.core.data.comment.CommentRepository
 import cord.eoeo.momentwo.core.data.description.DescriptionRepository
 import cord.eoeo.momentwo.core.data.like.LikeRepository
-import cord.eoeo.momentwo.domain.photo.DownloadPhotoUseCase
-import cord.eoeo.momentwo.domain.photo.UpdateIsLikedUseCase
+import cord.eoeo.momentwo.core.domain.photo.DownloadPhotoUseCase
+import cord.eoeo.momentwo.core.domain.photo.UpdateIsLikedUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination
 import cord.eoeo.momentwo.core.model.DescriptionItem

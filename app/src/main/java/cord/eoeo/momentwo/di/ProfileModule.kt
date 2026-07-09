@@ -1,14 +1,14 @@
 package cord.eoeo.momentwo.di
 
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
-import cord.eoeo.momentwo.data.profile.ProfileDataSource
-import cord.eoeo.momentwo.data.profile.ProfileRepositoryImpl
+import cord.eoeo.momentwo.core.data.profile.ProfileDataSource
+import cord.eoeo.momentwo.core.data.profile.ProfileRepositoryImpl
 import cord.eoeo.momentwo.core.database.ProfileDao
-import cord.eoeo.momentwo.data.profile.local.ProfileLocalDataSource
-import cord.eoeo.momentwo.data.profile.remote.ProfileRemoteDataSource
-import cord.eoeo.momentwo.data.profile.remote.ProfileService
-import cord.eoeo.momentwo.domain.mapper.ProfileMapper
-import cord.eoeo.momentwo.domain.profile.ProfileRepository
+import cord.eoeo.momentwo.core.data.profile.local.ProfileLocalDataSource
+import cord.eoeo.momentwo.core.data.profile.remote.ProfileRemoteDataSource
+import cord.eoeo.momentwo.core.data.profile.remote.ProfileService
+import cord.eoeo.momentwo.core.data.mapper.ProfileMapper
+import cord.eoeo.momentwo.core.data.profile.ProfileRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

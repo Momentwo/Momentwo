@@ -1,10 +1,10 @@
 package cord.eoeo.momentwo.di
 
-import cord.eoeo.momentwo.data.description.DescriptionDataSource
-import cord.eoeo.momentwo.data.description.DescriptionRepository
-import cord.eoeo.momentwo.data.description.DescriptionRepositoryImpl
-import cord.eoeo.momentwo.data.description.remote.DescriptionRemoteDataSource
-import cord.eoeo.momentwo.data.description.remote.DescriptionService
+import cord.eoeo.momentwo.core.data.description.DescriptionDataSource
+import cord.eoeo.momentwo.core.data.description.DescriptionRepository
+import cord.eoeo.momentwo.core.data.description.DescriptionRepositoryImpl
+import cord.eoeo.momentwo.core.data.description.remote.DescriptionRemoteDataSource
+import cord.eoeo.momentwo.core.data.description.remote.DescriptionService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,12 +1,12 @@
 package cord.eoeo.momentwo.di
 
 import android.content.Context
-import cord.eoeo.momentwo.data.album.AlbumDataSource
-import cord.eoeo.momentwo.data.album.AlbumRepositoryImpl
-import cord.eoeo.momentwo.data.album.remote.AlbumRemoteDataSource
-import cord.eoeo.momentwo.data.album.remote.AlbumService
-import cord.eoeo.momentwo.data.presigned.PresignedDataSource
-import cord.eoeo.momentwo.domain.album.AlbumRepository
+import cord.eoeo.momentwo.core.data.album.AlbumDataSource
+import cord.eoeo.momentwo.core.data.album.AlbumRepositoryImpl
+import cord.eoeo.momentwo.core.data.album.remote.AlbumRemoteDataSource
+import cord.eoeo.momentwo.core.data.album.remote.AlbumService
+import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
+import cord.eoeo.momentwo.core.data.album.AlbumRepository
 import cord.eoeo.momentwo.domain.album.GetAlbumListUseCase
 import cord.eoeo.momentwo.domain.album.RequestCreateAlbumUseCase
 import dagger.Module

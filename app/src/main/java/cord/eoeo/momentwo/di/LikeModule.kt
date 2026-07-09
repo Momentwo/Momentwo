@@ -1,10 +1,10 @@
 package cord.eoeo.momentwo.di
 
-import cord.eoeo.momentwo.data.like.LikeDataSource
-import cord.eoeo.momentwo.data.like.LikeRepository
-import cord.eoeo.momentwo.data.like.LikeRepositoryImpl
-import cord.eoeo.momentwo.data.like.remote.LikeRemoteDataSource
-import cord.eoeo.momentwo.data.like.remote.LikeService
+import cord.eoeo.momentwo.core.data.like.LikeDataSource
+import cord.eoeo.momentwo.core.data.like.LikeRepository
+import cord.eoeo.momentwo.core.data.like.LikeRepositoryImpl
+import cord.eoeo.momentwo.core.data.like.remote.LikeRemoteDataSource
+import cord.eoeo.momentwo.core.data.like.remote.LikeService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

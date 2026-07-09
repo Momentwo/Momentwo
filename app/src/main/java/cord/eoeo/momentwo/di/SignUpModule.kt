@@ -1,10 +1,10 @@
 package cord.eoeo.momentwo.di
 
-import cord.eoeo.momentwo.data.signup.remote.SignUpService
-import cord.eoeo.momentwo.data.signup.SignUpDataSource
-import cord.eoeo.momentwo.data.signup.SignUpRepository
-import cord.eoeo.momentwo.data.signup.SignUpRepositoryImpl
-import cord.eoeo.momentwo.data.signup.remote.SignUpRemoteDataSource
+import cord.eoeo.momentwo.core.data.signup.remote.SignUpService
+import cord.eoeo.momentwo.core.data.signup.SignUpDataSource
+import cord.eoeo.momentwo.core.data.signup.SignUpRepository
+import cord.eoeo.momentwo.core.data.signup.SignUpRepositoryImpl
+import cord.eoeo.momentwo.core.data.signup.remote.SignUpRemoteDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

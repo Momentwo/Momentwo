@@ -1,4 +1,5 @@
 package cord.eoeo.momentwo.domain.subalbum
+import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepository
 
 class ChangeSubAlbumTitleUseCase(
     private val subAlbumRepository: SubAlbumRepository,

@@ -1,8 +1,8 @@
 package cord.eoeo.momentwo.di
 
-import cord.eoeo.momentwo.data.presigned.PresignedDataSource
-import cord.eoeo.momentwo.data.presigned.remote.PresignedRemoteDataSource
-import cord.eoeo.momentwo.data.presigned.remote.PresignedService
+import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
+import cord.eoeo.momentwo.core.data.presigned.remote.PresignedRemoteDataSource
+import cord.eoeo.momentwo.core.data.presigned.remote.PresignedService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

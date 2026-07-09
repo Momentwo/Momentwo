@@ -1,15 +1,15 @@
 package cord.eoeo.momentwo.di
 
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
-import cord.eoeo.momentwo.data.friend.FriendDataSource
-import cord.eoeo.momentwo.data.friend.FriendRemoteMediator
-import cord.eoeo.momentwo.data.friend.FriendRepositoryImpl
+import cord.eoeo.momentwo.core.data.friend.FriendDataSource
+import cord.eoeo.momentwo.core.data.friend.FriendRemoteMediator
+import cord.eoeo.momentwo.core.data.friend.FriendRepositoryImpl
 import cord.eoeo.momentwo.core.database.FriendDao
-import cord.eoeo.momentwo.data.friend.local.FriendLocalDataSource
+import cord.eoeo.momentwo.core.data.friend.local.FriendLocalDataSource
 import cord.eoeo.momentwo.core.database.FriendRemoteKeyDao
-import cord.eoeo.momentwo.data.friend.remote.FriendRemoteDataSource
-import cord.eoeo.momentwo.data.friend.remote.FriendService
-import cord.eoeo.momentwo.domain.friend.FriendRepository
+import cord.eoeo.momentwo.core.data.friend.remote.FriendRemoteDataSource
+import cord.eoeo.momentwo.core.data.friend.remote.FriendService
+import cord.eoeo.momentwo.core.data.friend.FriendRepository
 import cord.eoeo.momentwo.domain.friend.GetFriendListUseCase
 import dagger.Module
 import dagger.Provides

@@ -1,10 +1,10 @@
 package cord.eoeo.momentwo.di
 
-import cord.eoeo.momentwo.data.comment.CommentDataSource
-import cord.eoeo.momentwo.data.comment.CommentRepository
-import cord.eoeo.momentwo.data.comment.CommentRepositoryImpl
-import cord.eoeo.momentwo.data.comment.remote.CommentRemoteDataSource
-import cord.eoeo.momentwo.data.comment.remote.CommentService
+import cord.eoeo.momentwo.core.data.comment.CommentDataSource
+import cord.eoeo.momentwo.core.data.comment.CommentRepository
+import cord.eoeo.momentwo.core.data.comment.CommentRepositoryImpl
+import cord.eoeo.momentwo.core.data.comment.remote.CommentRemoteDataSource
+import cord.eoeo.momentwo.core.data.comment.remote.CommentService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

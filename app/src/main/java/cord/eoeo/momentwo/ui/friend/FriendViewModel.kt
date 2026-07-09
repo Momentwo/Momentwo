@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.ui.friend
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import cord.eoeo.momentwo.domain.friend.FriendRepository
+import cord.eoeo.momentwo.core.data.friend.FriendRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.emptyFlow

@@ -16,4 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Momentwo"
 include(":app")
+include(":core:designsystem")
  

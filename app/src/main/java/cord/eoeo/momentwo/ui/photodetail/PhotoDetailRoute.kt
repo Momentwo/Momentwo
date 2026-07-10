@@ -18,7 +18,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.ImageLoader
 import cord.eoeo.momentwo.ui.model.CommentItem
-import cord.eoeo.momentwo.ui.theme.backgroundDark
+import cord.eoeo.momentwo.core.designsystem.theme.backgroundDark
 import kotlinx.coroutines.CoroutineScope
 
 @Composable

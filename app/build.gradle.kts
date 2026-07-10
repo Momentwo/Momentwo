@@ -45,6 +45,8 @@ android {
 fun getLocalProperty(key: String): String = gradleLocalProperties(rootDir, providers).getProperty(key)
 
 dependencies {
+    implementation(project(":core:designsystem"))
+
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)
     implementation(libs.icons)

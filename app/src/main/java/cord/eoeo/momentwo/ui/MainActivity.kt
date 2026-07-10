@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import coil.imageLoader
-import cord.eoeo.momentwo.ui.theme.MomentwoTheme
+import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

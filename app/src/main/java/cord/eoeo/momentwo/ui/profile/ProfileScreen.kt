@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.imageLoader
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.theme.MomentwoTheme
+import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.data.authentication
+package cord.eoeo.momentwo.core.network
 
 import cord.eoeo.momentwo.core.datastore.PreferenceRepository
 import kotlinx.coroutines.runBlocking

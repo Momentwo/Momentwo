@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-
 plugins {
     alias(libs.plugins.momentwo.android.application)
     alias(libs.plugins.momentwo.android.application.compose)
@@ -20,8 +18,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        buildConfigField("String", "BASE_URL", getLocalProperty("BASE_URL"))
     }
 
     buildTypes {
@@ -42,14 +38,13 @@ android {
     }
 }
 
-fun getLocalProperty(key: String): String = gradleLocalProperties(rootDir, providers).getProperty(key)
-
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:datastore"))
+    implementation(project(":core:network"))
 
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)

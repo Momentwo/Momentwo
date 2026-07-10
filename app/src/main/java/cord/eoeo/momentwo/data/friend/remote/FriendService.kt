@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.friend.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.FriendPage
 import cord.eoeo.momentwo.data.model.FriendRequestResponse
 import cord.eoeo.momentwo.data.model.ReceivedFriendRequestList

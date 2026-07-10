@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.data.comment.remote
 
-import cord.eoeo.momentwo.data.MomentwoApi
+import cord.eoeo.momentwo.core.network.MomentwoApi
 import cord.eoeo.momentwo.data.model.CommentPage
 import cord.eoeo.momentwo.data.model.CreateComment
 import cord.eoeo.momentwo.data.model.EditComment

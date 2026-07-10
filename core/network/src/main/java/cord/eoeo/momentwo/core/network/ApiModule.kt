@@ -1,10 +1,10 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.network
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import cord.eoeo.momentwo.data.MomentwoApi
-import cord.eoeo.momentwo.data.authentication.AuthAuthenticator
-import cord.eoeo.momentwo.data.authentication.AuthInterceptor
+import cord.eoeo.momentwo.core.network.MomentwoApi
+import cord.eoeo.momentwo.core.network.AuthAuthenticator
+import cord.eoeo.momentwo.core.network.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

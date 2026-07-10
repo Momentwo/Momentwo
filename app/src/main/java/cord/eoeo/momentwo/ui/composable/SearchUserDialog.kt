@@ -45,7 +45,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import coil.imageLoader
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.core.model.UserItem
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

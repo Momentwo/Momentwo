@@ -68,7 +68,7 @@ import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import cord.eoeo.momentwo.ui.composable.CircleAsyncImage
 import cord.eoeo.momentwo.ui.composable.TextFieldDialog
-import cord.eoeo.momentwo.ui.model.CommentItem
+import cord.eoeo.momentwo.core.model.CommentItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

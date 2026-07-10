@@ -45,8 +45,8 @@ import cord.eoeo.momentwo.ui.albumdetail.subalbumlist.SubAlbumListScreen
 import cord.eoeo.momentwo.ui.composable.InviteDialog
 import cord.eoeo.momentwo.ui.composable.TextFieldDialog
 import cord.eoeo.momentwo.ui.model.BottomNavigationItem
-import cord.eoeo.momentwo.ui.model.MemberAuth
-import cord.eoeo.momentwo.ui.model.TextFieldDialogItem
+import cord.eoeo.momentwo.core.model.MemberAuth
+import cord.eoeo.momentwo.core.model.TextFieldDialogItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

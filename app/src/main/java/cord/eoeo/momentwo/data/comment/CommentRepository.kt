@@ -1,7 +1,7 @@
 package cord.eoeo.momentwo.data.comment
 
 import androidx.paging.PagingData
-import cord.eoeo.momentwo.ui.model.CommentItem
+import cord.eoeo.momentwo.core.model.CommentItem
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {

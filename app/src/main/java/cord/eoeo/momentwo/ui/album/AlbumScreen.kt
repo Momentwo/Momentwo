@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.AlbumItemCard
-import cord.eoeo.momentwo.ui.model.AlbumItem
+import cord.eoeo.momentwo.core.model.AlbumItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect

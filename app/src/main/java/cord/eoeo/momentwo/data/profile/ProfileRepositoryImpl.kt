@@ -1,7 +1,7 @@
 package cord.eoeo.momentwo.data.profile
 
 import cord.eoeo.momentwo.domain.mapper.ProfileMapper
-import cord.eoeo.momentwo.domain.model.Profile
+import cord.eoeo.momentwo.core.model.Profile
 import cord.eoeo.momentwo.domain.profile.ProfileRepository
 
 class ProfileRepositoryImpl(

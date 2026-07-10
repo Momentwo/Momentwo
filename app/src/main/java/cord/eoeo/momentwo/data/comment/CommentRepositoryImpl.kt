@@ -7,7 +7,7 @@ import androidx.paging.map
 import cord.eoeo.momentwo.data.comment.remote.CommentPagingSource
 import cord.eoeo.momentwo.data.model.CreateComment
 import cord.eoeo.momentwo.data.model.EditComment
-import cord.eoeo.momentwo.ui.model.CommentItem
+import cord.eoeo.momentwo.core.model.CommentItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

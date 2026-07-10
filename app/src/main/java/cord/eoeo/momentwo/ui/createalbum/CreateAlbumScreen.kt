@@ -38,7 +38,7 @@ import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.InviteDialog
 import cord.eoeo.momentwo.ui.composable.UserItemBox
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.core.model.UserItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect

@@ -24,7 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import cord.eoeo.momentwo.ui.model.PhotoItem
+import cord.eoeo.momentwo.core.model.PhotoItem
 import cord.eoeo.momentwo.core.designsystem.theme.favoriteBorder
 import cord.eoeo.momentwo.core.designsystem.theme.primaryDark
 

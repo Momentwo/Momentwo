@@ -2,8 +2,8 @@ package cord.eoeo.momentwo.domain.mapper
 
 import cord.eoeo.momentwo.data.model.UserProfile
 import cord.eoeo.momentwo.data.profile.local.entity.ProfileEntity
-import cord.eoeo.momentwo.domain.model.Profile
-import cord.eoeo.momentwo.ui.model.ProfileItem
+import cord.eoeo.momentwo.core.model.Profile
+import cord.eoeo.momentwo.core.model.ProfileItem
 import javax.inject.Inject
 
 class ProfileMapper

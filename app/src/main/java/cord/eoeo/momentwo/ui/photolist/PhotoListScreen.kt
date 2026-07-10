@@ -36,7 +36,7 @@ import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.TextFieldDialog
-import cord.eoeo.momentwo.ui.model.PhotoItem
+import cord.eoeo.momentwo.core.model.PhotoItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

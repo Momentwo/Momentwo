@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import cord.eoeo.momentwo.ui.model.SubAlbumItem
+import cord.eoeo.momentwo.core.model.SubAlbumItem
 
 @Composable
 fun SubAlbumItemCard(

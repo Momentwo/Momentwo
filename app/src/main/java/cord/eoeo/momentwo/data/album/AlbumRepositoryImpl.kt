@@ -11,8 +11,8 @@ import cord.eoeo.momentwo.data.model.PresignedRequest
 import cord.eoeo.momentwo.data.model.UriRequestBody
 import cord.eoeo.momentwo.data.presigned.PresignedDataSource
 import cord.eoeo.momentwo.domain.album.AlbumRepository
-import cord.eoeo.momentwo.ui.model.AlbumItem
-import cord.eoeo.momentwo.ui.model.MemberAuth
+import cord.eoeo.momentwo.core.model.AlbumItem
+import cord.eoeo.momentwo.core.model.MemberAuth
 
 class AlbumRepositoryImpl(
     private val albumRemoteDataSource: AlbumDataSource,

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.domain.model
+package cord.eoeo.momentwo.core.model
 
 data class LoginData(
     val accessToken: String,

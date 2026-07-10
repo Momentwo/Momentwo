@@ -1,7 +1,7 @@
 package cord.eoeo.momentwo.ui
 
 import androidx.navigation.NavHostController
-import cord.eoeo.momentwo.ui.model.AlbumItem
+import cord.eoeo.momentwo.core.model.AlbumItem
 import kotlinx.serialization.Serializable
 
 sealed interface MomentwoDestination {

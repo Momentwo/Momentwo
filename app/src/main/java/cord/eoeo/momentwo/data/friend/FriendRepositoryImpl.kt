@@ -7,9 +7,9 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import cord.eoeo.momentwo.data.friend.remote.SearchUserPagingSource
 import cord.eoeo.momentwo.domain.friend.FriendRepository
-import cord.eoeo.momentwo.ui.model.FriendItem
-import cord.eoeo.momentwo.ui.model.FriendRequestItem
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.core.model.FriendItem
+import cord.eoeo.momentwo.core.model.FriendRequestItem
+import cord.eoeo.momentwo.core.model.UserItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

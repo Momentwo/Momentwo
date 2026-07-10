@@ -1,6 +1,6 @@
 package cord.eoeo.momentwo.domain.subalbum
 
-import cord.eoeo.momentwo.ui.model.SubAlbumItem
+import cord.eoeo.momentwo.core.model.SubAlbumItem
 
 interface SubAlbumRepository {
     suspend fun requestCreateSubAlbum(

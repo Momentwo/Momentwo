@@ -32,8 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import cord.eoeo.momentwo.ui.model.FriendItem
-import cord.eoeo.momentwo.ui.model.UserItem
+import cord.eoeo.momentwo.core.model.FriendItem
+import cord.eoeo.momentwo.core.model.UserItem
 
 @Composable
 fun InviteDialog(

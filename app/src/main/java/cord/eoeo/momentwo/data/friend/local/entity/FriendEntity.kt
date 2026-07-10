@@ -3,7 +3,7 @@ package cord.eoeo.momentwo.data.friend.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import cord.eoeo.momentwo.ui.model.FriendItem
+import cord.eoeo.momentwo.core.model.FriendItem
 
 @Entity(tableName = "friend")
 data class FriendEntity(

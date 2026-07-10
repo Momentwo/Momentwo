@@ -2,8 +2,8 @@ package cord.eoeo.momentwo.data.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import cord.eoeo.momentwo.ui.model.ImageItem
-import cord.eoeo.momentwo.ui.model.SubAlbumItem
+import cord.eoeo.momentwo.core.model.ImageItem
+import cord.eoeo.momentwo.core.model.SubAlbumItem
 
 @JsonClass(generateAdapter = true)
 data class CreateSubAlbumInfo(

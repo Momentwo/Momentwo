@@ -4,11 +4,11 @@ import android.net.Uri
 import cord.eoeo.momentwo.ui.UiEffect
 import cord.eoeo.momentwo.ui.UiEvent
 import cord.eoeo.momentwo.ui.UiState
-import cord.eoeo.momentwo.ui.model.AlbumItem
-import cord.eoeo.momentwo.ui.model.FriendItem
-import cord.eoeo.momentwo.ui.model.MemberAuth
-import cord.eoeo.momentwo.ui.model.MemberItem
-import cord.eoeo.momentwo.ui.model.SubAlbumItem
+import cord.eoeo.momentwo.core.model.AlbumItem
+import cord.eoeo.momentwo.core.model.FriendItem
+import cord.eoeo.momentwo.core.model.MemberAuth
+import cord.eoeo.momentwo.core.model.MemberItem
+import cord.eoeo.momentwo.core.model.SubAlbumItem
 
 class AlbumDetailContract {
     data class State(

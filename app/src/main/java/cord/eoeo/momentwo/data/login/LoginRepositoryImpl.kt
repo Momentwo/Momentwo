@@ -3,7 +3,7 @@ package cord.eoeo.momentwo.data.login
 import cord.eoeo.momentwo.data.model.LoginRequest
 import cord.eoeo.momentwo.domain.login.LoginRepository
 import cord.eoeo.momentwo.domain.mapper.ProfileMapper
-import cord.eoeo.momentwo.domain.model.LoginData
+import cord.eoeo.momentwo.core.model.LoginData
 
 class LoginRepositoryImpl(
     private val loginRemoteDataSource: LoginDataSource,

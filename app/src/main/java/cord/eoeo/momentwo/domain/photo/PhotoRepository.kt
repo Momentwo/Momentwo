@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.domain.photo
 
 import android.net.Uri
 import androidx.paging.PagingData
-import cord.eoeo.momentwo.ui.model.PhotoItem
+import cord.eoeo.momentwo.core.model.PhotoItem
 import kotlinx.coroutines.flow.Flow
 
 interface PhotoRepository {

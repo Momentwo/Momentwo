@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.model.FriendItem
+import cord.eoeo.momentwo.core.model.FriendItem
 import kotlinx.coroutines.CoroutineScope
 
 @Composable

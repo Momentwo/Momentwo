@@ -1,8 +1,8 @@
 package cord.eoeo.momentwo.domain.album
 
 import android.net.Uri
-import cord.eoeo.momentwo.ui.model.AlbumItem
-import cord.eoeo.momentwo.ui.model.MemberAuth
+import cord.eoeo.momentwo.core.model.AlbumItem
+import cord.eoeo.momentwo.core.model.MemberAuth
 
 interface AlbumRepository {
     suspend fun requestCreateAlbum(

@@ -3,7 +3,7 @@ package cord.eoeo.momentwo.ui.album
 import cord.eoeo.momentwo.ui.UiEffect
 import cord.eoeo.momentwo.ui.UiEvent
 import cord.eoeo.momentwo.ui.UiState
-import cord.eoeo.momentwo.ui.model.AlbumItem
+import cord.eoeo.momentwo.core.model.AlbumItem
 
 class AlbumContract {
     data class State(

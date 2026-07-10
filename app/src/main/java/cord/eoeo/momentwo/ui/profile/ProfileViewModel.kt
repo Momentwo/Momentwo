@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
 import cord.eoeo.momentwo.core.data.profile.ProfileRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
-import cord.eoeo.momentwo.ui.MomentwoDestination
+import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

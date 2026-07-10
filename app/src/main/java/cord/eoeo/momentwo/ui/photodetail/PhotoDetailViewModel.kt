@@ -10,7 +10,7 @@ import cord.eoeo.momentwo.core.data.like.LikeRepository
 import cord.eoeo.momentwo.core.domain.photo.DownloadPhotoUseCase
 import cord.eoeo.momentwo.core.domain.photo.UpdateIsLikedUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel
-import cord.eoeo.momentwo.ui.MomentwoDestination
+import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.core.model.DescriptionItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

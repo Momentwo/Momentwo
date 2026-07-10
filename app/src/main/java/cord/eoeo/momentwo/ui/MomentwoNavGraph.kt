@@ -1,4 +1,5 @@
 package cord.eoeo.momentwo.ui
+import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

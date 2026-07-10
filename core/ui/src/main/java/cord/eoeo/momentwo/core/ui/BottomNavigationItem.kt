@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.model
+package cord.eoeo.momentwo.core.ui
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

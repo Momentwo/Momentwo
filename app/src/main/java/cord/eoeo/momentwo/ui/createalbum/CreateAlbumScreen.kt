@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.core.common.START_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.composable.InviteDialog
-import cord.eoeo.momentwo.ui.composable.UserItemBox
+import cord.eoeo.momentwo.core.ui.InviteDialog
+import cord.eoeo.momentwo.core.ui.UserItemBox
 import cord.eoeo.momentwo.core.model.UserItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

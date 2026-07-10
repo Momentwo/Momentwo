@@ -1,10 +1,10 @@
-package cord.eoeo.momentwo.data.profile.local
+package cord.eoeo.momentwo.core.database
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import cord.eoeo.momentwo.data.profile.local.entity.ProfileEntity
+import cord.eoeo.momentwo.core.database.ProfileEntity
 
 @Dao
 interface ProfileDao {

@@ -4,8 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import cord.eoeo.momentwo.data.friend.local.entity.FriendEntity
-import cord.eoeo.momentwo.data.friend.local.entity.FriendRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.FriendEntity
+import cord.eoeo.momentwo.core.database.FriendRemoteKeyEntity
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)

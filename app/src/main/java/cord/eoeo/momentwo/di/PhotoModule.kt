@@ -1,13 +1,13 @@
 package cord.eoeo.momentwo.di
 
 import android.content.Context
-import cord.eoeo.momentwo.data.MomentwoDatabase
+import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import cord.eoeo.momentwo.data.photo.PhotoDataSource
 import cord.eoeo.momentwo.data.photo.PhotoRemoteMediator
 import cord.eoeo.momentwo.data.photo.PhotoRepositoryImpl
-import cord.eoeo.momentwo.data.photo.local.PhotoDao
+import cord.eoeo.momentwo.core.database.PhotoDao
 import cord.eoeo.momentwo.data.photo.local.PhotoLocalDataSource
-import cord.eoeo.momentwo.data.photo.local.PhotoRemoteKeyDao
+import cord.eoeo.momentwo.core.database.PhotoRemoteKeyDao
 import cord.eoeo.momentwo.data.photo.remote.PhotoRemoteDataSource
 import cord.eoeo.momentwo.data.photo.remote.PhotoService
 import cord.eoeo.momentwo.data.presigned.PresignedDataSource

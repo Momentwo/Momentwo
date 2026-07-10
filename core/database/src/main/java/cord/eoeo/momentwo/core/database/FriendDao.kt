@@ -1,11 +1,11 @@
-package cord.eoeo.momentwo.data.friend.local
+package cord.eoeo.momentwo.core.database
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import cord.eoeo.momentwo.data.friend.local.entity.FriendEntity
+import cord.eoeo.momentwo.core.database.FriendEntity
 
 @Dao
 interface FriendDao {

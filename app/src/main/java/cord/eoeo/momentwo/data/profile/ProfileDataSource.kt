@@ -1,7 +1,7 @@
 package cord.eoeo.momentwo.data.profile
 
 import cord.eoeo.momentwo.data.model.UserProfile
-import cord.eoeo.momentwo.data.profile.local.entity.ProfileEntity
+import cord.eoeo.momentwo.core.database.ProfileEntity
 
 interface ProfileDataSource {
     interface Local {

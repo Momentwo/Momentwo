@@ -5,8 +5,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import cord.eoeo.momentwo.data.photo.local.entity.PhotoEntity
-import cord.eoeo.momentwo.data.photo.local.entity.PhotoRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.PhotoEntity
+import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)

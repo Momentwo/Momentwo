@@ -3,8 +3,10 @@ package cord.eoeo.momentwo.data.photo.local
 import android.graphics.Bitmap
 import androidx.paging.PagingSource
 import cord.eoeo.momentwo.data.photo.PhotoDataSource
-import cord.eoeo.momentwo.data.photo.local.entity.PhotoEntity
-import cord.eoeo.momentwo.data.photo.local.entity.PhotoRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.PhotoDao
+import cord.eoeo.momentwo.core.database.PhotoRemoteKeyDao
+import cord.eoeo.momentwo.core.database.PhotoEntity
+import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

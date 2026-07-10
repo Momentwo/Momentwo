@@ -1,10 +1,10 @@
-package cord.eoeo.momentwo.data.photo.local
+package cord.eoeo.momentwo.core.database
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import cord.eoeo.momentwo.data.photo.local.entity.PhotoRemoteKeyEntity
+import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
 
 @Dao
 interface PhotoRemoteKeyDao {

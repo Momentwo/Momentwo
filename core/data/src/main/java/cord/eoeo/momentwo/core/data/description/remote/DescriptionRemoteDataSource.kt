@@ -5,12 +5,11 @@ import cord.eoeo.momentwo.core.data.model.CreateDescription
 import cord.eoeo.momentwo.core.data.model.Description
 import cord.eoeo.momentwo.core.data.model.EditDescription
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class DescriptionRemoteDataSource(
     private val descriptionService: DescriptionService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : DescriptionDataSource {
     override suspend fun createDescription(createDescription: CreateDescription): Result<Unit> =
         runCatching {

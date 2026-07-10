@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumDataSource
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepositoryImpl
@@ -21,8 +23,11 @@ object SubAlbumModule {
 
     @Provides
     @Singleton
-    fun provideSubAlbumRemoteDataSource(subAlbumService: SubAlbumService): SubAlbumDataSource =
-        SubAlbumRemoteDataSource(subAlbumService)
+    fun provideSubAlbumRemoteDataSource(
+        subAlbumService: SubAlbumService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): SubAlbumDataSource =
+        SubAlbumRemoteDataSource(subAlbumService, dispatcher)
 
     @Provides
     @Singleton

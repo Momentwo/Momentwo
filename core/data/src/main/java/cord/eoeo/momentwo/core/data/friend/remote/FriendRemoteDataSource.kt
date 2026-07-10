@@ -7,12 +7,11 @@ import cord.eoeo.momentwo.core.data.model.ReceivedFriendRequestList
 import cord.eoeo.momentwo.core.data.model.SearchUser
 import cord.eoeo.momentwo.core.data.model.SentFriendRequestList
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class FriendRemoteDataSource(
     private val friendService: FriendService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : FriendDataSource.Remote {
     override suspend fun sendFriendRequest(nickname: String): Result<Unit> =
         runCatching {

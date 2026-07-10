@@ -6,12 +6,11 @@ import cord.eoeo.momentwo.core.data.model.EditMembers
 import cord.eoeo.momentwo.core.data.model.InviteMembers
 import cord.eoeo.momentwo.core.data.model.MemberList
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MemberRemoteDataSource(
     private val memberService: MemberService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : MemberDataSource {
     override suspend fun exitFromAlbum(albumId: Int): Result<Unit> =
         runCatching {

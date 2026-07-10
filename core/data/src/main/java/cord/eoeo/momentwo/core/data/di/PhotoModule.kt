@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import android.content.Context
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
@@ -38,8 +40,11 @@ object PhotoModule {
     @Provides
     @Singleton
     @QualifierModule.RemoteDataSource
-    fun providePhotoRemoteDataSource(photoService: PhotoService): PhotoDataSource.Remote =
-        PhotoRemoteDataSource(photoService)
+    fun providePhotoRemoteDataSource(
+        photoService: PhotoService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): PhotoDataSource.Remote =
+        PhotoRemoteDataSource(photoService, dispatcher)
 
     @Provides
     @Singleton
@@ -47,7 +52,8 @@ object PhotoModule {
     fun providePhotoLocalDataSource(
         photoDao: PhotoDao,
         photoRemoteKeyDao: PhotoRemoteKeyDao,
-    ): PhotoDataSource.Local = PhotoLocalDataSource(photoDao, photoRemoteKeyDao)
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): PhotoDataSource.Local = PhotoLocalDataSource(photoDao, photoRemoteKeyDao, dispatcher)
 
     @Provides
     @Singleton
@@ -64,11 +70,13 @@ object PhotoModule {
         presignedRemoteDataSource: PresignedDataSource,
         photoRemoteMediator: PhotoRemoteMediator,
         @ApplicationContext applicationContext: Context,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
     ): PhotoRepository = PhotoRepositoryImpl(
         photoRemoteDataSource,
         photoLocalDataSource,
         presignedRemoteDataSource,
         photoRemoteMediator,
         applicationContext,
+        dispatcher,
     )
 }

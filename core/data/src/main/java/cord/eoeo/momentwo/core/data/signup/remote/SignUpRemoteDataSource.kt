@@ -3,12 +3,11 @@ package cord.eoeo.momentwo.core.data.signup.remote
 import cord.eoeo.momentwo.core.data.model.User
 import cord.eoeo.momentwo.core.data.signup.SignUpDataSource
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class SignUpRemoteDataSource(
     private val signUpService: SignUpService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher
 ) : SignUpDataSource {
     override suspend fun requestSignUp(user: User): Result<Unit> = runCatching {
         withContext(dispatcher) {

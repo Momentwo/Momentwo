@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.login.LoginDataSource
 import cord.eoeo.momentwo.core.data.login.LoginRepositoryImpl
@@ -22,7 +24,10 @@ object LoginModule {
 
     @Provides
     @Singleton
-    fun provideLoginRemoteDataSource(loginService: LoginService): LoginDataSource = LoginRemoteDataSource(loginService)
+    fun provideLoginRemoteDataSource(
+        loginService: LoginService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): LoginDataSource = LoginRemoteDataSource(loginService, dispatcher)
 
     @Provides
     @Singleton

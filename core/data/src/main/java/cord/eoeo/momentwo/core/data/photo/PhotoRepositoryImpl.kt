@@ -19,8 +19,9 @@ import cord.eoeo.momentwo.core.data.model.UploadPhoto
 import cord.eoeo.momentwo.core.data.model.UriRequestBody
 import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
 import cord.eoeo.momentwo.core.data.photo.PhotoRepository
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
 import cord.eoeo.momentwo.core.model.PhotoItem
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -31,6 +32,7 @@ class PhotoRepositoryImpl(
     private val presignedRemoteDataSource: PresignedDataSource,
     private val photoRemoteMediator: PhotoRemoteMediator,
     private val applicationContext: Context,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : PhotoRepository {
     private val imageLoader = applicationContext.imageLoader
     private val contentResolver = applicationContext.contentResolver
@@ -136,7 +138,7 @@ class PhotoRepositoryImpl(
     }
 
     private suspend fun loadBitmapFromUrl(imageUrl: String): Bitmap? =
-        withContext(Dispatchers.IO) {
+        withContext(dispatcher) {
             (
                 (
                     (

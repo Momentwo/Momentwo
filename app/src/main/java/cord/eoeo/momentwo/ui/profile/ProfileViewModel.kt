@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.ui.profile
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
-import cord.eoeo.momentwo.domain.profile.ProfileRepository
+import cord.eoeo.momentwo.core.data.profile.ProfileRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,4 +1,5 @@
 package cord.eoeo.momentwo.domain.friend
+import cord.eoeo.momentwo.core.data.friend.FriendRepository
 
 import cord.eoeo.momentwo.core.model.FriendItem
 

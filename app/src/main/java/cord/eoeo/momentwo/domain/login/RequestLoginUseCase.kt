@@ -1,7 +1,8 @@
 package cord.eoeo.momentwo.domain.login
+import cord.eoeo.momentwo.core.data.login.LoginRepository
 
 import cord.eoeo.momentwo.core.datastore.PreferenceRepository
-import cord.eoeo.momentwo.domain.profile.ProfileRepository
+import cord.eoeo.momentwo.core.data.profile.ProfileRepository
 
 class RequestLoginUseCase(
     private val loginRepository: LoginRepository,

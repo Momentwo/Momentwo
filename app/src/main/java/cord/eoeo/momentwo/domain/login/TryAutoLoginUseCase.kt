@@ -1,4 +1,5 @@
 package cord.eoeo.momentwo.domain.login
+import cord.eoeo.momentwo.core.data.login.LoginRepository
 
 import cord.eoeo.momentwo.core.datastore.PreferenceRepository
 

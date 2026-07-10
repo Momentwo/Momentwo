@@ -1,15 +1,15 @@
 package cord.eoeo.momentwo.di
 
 import cord.eoeo.momentwo.core.datastore.PreferenceRepository
-import cord.eoeo.momentwo.data.login.LoginDataSource
-import cord.eoeo.momentwo.data.login.LoginRepositoryImpl
-import cord.eoeo.momentwo.data.login.remote.LoginRemoteDataSource
-import cord.eoeo.momentwo.data.login.remote.LoginService
-import cord.eoeo.momentwo.domain.login.LoginRepository
+import cord.eoeo.momentwo.core.data.login.LoginDataSource
+import cord.eoeo.momentwo.core.data.login.LoginRepositoryImpl
+import cord.eoeo.momentwo.core.data.login.remote.LoginRemoteDataSource
+import cord.eoeo.momentwo.core.data.login.remote.LoginService
+import cord.eoeo.momentwo.core.data.login.LoginRepository
 import cord.eoeo.momentwo.domain.login.RequestLoginUseCase
 import cord.eoeo.momentwo.domain.login.TryAutoLoginUseCase
-import cord.eoeo.momentwo.domain.mapper.ProfileMapper
-import cord.eoeo.momentwo.domain.profile.ProfileRepository
+import cord.eoeo.momentwo.core.data.mapper.ProfileMapper
+import cord.eoeo.momentwo.core.data.profile.ProfileRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

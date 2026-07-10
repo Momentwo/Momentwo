@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import cord.eoeo.momentwo.data.comment.CommentRepository
-import cord.eoeo.momentwo.data.description.DescriptionRepository
-import cord.eoeo.momentwo.data.like.LikeRepository
+import cord.eoeo.momentwo.core.data.comment.CommentRepository
+import cord.eoeo.momentwo.core.data.description.DescriptionRepository
+import cord.eoeo.momentwo.core.data.like.LikeRepository
 import cord.eoeo.momentwo.domain.photo.DownloadPhotoUseCase
 import cord.eoeo.momentwo.domain.photo.UpdateIsLikedUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel

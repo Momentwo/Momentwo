@@ -5,10 +5,10 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import cord.eoeo.momentwo.data.member.MemberRepository
-import cord.eoeo.momentwo.domain.album.AlbumRepository
+import cord.eoeo.momentwo.core.data.member.MemberRepository
+import cord.eoeo.momentwo.core.data.album.AlbumRepository
 import cord.eoeo.momentwo.domain.friend.GetFriendListUseCase
-import cord.eoeo.momentwo.domain.subalbum.SubAlbumRepository
+import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination
 import cord.eoeo.momentwo.core.model.AlbumItem

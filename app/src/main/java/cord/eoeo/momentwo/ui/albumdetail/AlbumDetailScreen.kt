@@ -37,7 +37,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.albumdetail.albumsetting.AlbumSettingRoute
 import cord.eoeo.momentwo.ui.albumdetail.albumsetting.ChangeImageRoute
 import cord.eoeo.momentwo.ui.albumdetail.member.MemberScreen

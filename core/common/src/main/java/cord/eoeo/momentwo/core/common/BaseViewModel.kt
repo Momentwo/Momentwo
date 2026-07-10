@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui
+package cord.eoeo.momentwo.core.common
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

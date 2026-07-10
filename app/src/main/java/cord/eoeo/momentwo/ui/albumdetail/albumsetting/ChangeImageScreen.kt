@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.composable.AlbumItemCard
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

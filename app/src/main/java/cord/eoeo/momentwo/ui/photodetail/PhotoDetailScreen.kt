@@ -47,7 +47,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import cord.eoeo.momentwo.ui.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.core.model.CommentItem
 import cord.eoeo.momentwo.ui.photodetail.composable.CommentBottomSheet
 import cord.eoeo.momentwo.ui.photodetail.composable.DescriptionBottomSheet

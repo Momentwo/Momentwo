@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleStartEffect
-import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.START_EFFECTS_KEY
 import cord.eoeo.momentwo.core.model.MemberItem
 
 @Composable

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import cord.eoeo.momentwo.domain.photo.PhotoRepository
 import cord.eoeo.momentwo.domain.subalbum.ChangeSubAlbumTitleUseCase
-import cord.eoeo.momentwo.ui.BaseViewModel
+import cord.eoeo.momentwo.core.common.BaseViewModel
 import cord.eoeo.momentwo.ui.MomentwoDestination
 import cord.eoeo.momentwo.ui.photolist.PhotoListContract.Effect.ShowSnackbar
 import dagger.hilt.android.lifecycle.HiltViewModel

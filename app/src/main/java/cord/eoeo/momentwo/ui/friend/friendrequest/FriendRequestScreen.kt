@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.RESUME_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.START_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.RESUME_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.START_EFFECTS_KEY
 import cord.eoeo.momentwo.core.model.FriendRequestItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

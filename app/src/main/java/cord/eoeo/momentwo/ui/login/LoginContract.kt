@@ -1,8 +1,8 @@
 package cord.eoeo.momentwo.ui.login
 
-import cord.eoeo.momentwo.ui.UiEffect
-import cord.eoeo.momentwo.ui.UiEvent
-import cord.eoeo.momentwo.ui.UiState
+import cord.eoeo.momentwo.core.common.UiEffect
+import cord.eoeo.momentwo.core.common.UiEvent
+import cord.eoeo.momentwo.core.common.UiState
 
 class LoginContract {
     data class State(

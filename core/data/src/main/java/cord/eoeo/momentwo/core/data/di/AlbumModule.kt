@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.data.di
 
 import android.content.Context
 import cord.eoeo.momentwo.core.data.album.AlbumDataSource
@@ -7,8 +7,6 @@ import cord.eoeo.momentwo.core.data.album.remote.AlbumRemoteDataSource
 import cord.eoeo.momentwo.core.data.album.remote.AlbumService
 import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
 import cord.eoeo.momentwo.core.data.album.AlbumRepository
-import cord.eoeo.momentwo.domain.album.GetAlbumListUseCase
-import cord.eoeo.momentwo.domain.album.RequestCreateAlbumUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,14 +33,4 @@ object AlbumModule {
         presignedRemoteDataSource: PresignedDataSource,
         @ApplicationContext applicationContext: Context,
     ): AlbumRepository = AlbumRepositoryImpl(albumRemoteDataSource, presignedRemoteDataSource, applicationContext)
-
-    @Provides
-    @Singleton
-    fun provideRequestCreateAlbumUseCase(albumRepository: AlbumRepository): RequestCreateAlbumUseCase =
-        RequestCreateAlbumUseCase(albumRepository)
-
-    @Provides
-    @Singleton
-    fun provideGetAlbumListUseCase(albumRepository: AlbumRepository): GetAlbumListUseCase =
-        GetAlbumListUseCase(albumRepository)
 }

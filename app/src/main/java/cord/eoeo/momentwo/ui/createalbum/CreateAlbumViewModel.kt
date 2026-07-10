@@ -2,8 +2,8 @@ package cord.eoeo.momentwo.ui.createalbum
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import cord.eoeo.momentwo.domain.album.RequestCreateAlbumUseCase
-import cord.eoeo.momentwo.domain.friend.GetFriendListUseCase
+import cord.eoeo.momentwo.core.domain.album.RequestCreateAlbumUseCase
+import cord.eoeo.momentwo.core.domain.friend.GetFriendListUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

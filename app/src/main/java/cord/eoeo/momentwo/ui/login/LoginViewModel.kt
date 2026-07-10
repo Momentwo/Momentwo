@@ -2,8 +2,8 @@ package cord.eoeo.momentwo.ui.login
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import cord.eoeo.momentwo.domain.login.RequestLoginUseCase
-import cord.eoeo.momentwo.domain.login.TryAutoLoginUseCase
+import cord.eoeo.momentwo.core.domain.login.RequestLoginUseCase
+import cord.eoeo.momentwo.core.domain.login.TryAutoLoginUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

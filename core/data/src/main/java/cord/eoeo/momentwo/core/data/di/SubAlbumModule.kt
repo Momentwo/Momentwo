@@ -1,10 +1,9 @@
-package cord.eoeo.momentwo.di
+package cord.eoeo.momentwo.core.data.di
 
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumDataSource
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepositoryImpl
 import cord.eoeo.momentwo.core.data.subalbum.remote.SubAlbumRemoteDataSource
 import cord.eoeo.momentwo.core.data.subalbum.remote.SubAlbumService
-import cord.eoeo.momentwo.domain.subalbum.ChangeSubAlbumTitleUseCase
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepository
 import dagger.Module
 import dagger.Provides
@@ -29,9 +28,4 @@ object SubAlbumModule {
     @Singleton
     fun provideSubAlbumRepository(subAlbumRemoteDataSource: SubAlbumDataSource): SubAlbumRepository =
         SubAlbumRepositoryImpl(subAlbumRemoteDataSource)
-
-    @Provides
-    @Singleton
-    fun provideChangeSubAlbumTitleUseCase(subAlbumRepository: SubAlbumRepository): ChangeSubAlbumTitleUseCase =
-        ChangeSubAlbumTitleUseCase(subAlbumRepository)
 }

@@ -1,7 +1,8 @@
-package cord.eoeo.momentwo.domain.subalbum
+package cord.eoeo.momentwo.core.domain.subalbum
+import javax.inject.Inject
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepository
 
-class ChangeSubAlbumTitleUseCase(
+class ChangeSubAlbumTitleUseCase @Inject constructor(
     private val subAlbumRepository: SubAlbumRepository,
 ) {
     suspend operator fun invoke(

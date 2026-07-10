@@ -10,7 +10,7 @@ import cord.eoeo.momentwo.core.data.album.AlbumRepository
 import cord.eoeo.momentwo.core.domain.friend.GetFriendListUseCase
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
-import cord.eoeo.momentwo.ui.MomentwoDestination
+import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.core.model.AlbumItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

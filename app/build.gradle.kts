@@ -48,6 +48,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
+    implementation(project(":core:navigation"))
 
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)

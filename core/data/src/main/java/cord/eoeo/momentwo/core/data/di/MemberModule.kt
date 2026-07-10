@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.member.MemberDataSource
 import cord.eoeo.momentwo.core.data.member.MemberRepository
@@ -21,7 +23,10 @@ object MemberModule {
 
     @Provides
     @Singleton
-    fun provideMemberRemoteDataSource(memberService: MemberService): MemberDataSource = MemberRemoteDataSource(memberService)
+    fun provideMemberRemoteDataSource(
+        memberService: MemberService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): MemberDataSource = MemberRemoteDataSource(memberService, dispatcher)
 
     @Provides
     @Singleton

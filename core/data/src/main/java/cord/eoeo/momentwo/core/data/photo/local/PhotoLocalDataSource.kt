@@ -8,14 +8,13 @@ import cord.eoeo.momentwo.core.database.PhotoRemoteKeyDao
 import cord.eoeo.momentwo.core.database.PhotoEntity
 import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.OutputStream
 
 class PhotoLocalDataSource(
     private val photoDao: PhotoDao,
     private val photoRemoteKeyDao: PhotoRemoteKeyDao,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher
 ) : PhotoDataSource.Local {
     override fun getPhotoPagingSource(albumId: Int, subAlbumId: Int): PagingSource<Int, PhotoEntity> =
         photoDao.getPhotoPagingSource(albumId, subAlbumId)

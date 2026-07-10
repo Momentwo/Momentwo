@@ -10,12 +10,11 @@ import cord.eoeo.momentwo.core.data.model.EditAlbumTitle
 import cord.eoeo.momentwo.core.data.model.PresignedRequest
 import cord.eoeo.momentwo.core.data.model.PresignedUrl
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AlbumRemoteDataSource(
     private val albumService: AlbumService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : AlbumDataSource {
     override suspend fun requestCreateAlbum(createAlbumInfo: CreateAlbumInfo): Result<Unit> =
         runCatching {

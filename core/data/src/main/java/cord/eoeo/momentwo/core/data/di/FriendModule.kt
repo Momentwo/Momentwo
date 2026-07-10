@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import cord.eoeo.momentwo.core.data.friend.FriendDataSource
@@ -35,17 +37,21 @@ object FriendModule {
     @Provides
     @Singleton
     @QualifierModule.RemoteDataSource
-    fun provideFriendRemoteDataSource(friendService: FriendService): FriendDataSource.Remote =
-        FriendRemoteDataSource(friendService)
+    fun provideFriendRemoteDataSource(
+        friendService: FriendService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): FriendDataSource.Remote =
+        FriendRemoteDataSource(friendService, dispatcher)
 
     @Provides
     @Singleton
     @QualifierModule.LocalDataSource
     fun provideFriendLocalDataSource(
         friendDao: FriendDao,
-        friendRemoteKeyDao: FriendRemoteKeyDao
+        friendRemoteKeyDao: FriendRemoteKeyDao,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
     ): FriendDataSource.Local =
-        FriendLocalDataSource(friendDao, friendRemoteKeyDao)
+        FriendLocalDataSource(friendDao, friendRemoteKeyDao, dispatcher)
 
     @Provides
     @Singleton

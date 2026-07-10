@@ -5,12 +5,11 @@ import cord.eoeo.momentwo.core.data.model.CommentPage
 import cord.eoeo.momentwo.core.data.model.CreateComment
 import cord.eoeo.momentwo.core.data.model.EditComment
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CommentRemoteDataSource(
     private val commentService: CommentService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : CommentDataSource {
     override suspend fun createComment(createComment: CreateComment): Result<Unit> =
         runCatching {

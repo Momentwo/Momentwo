@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.signup.remote.SignUpService
 import cord.eoeo.momentwo.core.data.signup.SignUpDataSource
@@ -22,8 +24,11 @@ object SignUpModule {
 
     @Provides
     @Singleton
-    fun provideSignUpRemoteDataSource(signUpService: SignUpService): SignUpDataSource =
-        SignUpRemoteDataSource(signUpService)
+    fun provideSignUpRemoteDataSource(
+        signUpService: SignUpService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): SignUpDataSource =
+        SignUpRemoteDataSource(signUpService, dispatcher)
 
     @Provides
     @Singleton

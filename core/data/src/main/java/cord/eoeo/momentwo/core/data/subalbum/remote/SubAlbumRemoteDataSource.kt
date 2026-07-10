@@ -5,12 +5,11 @@ import cord.eoeo.momentwo.core.data.model.EditSubAlbumInfo
 import cord.eoeo.momentwo.core.data.model.SubAlbumList
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumDataSource
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class SubAlbumRemoteDataSource(
     private val subAlbumService: SubAlbumService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : SubAlbumDataSource {
     override suspend fun requestCreateSubAlbum(createSubAlbumInfo: CreateSubAlbumInfo): Result<Unit> =
         runCatching {

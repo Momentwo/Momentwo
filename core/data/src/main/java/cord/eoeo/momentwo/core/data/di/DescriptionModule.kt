@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.description.DescriptionDataSource
 import cord.eoeo.momentwo.core.data.description.DescriptionRepository
@@ -22,8 +24,11 @@ object DescriptionModule {
 
     @Provides
     @Singleton
-    fun provideDescriptionRemoteDataSource(descriptionService: DescriptionService): DescriptionDataSource =
-        DescriptionRemoteDataSource(descriptionService)
+    fun provideDescriptionRemoteDataSource(
+        descriptionService: DescriptionService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): DescriptionDataSource =
+        DescriptionRemoteDataSource(descriptionService, dispatcher)
 
     @Provides
     @Singleton

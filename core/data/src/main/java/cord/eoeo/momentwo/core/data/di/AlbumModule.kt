@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import android.content.Context
 import cord.eoeo.momentwo.core.data.album.AlbumDataSource
@@ -24,7 +26,10 @@ object AlbumModule {
 
     @Provides
     @Singleton
-    fun provideAlbumRemoteDataSource(albumService: AlbumService): AlbumDataSource = AlbumRemoteDataSource(albumService)
+    fun provideAlbumRemoteDataSource(
+        albumService: AlbumService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): AlbumDataSource = AlbumRemoteDataSource(albumService, dispatcher)
 
     @Provides
     @Singleton

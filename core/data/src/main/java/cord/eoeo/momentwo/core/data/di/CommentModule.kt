@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.comment.CommentDataSource
 import cord.eoeo.momentwo.core.data.comment.CommentRepository
@@ -22,8 +24,11 @@ object CommentModule {
 
     @Provides
     @Singleton
-    fun provideCommentRemoteDataSource(commentService: CommentService): CommentDataSource =
-        CommentRemoteDataSource(commentService)
+    fun provideCommentRemoteDataSource(
+        commentService: CommentService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): CommentDataSource =
+        CommentRemoteDataSource(commentService, dispatcher)
 
     @Provides
     @Singleton

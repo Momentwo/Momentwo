@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
 import cord.eoeo.momentwo.core.data.presigned.remote.PresignedRemoteDataSource
@@ -19,6 +21,9 @@ object PresignedModule {
 
     @Provides
     @Singleton
-    fun providePresignedRemoteDataSource(presignedService: PresignedService): PresignedDataSource =
-        PresignedRemoteDataSource(presignedService)
+    fun providePresignedRemoteDataSource(
+        presignedService: PresignedService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): PresignedDataSource =
+        PresignedRemoteDataSource(presignedService, dispatcher)
 }

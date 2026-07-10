@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import cord.eoeo.momentwo.core.data.profile.ProfileDataSource
@@ -30,12 +32,18 @@ object ProfileModule {
     @Provides
     @Singleton
     @QualifierModule.LocalDataSource
-    fun provideProfileLocalDataSource(profileDao: ProfileDao): ProfileDataSource.Local = ProfileLocalDataSource(profileDao)
+    fun provideProfileLocalDataSource(
+        profileDao: ProfileDao,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): ProfileDataSource.Local = ProfileLocalDataSource(profileDao, dispatcher)
 
     @Provides
     @Singleton
     @QualifierModule.RemoteDataSource
-    fun provideProfileRemoteDataSource(profileService: ProfileService): ProfileDataSource.Remote = ProfileRemoteDataSource(profileService)
+    fun provideProfileRemoteDataSource(
+        profileService: ProfileService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): ProfileDataSource.Remote = ProfileRemoteDataSource(profileService, dispatcher)
 
     @Provides
     @Singleton

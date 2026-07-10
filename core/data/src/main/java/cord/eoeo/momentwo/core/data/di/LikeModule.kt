@@ -1,4 +1,6 @@
 package cord.eoeo.momentwo.core.data.di
+import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 
 import cord.eoeo.momentwo.core.data.like.LikeDataSource
 import cord.eoeo.momentwo.core.data.like.LikeRepository
@@ -22,8 +24,11 @@ object LikeModule {
 
     @Provides
     @Singleton
-    fun provideLikeRemoteDataSource(likeService: LikeService): LikeDataSource =
-        LikeRemoteDataSource(likeService)
+    fun provideLikeRemoteDataSource(
+        likeService: LikeService,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+    ): LikeDataSource =
+        LikeRemoteDataSource(likeService, dispatcher)
 
     @Provides
     @Singleton

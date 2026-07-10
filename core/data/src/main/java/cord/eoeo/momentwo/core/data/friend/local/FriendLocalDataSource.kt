@@ -7,13 +7,12 @@ import cord.eoeo.momentwo.core.database.FriendRemoteKeyDao
 import cord.eoeo.momentwo.core.database.FriendEntity
 import cord.eoeo.momentwo.core.database.FriendRemoteKeyEntity
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class FriendLocalDataSource(
     private val friendDao: FriendDao,
     private val friendRemoteKeyDao: FriendRemoteKeyDao,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher
 ) : FriendDataSource.Local {
     override fun getPhotoPagingSource(): PagingSource<Int, FriendEntity> =
         friendDao.getFriendPagingSource()

@@ -2,13 +2,12 @@ package cord.eoeo.momentwo.core.data.presigned.remote
 
 import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.RequestBody
 
 class PresignedRemoteDataSource(
     private val presignedService: PresignedService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher
 ): PresignedDataSource {
     override suspend fun uploadPhoto(presignedUrl: String, image: RequestBody): Result<Unit> =
         runCatching {

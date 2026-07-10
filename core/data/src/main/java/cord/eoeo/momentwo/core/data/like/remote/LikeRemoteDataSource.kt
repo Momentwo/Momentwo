@@ -4,12 +4,11 @@ import cord.eoeo.momentwo.core.data.like.LikeDataSource
 import cord.eoeo.momentwo.core.data.model.LikeCount
 import cord.eoeo.momentwo.core.data.model.LikeRequest
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class LikeRemoteDataSource(
     private val likeService: LikeService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : LikeDataSource {
     override suspend fun requestDoLike(likeRequest: LikeRequest): Result<Unit> =
         runCatching {

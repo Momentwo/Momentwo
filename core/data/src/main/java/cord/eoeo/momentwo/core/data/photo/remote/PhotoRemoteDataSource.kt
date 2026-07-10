@@ -7,12 +7,11 @@ import cord.eoeo.momentwo.core.data.model.PresignedUrl
 import cord.eoeo.momentwo.core.data.model.UploadPhoto
 import cord.eoeo.momentwo.core.data.photo.PhotoDataSource
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class PhotoRemoteDataSource(
     private val photoService: PhotoService,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
 ) : PhotoDataSource.Remote {
     override suspend fun getPhotoPage(
         albumId: Int,

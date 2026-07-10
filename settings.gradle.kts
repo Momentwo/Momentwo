@@ -26,4 +26,5 @@ include(":core:database")
 include(":core:data")
 include(":core:domain")
 include(":core:navigation")
+include(":core:testing")
  

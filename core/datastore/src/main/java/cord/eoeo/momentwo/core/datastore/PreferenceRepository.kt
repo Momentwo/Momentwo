@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.data.authentication
+package cord.eoeo.momentwo.core.datastore
 
 interface PreferenceRepository {
     suspend fun storeAccessToken(accessToken: String)

@@ -3,6 +3,7 @@ package cord.eoeo.momentwo.ui.signup
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -87,48 +88,50 @@ fun SignUpScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState()) },
         modifier = Modifier.fillMaxWidth()
     ) { paddingValues ->
-        HorizontalPager(
-            state = pagerState(),
-            userScrollEnabled = false,
-            modifier = Modifier.fillMaxWidth(),
-            beyondViewportPageCount = 1,
-        ) { page ->
-            if (page == 0) {
-                FirstSignUpPage(
-                    email = { uiState().email },
-                    password = { uiState().password },
-                    passwordCheck = { uiState().passwordCheck },
-                ) { event -> onEvent(event) }
-            } else {
-                SecondSignUpPage(
-                    nickname = { uiState().nickname },
-                    name = { uiState().name },
-                    birthday = { uiState().birthday },
-                    phone = { uiState().phone },
-                ) { event -> onEvent(event) }
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(0.dp, 0.dp, 32.dp, 32.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            Button(
-                onClick = {
-                    if (pagerState().currentPage == 0) {
-                        onEvent(SignUpContract.Event.OnNextClicked)
-                    } else {
-                        onEvent(SignUpContract.Event.OnAcceptClicked)
-                    }
-                },
-            ) {
-                if (pagerState().currentPage == 0) {
-                    Text(text = "다음")
+        Box(modifier = Modifier.padding(paddingValues)) {
+            HorizontalPager(
+                state = pagerState(),
+                userScrollEnabled = false,
+                modifier = Modifier.fillMaxWidth(),
+                beyondViewportPageCount = 1,
+            ) { page ->
+                if (page == 0) {
+                    FirstSignUpPage(
+                        email = { uiState().email },
+                        password = { uiState().password },
+                        passwordCheck = { uiState().passwordCheck },
+                    ) { event -> onEvent(event) }
                 } else {
-                    Text(text = "확인")
+                    SecondSignUpPage(
+                        nickname = { uiState().nickname },
+                        name = { uiState().name },
+                        birthday = { uiState().birthday },
+                        phone = { uiState().phone },
+                    ) { event -> onEvent(event) }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(0.dp, 0.dp, 32.dp, 32.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                Button(
+                    onClick = {
+                        if (pagerState().currentPage == 0) {
+                            onEvent(SignUpContract.Event.OnNextClicked)
+                        } else {
+                            onEvent(SignUpContract.Event.OnAcceptClicked)
+                        }
+                    },
+                ) {
+                    if (pagerState().currentPage == 0) {
+                        Text(text = "다음")
+                    } else {
+                        Text(text = "확인")
+                    }
                 }
             }
         }

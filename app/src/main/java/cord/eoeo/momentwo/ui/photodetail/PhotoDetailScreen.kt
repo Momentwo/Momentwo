@@ -56,6 +56,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
+// 몰입형 전체화면 사진 뷰어 — 바(AnimatedVisibility)가 오버레이되며 사진은 edge-to-edge full-bleed 유지
+@Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun PhotoDetailScreen(
     coroutineScope: CoroutineScope,

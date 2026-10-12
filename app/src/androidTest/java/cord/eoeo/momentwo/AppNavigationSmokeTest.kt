@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo
 
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -35,6 +36,10 @@ class AppNavigationSmokeTest {
     fun installTestGraph() {
         compose.runOnUiThread {
             val activity = compose.activity
+            // Display only this test activity when the device auto-locks during the suite.
+            activity.setShowWhenLocked(true)
+            activity.setTurnScreenOn(true)
+            activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             val images = activity.applicationContext.imageLoader
             val insets = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
             activity.setContent {
@@ -46,6 +51,8 @@ class AppNavigationSmokeTest {
                 }
             }
         }
+        // Waking a locked device is asynchronous; wait until this window can receive input.
+        compose.waitUntil(timeoutMillis = 10_000) { compose.activity.hasWindowFocus() }
         compose.waitForIdle()
     }
 

@@ -2,12 +2,12 @@ package cord.eoeo.momentwo.feature.friend.impl
 
 import androidx.navigation.NavHostController
 
-object FriendTabDestination {
+internal object FriendTabDestination {
     const val LIST_ROUTE = "list"
     const val REQUEST_ROUTE = "request"
 }
 
-class FriendNavigationActions(
+internal class FriendNavigationActions(
     navController: NavHostController,
 ) {
     val navigateToFriendList: () -> Unit = {

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend.friendlist
+package cord.eoeo.momentwo.feature.friend.impl.friendlist
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,7 +17,7 @@ import cord.eoeo.momentwo.core.ui.CircleAsyncImage
 import cord.eoeo.momentwo.core.model.FriendItem
 
 @Composable
-fun FriendListItem(
+internal fun FriendListItem(
     imageLoader: ImageLoader,
     friendItem: () -> FriendItem,
 ) {

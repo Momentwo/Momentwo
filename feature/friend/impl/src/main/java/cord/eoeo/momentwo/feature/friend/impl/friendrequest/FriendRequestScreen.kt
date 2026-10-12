@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend.friendrequest
+package cord.eoeo.momentwo.feature.friend.impl.friendrequest
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun FriendRequestScreen(
+internal fun FriendRequestScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     receivedRequests: () -> List<FriendRequestItem>,
@@ -95,7 +95,7 @@ fun FriendRequestScreen(
 }
 
 @Composable
-fun ReceivedRequestScreen(
+internal fun ReceivedRequestScreen(
     imageLoader: ImageLoader,
     receivedRequests: () -> List<FriendRequestItem>,
     isReceivedListChanged: () -> Boolean,
@@ -123,7 +123,7 @@ fun ReceivedRequestScreen(
 }
 
 @Composable
-fun SentRequestScreen(
+internal fun SentRequestScreen(
     imageLoader: ImageLoader,
     sentRequests: () -> List<FriendRequestItem>,
     isSentListChanged: () -> Boolean,

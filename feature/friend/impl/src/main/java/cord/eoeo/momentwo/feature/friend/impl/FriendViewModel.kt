@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend
+package cord.eoeo.momentwo.feature.friend.impl
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FriendViewModel
+internal class FriendViewModel
     @Inject
     constructor(
         private val friendRepository: FriendRepository,

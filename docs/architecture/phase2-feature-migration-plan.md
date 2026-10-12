@@ -1,7 +1,7 @@
 # Momentwo Phase 2 — Feature 분리 재개 계획
 
 > 2026-10-02 작성. 기준: `develop` / `c67f368` (원격 develop과 동일).
-> 2026-10-12 갱신: 작업별 새 브랜치·PR, develop 기준 순차 병합 흐름 확정. 원격 develop은 여전히 `c67f368`이며 열린 PR은 없다. 아래 브랜치와 PR은 생성 예정이다.
+> 2026-10-12 갱신: 작업별 새 브랜치·PR, develop 기준 순차 병합 흐름 확정. 아래 초기 현황은 재개 전 기준이며, 실제 완료 상태와 검증 결과는 실행 기록에 누적한다.
 > 상위 이슈: [#109](https://github.com/Momentwo/Momentwo/issues/109). 전체 계획: [multi-module-migration-plan.md](multi-module-migration-plan.md).
 > 이 문서는 현재 코드에 맞춘 Phase 2 실행 기준이다. 기존 하위 이슈의 Route 이동 설명과 다른 부분은 아래 결정에 따른다.
 
@@ -9,7 +9,7 @@
 
 - Phase 0: convention plugin 9개 도입 완료(PR #105).
 - Phase 1: Core 11개 분리 및 Dispatcher 후속 작업 완료(PR #129, #131~#141; #130은 #141로 대체되어 미병합 종료).
-- 현재 `:app` + `:core:*` 11개 = 12개 모듈. Feature 모듈은 아직 없다.
+- 재개 전 기준은 `:app` + `:core:*` 11개 = 12개 모듈이다. 이후 Feature 모듈 추가 현황은 실행 기록을 따른다.
 - 2026-10-02 `:app:assembleDebug :app:lintDebug :app:testDebugUnitTest` 성공. 증분 빌드이며 clean 빌드 결과는 아니다.
 - app 의존에 포함되지 않는 `:core:testing:assembleDebug`도 별도 성공(8s, 증분 빌드).
 - 기기 골든 패스는 이번 점검에서 실행하지 않았다. Phase 2 구현을 시작하기 전 기준 동작을 기록하고, 각 PR 병합 전에 해당 경로를 재검증한다.
@@ -197,7 +197,7 @@ P6 병합 후 Phase 2 종료 검증까지 완료하면 #110을 **별도 새 브�
 - [ ] 로그인 성공/실패·자동 로그인·회원가입 검증·Effect 등의 실제 동작 테스트 추가 (Auth부터)
 - [ ] 변경으로 생긴 오류와 기존 실패를 PR의 검증 결과에 구분해서 기록
 
-현재 자동 테스트는 산술/기본 계측 예제뿐이다. 테스트 task 성공만으로 MVI 회귀가 검증됐다고 판단하지 않는다. `ktlintCheck`/`detekt`는 현재 구성돼 있지 않으므로 필수 명령으로 쓰지 않는다.
+재개 전 자동 테스트는 산술/기본 계측 예제뿐이었다. Auth부터 실제 상태·효과와 Navigation 회귀 테스트를 추가한다. 테스트 task 성공만으로 MVI 회귀가 검증됐다고 판단하지 않는다. `ktlintCheck`/`detekt`는 현재 구성돼 있지 않으므로 필수 명령으로 쓰지 않는다.
 
 ### Phase 2 종료 / Phase 3 인계
 
@@ -242,3 +242,13 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - Auth API 테스트 2개 및 ViewModel 동작 테스트 8개 통과: 로그인 성공·실패/세션 저장, 자동 로그인, 회원가입 이동·입력 검증·정규화·요청 매핑.
 - SM_N976N/API 31 별도 테스트 패키지에서 실제 app 그래프/Hilt를 사용하는 계측 테스트 2개 통과: 로그인→회원가입→뒤로가기, nullable Profile 진입→뒤로가기(최종 2m 12s).
 - 실제 API 응답·로그인 이후 데이터 동작은 백엔드 배포 중단으로 미확인이다. 사용자가 승인한 자동/기기 확인 기준으로 진행한다.
+
+### 2026-10-12 — P2 Friend 구현 및 검증
+
+- Auth PR #144 병합 후 develop/cbea6e3에서 `refactor/feature-friend`를 생성했다.
+- friend:api/impl을 추가하고 UI 11개 파일, MVI와 내부 목록/요청 그래프를 이관했다. FriendDestination은 기존 직렬화 이름을 유지하며 app은 friendScreen()으로 연결한다.
+- 내부 UI·VM·Contract·탭 경로/Actions는 internal로 제한했다. Paging/Coil/icons와 실제 Core 의존성을 명시했다.
+- friend api/impl 및 app 빌드·Lint, API 직렬화 단위 테스트 1개, app 단위 테스트 통과(최종 22s).
+- SM_N976N/API 31 별도 앱 패키지에서 기기 테스트 3개 통과(2m 41s): 로그인/회원가입/뒤로가기, nullable Profile, Friend 진입/요청 탭/뒤로가기.
+- 자동 잠금으로 처음 UI 계층을 찾지 못했던 테스트는 테스트 Activity 표시·화면 유지와 창 포커스 대기로 보완했다. 제품 코드/기기 보안 설정은 변경하지 않았다.
+- 실제 친구 API와 기존 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.

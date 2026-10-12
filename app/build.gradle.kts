@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:friend:api"))
+    implementation(project(":feature:friend:impl"))
     implementation(project(":feature:auth:api"))
     implementation(project(":feature:auth:impl"))
     implementation(project(":core:designsystem"))

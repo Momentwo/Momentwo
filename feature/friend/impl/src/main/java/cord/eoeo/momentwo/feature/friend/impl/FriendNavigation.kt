@@ -1,23 +1,23 @@
-package cord.eoeo.momentwo.ui.friend
+package cord.eoeo.momentwo.feature.friend.impl
 
 import androidx.navigation.NavHostController
 
-object FriendDestination {
+internal object FriendTabDestination {
     const val LIST_ROUTE = "list"
     const val REQUEST_ROUTE = "request"
 }
 
-class FriendNavigationActions(
+internal class FriendNavigationActions(
     navController: NavHostController,
 ) {
     val navigateToFriendList: () -> Unit = {
-        navController.navigate(FriendDestination.LIST_ROUTE) {
+        navController.navigate(FriendTabDestination.LIST_ROUTE) {
             launchSingleTop = true
             popUpTo(navController.graph.id)
         }
     }
     val navigateToFriendRequest: () -> Unit = {
-        navController.navigate(FriendDestination.REQUEST_ROUTE) {
+        navController.navigate(FriendTabDestination.REQUEST_ROUTE) {
             launchSingleTop = true
             popUpTo(navController.graph.id)
         }

@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo
 
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -12,6 +13,7 @@ import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import coil.imageLoader
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
+import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
@@ -34,6 +36,10 @@ class AppNavigationSmokeTest {
     fun installTestGraph() {
         compose.runOnUiThread {
             val activity = compose.activity
+            // Display only this test activity when the device auto-locks during the suite.
+            activity.setShowWhenLocked(true)
+            activity.setTurnScreenOn(true)
+            activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             val images = activity.applicationContext.imageLoader
             val insets = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
             activity.setContent {
@@ -45,6 +51,8 @@ class AppNavigationSmokeTest {
                 }
             }
         }
+        // Waking a locked device is asynchronous; wait until this window can receive input.
+        compose.waitUntil(timeoutMillis = 10_000) { compose.activity.hasWindowFocus() }
         compose.waitForIdle()
     }
 
@@ -71,6 +79,21 @@ class AppNavigationSmokeTest {
         compose.runOnIdle {
             assertEquals(ProfileDestination(null), navController.currentBackStackEntry!!.toRoute<ProfileDestination>())
         }
+        compose.runOnIdle { navController.popBackStack() }
+        compose.waitForIdle()
+        compose.onNodeWithText("Momentwo").assertExists()
+    }
+
+    @Test
+    fun friendGraphAndRequestTabAreReachableWithoutBackend() {
+        compose.runOnIdle { navController.navigate(FriendDestination) }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertEquals(FriendDestination, navController.currentBackStackEntry!!.toRoute<FriendDestination>())
+        }
+        compose.onNodeWithText("친구 요청").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("받은 요청").assertExists()
         compose.runOnIdle { navController.popBackStack() }
         compose.waitForIdle()
         compose.onNodeWithText("Momentwo").assertExists()

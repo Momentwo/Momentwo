@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend
+package cord.eoeo.momentwo.feature.friend.impl
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,8 +29,8 @@ import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.core.ui.SearchUserDialog
-import cord.eoeo.momentwo.ui.friend.friendlist.FriendListScreen
-import cord.eoeo.momentwo.ui.friend.friendrequest.FriendRequestRoute
+import cord.eoeo.momentwo.feature.friend.impl.friendlist.FriendListScreen
+import cord.eoeo.momentwo.feature.friend.impl.friendrequest.FriendRequestRoute
 import cord.eoeo.momentwo.core.ui.BottomNavigationItem
 import cord.eoeo.momentwo.core.model.FriendItem
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun FriendScreen(
+internal fun FriendScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     navController: NavHostController,
@@ -115,16 +115,16 @@ fun FriendScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(
                 navController = navController,
-                startDestination = FriendDestination.LIST_ROUTE,
+                startDestination = FriendTabDestination.LIST_ROUTE,
             ) {
-                composable(route = FriendDestination.LIST_ROUTE) {
+                composable(route = FriendTabDestination.LIST_ROUTE) {
                     FriendListScreen(
                         imageLoader = imageLoader,
                         friendPagingData = friendPagingData,
                         isFriendListChanged = { uiState().isFriendListChanged },
                     )
                 }
-                composable(route = FriendDestination.REQUEST_ROUTE) {
+                composable(route = FriendTabDestination.REQUEST_ROUTE) {
                     FriendRequestRoute(
                         coroutineScope = coroutineScope,
                         imageLoader = imageLoader,
@@ -169,7 +169,7 @@ fun FriendScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FriendTopAppBar(
+internal fun FriendTopAppBar(
     selectedNavIndex: () -> Int,
     onClickBack: () -> Unit,
     onClickAdd: () -> Unit,
@@ -190,7 +190,7 @@ fun FriendTopAppBar(
 }
 
 @Composable
-fun FriendNavigationBar(
+internal fun FriendNavigationBar(
     items: () -> List<BottomNavigationItem>,
     selectedNavIndex: () -> Int,
     onChangeNavIndex: (Int) -> Unit,

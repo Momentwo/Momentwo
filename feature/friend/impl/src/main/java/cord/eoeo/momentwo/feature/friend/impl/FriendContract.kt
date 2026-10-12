@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend
+package cord.eoeo.momentwo.feature.friend.impl
 
 import androidx.paging.PagingData
 import cord.eoeo.momentwo.core.common.UiEffect
@@ -10,7 +10,7 @@ import cord.eoeo.momentwo.core.model.UserItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-class FriendContract {
+internal class FriendContract {
     data class State(
         val selectedNavIndex: Int = 0,
         val isRequestDialogOpened: Boolean = false,

@@ -21,6 +21,7 @@ fun AlbumDetailRoute(
     imageLoader: ImageLoader,
     popBackStack: () -> Unit,
     navigateToPhotoList: (Int, Int, String, String) -> Unit,
+    subAlbumContent: @Composable (SubAlbumContentState, SubAlbumContentActions) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: AlbumDetailViewModel = hiltViewModel(),
@@ -42,5 +43,6 @@ fun AlbumDetailRoute(
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
         navigateToPhotoList = navigateToPhotoList,
+        subAlbumContent = subAlbumContent,
     )
 }

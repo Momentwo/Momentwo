@@ -41,7 +41,7 @@ import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.ui.albumdetail.albumsetting.AlbumSettingRoute
 import cord.eoeo.momentwo.ui.albumdetail.albumsetting.ChangeImageRoute
 import cord.eoeo.momentwo.ui.albumdetail.member.MemberScreen
-import cord.eoeo.momentwo.ui.albumdetail.subalbumlist.SubAlbumListScreen
+import cord.eoeo.momentwo.feature.subalbum.api.SubAlbumListDestination
 import cord.eoeo.momentwo.core.ui.InviteDialog
 import cord.eoeo.momentwo.core.ui.TextFieldDialog
 import cord.eoeo.momentwo.core.ui.BottomNavigationItem
@@ -68,6 +68,7 @@ fun AlbumDetailScreen(
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     navigateToPhotoList: (Int, Int, String, String) -> Unit,
+    subAlbumContent: @Composable (SubAlbumContentState, SubAlbumContentActions) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(SIDE_EFFECTS_KEY) {
@@ -241,42 +242,31 @@ fun AlbumDetailScreen(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = AlbumDetailDestination.SubAlbumList,
+            startDestination = SubAlbumListDestination,
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
         ) {
-            composable<AlbumDetailDestination.SubAlbumList> {
-                SubAlbumListScreen(
-                    imageLoader = imageLoader,
-                    subAlbumList = { uiState().subAlbumList },
-                    isEditMode = { uiState().isEditMode },
-                    getSubAlbums = { onEvent(AlbumDetailContract.Event.OnSubAlbumEvents(AlbumDetailContract.SubAlbumEvents.GetSubAlbums)) },
-                    getIsSelected = { uiState().selectedSubAlbumIds.contains(it) },
-                    onClickItem = { subAlbumId, subAlbumTitle ->
-                        navigateToPhotoList(
-                            uiState().albumItem.id,
-                            subAlbumId,
-                            uiState().albumItem.title,
-                            subAlbumTitle,
-                        )
-                    },
-                    onChangeSubAlbumSelected = { isSelected, subAlbumId ->
-                        onEvent(
-                            AlbumDetailContract.Event.OnChangeSubAlbumSelected(
-                                isSelected = isSelected,
-                                subAlbumId = subAlbumId,
-                            ),
-                        )
-                    },
-                    onBack = {
-                        if (uiState().isEditMode) {
-                            onEvent(AlbumDetailContract.Event.OnCancelEdit)
-                        } else {
-                            onEvent(AlbumDetailContract.Event.OnBack)
-                        }
-                    },
+            composable<SubAlbumListDestination> {
+                subAlbumContent(
+                    SubAlbumContentState(
+                        items = uiState().subAlbumList,
+                        isEditMode = uiState().isEditMode,
+                        selectedIds = uiState().selectedSubAlbumIds,
+                    ),
+                    SubAlbumContentActions(
+                        getSubAlbums = { onEvent(AlbumDetailContract.Event.OnSubAlbumEvents(AlbumDetailContract.SubAlbumEvents.GetSubAlbums)) },
+                        onClickItem = { subAlbumId, subAlbumTitle ->
+                            navigateToPhotoList(uiState().albumItem.id, subAlbumId, uiState().albumItem.title, subAlbumTitle)
+                        },
+                        onChangeSelected = { isSelected, subAlbumId ->
+                            onEvent(AlbumDetailContract.Event.OnChangeSubAlbumSelected(isSelected, subAlbumId))
+                        },
+                        onBack = {
+                            onEvent(if (uiState().isEditMode) AlbumDetailContract.Event.OnCancelEdit else AlbumDetailContract.Event.OnBack)
+                        },
+                    ),
                 )
             }
 

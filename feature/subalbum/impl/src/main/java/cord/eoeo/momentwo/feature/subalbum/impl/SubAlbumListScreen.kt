@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail.subalbumlist
+package cord.eoeo.momentwo.feature.subalbum.impl
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi

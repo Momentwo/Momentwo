@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail.subalbumlist
+package cord.eoeo.momentwo.feature.subalbum.impl
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +32,7 @@ import coil.compose.AsyncImage
 import cord.eoeo.momentwo.core.model.SubAlbumItem
 
 @Composable
-fun SubAlbumItemCard(
+internal fun SubAlbumItemCard(
     imageLoader: ImageLoader,
     subAlbumItem: () -> SubAlbumItem,
     isEditMode: () -> Boolean,
@@ -61,7 +61,7 @@ fun SubAlbumItemCard(
 }
 
 @Composable
-fun SubAlbumItemCardScreen(
+internal fun SubAlbumItemCardScreen(
     imageLoader: ImageLoader,
     subAlbumItem: () -> SubAlbumItem,
     isSelected: () -> Boolean,

@@ -3,8 +3,10 @@ package cord.eoeo.momentwo
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.performClick
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
@@ -17,7 +19,12 @@ import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
+import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.ui.MainActivity
+import cord.eoeo.momentwo.ui.SubAlbumContentAdapter
+import cord.eoeo.momentwo.ui.albumdetail.SubAlbumContentState
+import cord.eoeo.momentwo.ui.albumdetail.SubAlbumContentActions
+import cord.eoeo.momentwo.core.model.SubAlbumItem
 import cord.eoeo.momentwo.ui.MomentwoNavGraph
 import cord.eoeo.momentwo.ui.MomentwoNavigationActions
 import org.junit.Assert.assertEquals
@@ -98,4 +105,56 @@ class AppNavigationSmokeTest {
         compose.waitForIdle()
         compose.onNodeWithText("Momentwo").assertExists()
     }
+    @Test
+    fun subAlbumSlotAndDetailTabsAreReachableWithoutBackend() {
+        val destination = MomentwoDestination.AlbumDetail(123, "Migration album", "Test", "")
+        compose.runOnIdle { navController.navigate(destination) }
+        compose.waitForIdle()
+        compose.onNodeWithText("Migration album").assertExists()
+        compose.onNodeWithText("서브 앨범").assertExists()
+        compose.onNodeWithText("멤버").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("서브 앨범").performClick()
+        compose.waitForIdle()
+        compose.runOnIdle { navController.popBackStack() }
+        compose.waitForIdle()
+        compose.onNodeWithText("Momentwo").assertExists()
+    }
+
+    @Test
+    fun subAlbumAdapterPreservesClickAndEditSelectionCallbacks() {
+        val state = mutableStateOf(SubAlbumContentState(listOf(SubAlbumItem(7, "Fixture", emptyList())), false, emptyList()))
+        var clicked: Pair<Int, String>? = null
+        var selected: Pair<Boolean, Int>? = null
+        var loads = 0
+        compose.runOnUiThread {
+            val images = compose.activity.applicationContext.imageLoader
+            compose.activity.setContent {
+                MomentwoTheme {
+                    SubAlbumContentAdapter(images, state.value, SubAlbumContentActions(
+                        getSubAlbums = { loads++ },
+                        onClickItem = { id, title -> clicked = id to title },
+                        onChangeSelected = { checked, id -> selected = checked to id },
+                        onBack = {},
+                    ))
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Fixture").assertExists()
+        compose.onAllNodes(hasClickAction())[0].performClick()
+        compose.runOnIdle {
+            assertEquals(7 to "Fixture", clicked)
+            org.junit.Assert.assertTrue(loads > 0)
+            clicked = null
+            state.value = state.value.copy(isEditMode = true)
+        }
+        compose.waitForIdle()
+        compose.onAllNodes(hasClickAction())[0].performClick()
+        compose.runOnIdle {
+            assertEquals(true to 7, selected)
+            assertEquals(null, clicked)
+        }
+    }
+
 }

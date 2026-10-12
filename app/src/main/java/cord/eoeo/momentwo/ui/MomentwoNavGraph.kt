@@ -63,6 +63,7 @@ fun MomentwoNavGraph(
                 imageLoader = imageLoader,
                 popBackStack = navActions.popBackStack,
                 navigateToPhotoList = navActions.navigateToPhotoList,
+                subAlbumContent = { state, actions -> SubAlbumContentAdapter(imageLoader, state, actions) },
             )
         }
 

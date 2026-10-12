@@ -1,11 +1,11 @@
-package cord.eoeo.momentwo.ui.createalbum
+package cord.eoeo.momentwo.feature.album.impl.createalbum
 
 import cord.eoeo.momentwo.core.common.UiEffect
 import cord.eoeo.momentwo.core.common.UiEvent
 import cord.eoeo.momentwo.core.common.UiState
 import cord.eoeo.momentwo.core.model.FriendItem
 
-class CreateAlbumContract {
+internal class CreateAlbumContract {
     data class State(
         val isInviteFriendOpened: Boolean = false,
         val friendList: List<FriendItem> = emptyList(),

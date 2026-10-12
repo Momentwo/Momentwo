@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.album
+package cord.eoeo.momentwo.feature.album.impl.album
 
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun AlbumRoute(
+internal fun AlbumRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     navigateToCreateAlbum: () -> Unit,

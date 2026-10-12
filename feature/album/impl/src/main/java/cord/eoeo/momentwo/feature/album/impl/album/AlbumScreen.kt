@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.album
+package cord.eoeo.momentwo.feature.album.impl.album
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun AlbumScreen(
+internal fun AlbumScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     uiState: () -> AlbumContract.State,
@@ -125,7 +125,7 @@ fun AlbumScreen(
 }
 
 @Composable
-fun AlbumDrawerContent(
+internal fun AlbumDrawerContent(
     navigateToProfile: () -> Unit,
     navigateToFriend: () -> Unit,
     navigateToSetting: () -> Unit,
@@ -160,7 +160,7 @@ fun AlbumDrawerContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlbumTopAppBar(
+internal fun AlbumTopAppBar(
     onClickDrawer: () -> Unit,
     onClickSearch: () -> Unit,
 ) {
@@ -180,7 +180,7 @@ fun AlbumTopAppBar(
 }
 
 @Composable
-fun CreateAlbumFAB(onClick: () -> Unit) {
+internal fun CreateAlbumFAB(onClick: () -> Unit) {
     FloatingActionButton(onClick = onClick) {
         Icon(Icons.Default.Add, "")
     }

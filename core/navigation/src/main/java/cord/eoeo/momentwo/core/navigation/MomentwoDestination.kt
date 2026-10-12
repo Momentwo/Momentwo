@@ -7,14 +7,6 @@ sealed interface MomentwoDestination {
     data object Album : MomentwoDestination
 
     @Serializable
-    data class AlbumDetail(
-        val id: Int,
-        val title: String,
-        val subTitle: String,
-        val imageUrl: String,
-    ) : MomentwoDestination
-
-    @Serializable
     data class PhotoList(
         val albumId: Int,
         val subAlbumId: Int,

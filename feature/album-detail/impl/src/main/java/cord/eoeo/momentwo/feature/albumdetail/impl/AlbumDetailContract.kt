@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail
+package cord.eoeo.momentwo.feature.albumdetail.impl
 
 import android.net.Uri
 import cord.eoeo.momentwo.core.common.UiEffect
@@ -10,7 +10,7 @@ import cord.eoeo.momentwo.core.model.MemberAuth
 import cord.eoeo.momentwo.core.model.MemberItem
 import cord.eoeo.momentwo.core.model.SubAlbumItem
 
-class AlbumDetailContract {
+internal class AlbumDetailContract {
     data class State(
         val albumItem: AlbumItem = AlbumItem(-1, "", "", "", 0),
         val imageUri: Uri? = null,

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail.member
+package cord.eoeo.momentwo.feature.albumdetail.impl.member
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -29,7 +29,7 @@ import cord.eoeo.momentwo.core.model.MemberItem
 import cord.eoeo.momentwo.core.designsystem.theme.starYellow
 
 @Composable
-fun MemberListItem(
+internal fun MemberListItem(
     memberItem: () -> MemberItem,
     isEditMode: () -> Boolean,
     getIsSelected: (Int) -> Boolean,
@@ -55,7 +55,7 @@ fun MemberListItem(
 }
 
 @Composable
-fun MemberListItemScreen(
+internal fun MemberListItemScreen(
     memberItem: () -> MemberItem,
     isEditMode: () -> Boolean,
     authColor: () -> Color,

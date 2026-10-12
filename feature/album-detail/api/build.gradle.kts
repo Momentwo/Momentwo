@@ -1,0 +1,13 @@
+plugins {
+    alias(libs.plugins.momentwo.android.library)
+    alias(libs.plugins.kotlinSerialization)
+}
+
+android {
+    namespace = "cord.eoeo.momentwo.feature.albumdetail.api"
+}
+
+dependencies {
+    implementation(libs.kotlin.serialization)
+    testImplementation(libs.junit)
+}

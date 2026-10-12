@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail
+package cord.eoeo.momentwo.feature.albumdetail.impl
 
 import android.net.Uri
 import android.util.Log
@@ -10,14 +10,14 @@ import cord.eoeo.momentwo.core.data.album.AlbumRepository
 import cord.eoeo.momentwo.core.domain.friend.GetFriendListUseCase
 import cord.eoeo.momentwo.core.data.subalbum.SubAlbumRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
-import cord.eoeo.momentwo.core.navigation.MomentwoDestination
+import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.core.model.AlbumItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AlbumDetailViewModel
+internal class AlbumDetailViewModel
     @Inject
     constructor(
         private val getFriendListUseCase: GetFriendListUseCase,
@@ -27,7 +27,7 @@ class AlbumDetailViewModel
         savedStateHandle: SavedStateHandle,
     ) : BaseViewModel<AlbumDetailContract.State, AlbumDetailContract.Event, AlbumDetailContract.Effect>() {
         init {
-            val albumDetailItem = savedStateHandle.toRoute<MomentwoDestination.AlbumDetail>()
+            val albumDetailItem = savedStateHandle.toRoute<AlbumDetailDestination>()
             setState(
                 uiState.value.copy(
                     albumItem = AlbumItem(

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail.albumsetting
+package cord.eoeo.momentwo.feature.albumdetail.impl.albumsetting
 
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 import cord.eoeo.momentwo.core.model.MemberAuth
 
 @Composable
-fun AlbumSettingRoute(
+internal fun AlbumSettingRoute(
     memberAuth: () -> MemberAuth,
     onOpenTextFieldDialog: (Int) -> Unit,
     onClickChangeImage: () -> Unit,

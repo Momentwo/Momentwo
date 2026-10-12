@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail
+package cord.eoeo.momentwo.feature.albumdetail.impl
 
 import cord.eoeo.momentwo.core.model.SubAlbumItem
 

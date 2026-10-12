@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail.albumsetting
+package cord.eoeo.momentwo.feature.albumdetail.impl.albumsetting
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import cord.eoeo.momentwo.core.model.MemberAuth
 
 @Composable
-fun AlbumSettingScreen(
+internal fun AlbumSettingScreen(
     scrollableState: ScrollableState,
     memberAuth: () -> MemberAuth,
     textColor: () -> Color,
@@ -95,7 +95,7 @@ fun AlbumSettingScreen(
 }
 
 @Composable
-fun AlbumSettingListItem(
+internal fun AlbumSettingListItem(
     text: () -> String,
     onClick: () -> Unit,
 ) {

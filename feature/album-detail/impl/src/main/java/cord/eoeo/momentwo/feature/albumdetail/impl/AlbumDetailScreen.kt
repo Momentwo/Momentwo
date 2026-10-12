@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail
+package cord.eoeo.momentwo.feature.albumdetail.impl
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
@@ -38,9 +38,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.ImageLoader
 import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.albumdetail.albumsetting.AlbumSettingRoute
-import cord.eoeo.momentwo.ui.albumdetail.albumsetting.ChangeImageRoute
-import cord.eoeo.momentwo.ui.albumdetail.member.MemberScreen
+import cord.eoeo.momentwo.feature.albumdetail.impl.albumsetting.AlbumSettingRoute
+import cord.eoeo.momentwo.feature.albumdetail.impl.albumsetting.ChangeImageRoute
+import cord.eoeo.momentwo.feature.albumdetail.impl.member.MemberScreen
 import cord.eoeo.momentwo.feature.subalbum.api.SubAlbumListDestination
 import cord.eoeo.momentwo.core.ui.InviteDialog
 import cord.eoeo.momentwo.core.ui.TextFieldDialog
@@ -56,7 +56,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlbumDetailScreen(
+internal fun AlbumDetailScreen(
     coroutineScope: CoroutineScope,
     navController: NavHostController,
     navActions: AlbumDetailNavigationActions,
@@ -270,7 +270,7 @@ fun AlbumDetailScreen(
                 )
             }
 
-            composable<AlbumDetailDestination.Member> {
+            composable<AlbumDetailTabDestination.Member> {
                 MemberScreen(
                     memberList = { uiState().memberList },
                     isEditMode = { uiState().isEditMode },
@@ -295,7 +295,7 @@ fun AlbumDetailScreen(
                 )
             }
 
-            composable<AlbumDetailDestination.AlbumSetting> {
+            composable<AlbumDetailTabDestination.AlbumSetting> {
                 AlbumSettingRoute(
                     memberAuth = { uiState().permission },
                     onClickChangeImage = navActions.navigateToChangeImage,
@@ -309,7 +309,7 @@ fun AlbumDetailScreen(
                 )
             }
 
-            composable<AlbumDetailDestination.ChangeImage> {
+            composable<AlbumDetailTabDestination.ChangeImage> {
                 ChangeImageRoute(
                     coroutineScope = coroutineScope,
                     imageLoader = imageLoader,
@@ -333,7 +333,7 @@ fun AlbumDetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlbumDetailTopAppBar(
+internal fun AlbumDetailTopAppBar(
     title: () -> String,
     subTitle: () -> String,
     selectedNavIndex: () -> Int,
@@ -402,7 +402,7 @@ fun AlbumDetailTopAppBar(
 }
 
 @Composable
-fun AlbumDetailBottomNavigation(
+internal fun AlbumDetailBottomNavigation(
     items: () -> List<BottomNavigationItem>,
     selectedNavIndex: () -> Int,
     onChangeNavIndex: (Int) -> Unit,

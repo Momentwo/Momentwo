@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail.albumsetting
+package cord.eoeo.momentwo.feature.albumdetail.impl.albumsetting
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangeImageRoute(
+internal fun ChangeImageRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     imageUri: () -> Uri?,

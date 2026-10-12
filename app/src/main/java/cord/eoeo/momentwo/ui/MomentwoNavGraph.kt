@@ -2,6 +2,7 @@ package cord.eoeo.momentwo.ui
 import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.friend.impl.friendScreen
+import cord.eoeo.momentwo.feature.albumdetail.impl.albumDetailScreen
 import cord.eoeo.momentwo.feature.auth.impl.authScreens
 
 import androidx.compose.runtime.Composable
@@ -12,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.ImageLoader
 import cord.eoeo.momentwo.ui.album.AlbumRoute
-import cord.eoeo.momentwo.ui.albumdetail.AlbumDetailRoute
 import cord.eoeo.momentwo.ui.createalbum.CreateAlbumRoute
 import cord.eoeo.momentwo.ui.photodetail.PhotoDetailRoute
 import cord.eoeo.momentwo.ui.photolist.PhotoListRoute
@@ -37,6 +37,14 @@ fun MomentwoNavGraph(
             popBackStack = navActions.popBackStack,
         )
 
+        albumDetailScreen(
+            coroutineScope = coroutineScope,
+            imageLoader = imageLoader,
+            popBackStack = navActions.popBackStack,
+            navigateToPhotoList = navActions.navigateToPhotoList,
+            subAlbumContent = { state, actions -> SubAlbumContentAdapter(imageLoader, state, actions) },
+        )
+
         authScreens(
             coroutineScope = coroutineScope,
             imageLoader = imageLoader,
@@ -54,16 +62,6 @@ fun MomentwoNavGraph(
                 navigateToProfile = { navActions.navigateToProfile(null) },
                 navigateToAlbumDetail = navActions.navigateToAlbumDetail,
                 imageLoader = imageLoader,
-            )
-        }
-
-        composable<MomentwoDestination.AlbumDetail> {
-            AlbumDetailRoute(
-                coroutineScope = coroutineScope,
-                imageLoader = imageLoader,
-                popBackStack = navActions.popBackStack,
-                navigateToPhotoList = navActions.navigateToPhotoList,
-                subAlbumContent = { state, actions -> SubAlbumContentAdapter(imageLoader, state, actions) },
             )
         }
 

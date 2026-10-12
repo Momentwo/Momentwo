@@ -3,6 +3,7 @@ package cord.eoeo.momentwo.ui
 import androidx.navigation.NavHostController
 import cord.eoeo.momentwo.core.model.AlbumItem
 import cord.eoeo.momentwo.feature.friend.api.FriendDestination
+import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
@@ -30,7 +31,7 @@ class MomentwoNavigationActions(
         }
     }
     val navigateToAlbumDetail: (AlbumItem) -> Unit = { (id, title, subTitle, imageUrl) ->
-        navController.navigate(MomentwoDestination.AlbumDetail(id, title, subTitle, imageUrl))
+        navController.navigate(AlbumDetailDestination(id, title, subTitle, imageUrl))
     }
     val navigateToPhotoList: (Int, Int, String, String) -> Unit = { albumId, subAlbumId, albumTitle, subAlbumTitle ->
         navController.navigate(MomentwoDestination.PhotoList(albumId, subAlbumId, albumTitle, subAlbumTitle))

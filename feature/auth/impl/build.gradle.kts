@@ -19,4 +19,5 @@ dependencies {
     implementation(libs.icons)
     implementation(libs.coil)
     testImplementation(project(":core:testing"))
+    testImplementation(project(":core:datastore"))
 }

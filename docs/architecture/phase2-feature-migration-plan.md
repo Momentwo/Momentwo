@@ -261,3 +261,12 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - subalbum api/impl 및 app 빌드·Lint·API 직렬화 테스트 1개/app 단위 테스트 통과(10s), 계측 테스트 추가 후 Lint도 통과(2s).
 - 실제 API 및 기존 배포 앱 업데이트/저장 백스택 복원은 배포 복구 후 확인 항목으로 유지한다.
 - SM_N976N/API 31의 기기 테스트 5개 통과(2m 34s): 기존 Auth/Friend 3개, 상세 진입·멤버/SubAlbum 탭 복귀, 어댑터 일반 클릭·편집 선택 콜백.
+
+### 2026-10-12 — P4 AlbumDetail 구현 및 검증
+
+- SubAlbum PR #146 병합 후 develop/0640da6에서 `refactor/feature-album-detail`를 생성했다.
+- album-detail:api/impl 추가, 상세·멤버·설정·이미지 변경의 UI/MVI/내부 그래프 12개 파일과 루트 키 이관. app은 공개 albumDetailScreen()과 SubAlbum 슬롯만 조립한다.
+- 루트 키 및 내부 멤버/설정/이미지 변경 키의 기존 직렬화 이름을 유지했다. SubAlbum 구현 직접 의존 없이 API와 app 슬롯을 사용한다.
+- api/impl 및 app 빌드·Lint·단위 테스트 통과(최종 6s). 루트 인자 왕복과 내부 키 3개 호환성 테스트 각 1개 통과.
+- 실제 API 및 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.
+- SM_N976N/API 31 기기 테스트 5개 통과(2m 39s): 상세 SavedStateHandle 인자 복원·멤버/설정/SubAlbum 탭 전환, 슬롯 콜백, 기존 Auth/Friend 회귀.

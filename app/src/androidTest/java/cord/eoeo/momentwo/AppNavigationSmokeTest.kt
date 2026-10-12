@@ -19,11 +19,11 @@ import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
-import cord.eoeo.momentwo.core.navigation.MomentwoDestination
+import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.ui.MainActivity
 import cord.eoeo.momentwo.ui.SubAlbumContentAdapter
-import cord.eoeo.momentwo.ui.albumdetail.SubAlbumContentState
-import cord.eoeo.momentwo.ui.albumdetail.SubAlbumContentActions
+import cord.eoeo.momentwo.feature.albumdetail.impl.SubAlbumContentState
+import cord.eoeo.momentwo.feature.albumdetail.impl.SubAlbumContentActions
 import cord.eoeo.momentwo.core.model.SubAlbumItem
 import cord.eoeo.momentwo.ui.MomentwoNavGraph
 import cord.eoeo.momentwo.ui.MomentwoNavigationActions
@@ -107,12 +107,15 @@ class AppNavigationSmokeTest {
     }
     @Test
     fun subAlbumSlotAndDetailTabsAreReachableWithoutBackend() {
-        val destination = MomentwoDestination.AlbumDetail(123, "Migration album", "Test", "")
+        val destination = AlbumDetailDestination(123, "Migration album", "Test", "")
         compose.runOnIdle { navController.navigate(destination) }
         compose.waitForIdle()
+        compose.runOnIdle { assertEquals(destination, navController.currentBackStackEntry!!.toRoute<AlbumDetailDestination>()) }
         compose.onNodeWithText("Migration album").assertExists()
         compose.onNodeWithText("서브 앨범").assertExists()
         compose.onNodeWithText("멤버").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("설정").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("서브 앨범").performClick()
         compose.waitForIdle()

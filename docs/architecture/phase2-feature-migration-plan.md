@@ -278,3 +278,12 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - 두 키의 기존 직렬화 이름 유지. API 직렬화·JSON 왕복 테스트 2개 통과.
 - api/impl 및 app 빌드·Lint·단위 테스트 통과(17s). 실제 API 및 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.
 - SM_N976N/API 31 기기 테스트 6개 통과(2m 44s): 기존 5개와 Album→CreateAlbum→목록→루트 복귀.
+
+### 2026-10-12 — P6 Photo 구현 및 검증
+
+- Album PR #148 병합 후 develop/1f8411e에서 `refactor/feature-photo`를 생성했다.
+- photo:api/impl 추가, 목록·상세·댓글/설명 BottomSheet UI/MVI 11개 파일과 두 경로 키 이관. app은 공개 photoScreens()로 이미지 로더·insets controller·콜백을 전달한다.
+- 두 키의 기존 직렬화 이름과 모든 인자 유지. API 직렬화·JSON 왕복 테스트 2개 통과.
+- api/impl 및 app 빌드·Lint·단위 테스트 통과(14s). app main 소스에는 앱 시작/루트 조립 파일 6개만 남았다.
+- 실제 API 및 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.
+- SM_N976N/API 31 기기 테스트 7개 통과(2m 46s): 기존 6개와 PhotoList/PhotoDetail 인자 복원·몰입 모드 전환·목록/루트 복귀.

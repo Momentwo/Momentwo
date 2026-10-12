@@ -252,3 +252,12 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - SM_N976N/API 31 별도 앱 패키지에서 기기 테스트 3개 통과(2m 41s): 로그인/회원가입/뒤로가기, nullable Profile, Friend 진입/요청 탭/뒤로가기.
 - 자동 잠금으로 처음 UI 계층을 찾지 못했던 테스트는 테스트 Activity 표시·화면 유지와 창 포커스 대기로 보완했다. 제품 코드/기기 보안 설정은 변경하지 않았다.
 - 실제 친구 API와 기존 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.
+
+### 2026-10-12 — P3 SubAlbum 구현 및 검증
+
+- Friend PR #145 병합 후 develop/add5c0b에서 `refactor/feature-subalbum`를 생성했다.
+- subalbum:api/impl을 추가하고 목록/카드 2개 파일과 SubAlbumList 키를 이관했다. 키의 기존 직렬화 이름을 유지했다.
+- AlbumDetail의 MVI·상태 소유권을 유지한 채 상태 조각/동작 콜백을 받는 Composable 슬롯과 app 어댑터를 도입했다. 상세 내부 NavHost는 SubAlbum API만 참조한다.
+- subalbum api/impl 및 app 빌드·Lint·API 직렬화 테스트 1개/app 단위 테스트 통과(10s), 계측 테스트 추가 후 Lint도 통과(2s).
+- 실제 API 및 기존 배포 앱 업데이트/저장 백스택 복원은 배포 복구 후 확인 항목으로 유지한다.
+- SM_N976N/API 31의 기기 테스트 5개 통과(2m 34s): 기존 Auth/Friend 3개, 상세 진입·멤버/SubAlbum 탭 복귀, 어댑터 일반 클릭·편집 선택 콜백.

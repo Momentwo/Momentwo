@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photolist
+package cord.eoeo.momentwo.feature.photo.impl.photolist
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,7 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoListRoute(
+internal fun PhotoListRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     popBackStack: () -> Unit,

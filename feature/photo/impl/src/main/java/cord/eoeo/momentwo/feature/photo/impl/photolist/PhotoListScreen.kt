@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photolist
+package cord.eoeo.momentwo.feature.photo.impl.photolist
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoListScreen(
+internal fun PhotoListScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     uiState: () -> PhotoListContract.State,
@@ -169,7 +169,7 @@ fun PhotoListScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoListTopAppBar(
+internal fun PhotoListTopAppBar(
     albumTitle: () -> String,
     subAlbumTitle: () -> String,
     isMenuExpended: () -> Boolean,

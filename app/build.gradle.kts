@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:photo:api"))
+    implementation(project(":feature:photo:impl"))
     implementation(project(":feature:album:api"))
     implementation(project(":feature:album:impl"))
     implementation(project(":feature:album-detail:api"))

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photodetail
+package cord.eoeo.momentwo.feature.photo.impl.photodetail
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -10,14 +10,14 @@ import cord.eoeo.momentwo.core.data.like.LikeRepository
 import cord.eoeo.momentwo.core.domain.photo.DownloadPhotoUseCase
 import cord.eoeo.momentwo.core.domain.photo.UpdateIsLikedUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel
-import cord.eoeo.momentwo.core.navigation.MomentwoDestination
+import cord.eoeo.momentwo.feature.photo.api.PhotoDetailDestination
 import cord.eoeo.momentwo.core.model.DescriptionItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PhotoDetailViewModel
+internal class PhotoDetailViewModel
     @Inject
     constructor(
         private val descriptionRepository: DescriptionRepository,
@@ -28,7 +28,7 @@ class PhotoDetailViewModel
         savedStateHandle: SavedStateHandle,
     ) : BaseViewModel<PhotoDetailContract.State, PhotoDetailContract.Event, PhotoDetailContract.Effect>() {
         init {
-            val (albumId, photoId, photoUrl, isLiked) = savedStateHandle.toRoute<MomentwoDestination.PhotoDetail>()
+            val (albumId, photoId, photoUrl, isLiked) = savedStateHandle.toRoute<PhotoDetailDestination>()
 
             viewModelScope.launch {
                 setState(

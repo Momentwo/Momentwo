@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photolist
+package cord.eoeo.momentwo.feature.photo.impl.photolist
 
 import android.net.Uri
 import androidx.paging.PagingData
@@ -9,7 +9,7 @@ import cord.eoeo.momentwo.core.model.PhotoItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-class PhotoListContract {
+internal class PhotoListContract {
     data class State(
         val albumId: Int = -1,
         val subAlbumId: Int = -1,

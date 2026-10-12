@@ -6,6 +6,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.performClick
 import androidx.core.view.WindowCompat
@@ -22,6 +23,8 @@ import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.feature.album.api.AlbumDestination
 import cord.eoeo.momentwo.feature.album.api.CreateAlbumDestination
+import cord.eoeo.momentwo.feature.photo.api.PhotoListDestination
+import cord.eoeo.momentwo.feature.photo.api.PhotoDetailDestination
 import cord.eoeo.momentwo.ui.MainActivity
 import cord.eoeo.momentwo.ui.SubAlbumContentAdapter
 import cord.eoeo.momentwo.feature.albumdetail.impl.SubAlbumContentState
@@ -177,6 +180,33 @@ class AppNavigationSmokeTest {
         compose.waitForIdle()
         compose.runOnIdle {
             assertEquals(AlbumDestination, navController.currentBackStackEntry!!.toRoute<AlbumDestination>())
+            navController.popBackStack()
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Momentwo").assertExists()
+    }
+
+    @Test
+    fun photoArgumentsImmersiveToggleAndBackStackArePreserved() {
+        val list = PhotoListDestination(123, 456, "Migration album", "Migration subalbum")
+        val detail = PhotoDetailDestination(123, 789, "", false)
+        compose.runOnIdle { navController.navigate(list) }
+        compose.waitForIdle()
+        compose.onNodeWithText("Migration subalbum").assertExists()
+        compose.runOnIdle { navController.navigate(detail) }
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(detail, navController.currentBackStackEntry!!.toRoute<PhotoDetailDestination>()) }
+        compose.onNodeWithContentDescription("사진 설명").assertExists()
+        compose.onNodeWithContentDescription("사진").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("사진 설명").assertDoesNotExist()
+        compose.onNodeWithContentDescription("사진").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("사진 설명").assertExists()
+        compose.runOnIdle { navController.popBackStack() }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertEquals(list, navController.currentBackStackEntry!!.toRoute<PhotoListDestination>())
             navController.popBackStack()
         }
         compose.waitForIdle()

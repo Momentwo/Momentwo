@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photolist
+package cord.eoeo.momentwo.feature.photo.impl.photolist
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -7,14 +7,14 @@ import androidx.navigation.toRoute
 import cord.eoeo.momentwo.core.data.photo.PhotoRepository
 import cord.eoeo.momentwo.core.domain.subalbum.ChangeSubAlbumTitleUseCase
 import cord.eoeo.momentwo.core.common.BaseViewModel
-import cord.eoeo.momentwo.core.navigation.MomentwoDestination
-import cord.eoeo.momentwo.ui.photolist.PhotoListContract.Effect.ShowSnackbar
+import cord.eoeo.momentwo.feature.photo.api.PhotoListDestination
+import cord.eoeo.momentwo.feature.photo.impl.photolist.PhotoListContract.Effect.ShowSnackbar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PhotoListViewModel
+internal class PhotoListViewModel
     @Inject
     constructor(
         private val photoRepository: PhotoRepository,
@@ -22,7 +22,7 @@ class PhotoListViewModel
         savedStateHandle: SavedStateHandle,
     ) : BaseViewModel<PhotoListContract.State, PhotoListContract.Event, PhotoListContract.Effect>() {
         init {
-            val (albumId, subAlbumId, albumTitle, subAlbumTitle) = savedStateHandle.toRoute<MomentwoDestination.PhotoList>()
+            val (albumId, subAlbumId, albumTitle, subAlbumTitle) = savedStateHandle.toRoute<PhotoListDestination>()
 
             viewModelScope.launch {
                 setState(

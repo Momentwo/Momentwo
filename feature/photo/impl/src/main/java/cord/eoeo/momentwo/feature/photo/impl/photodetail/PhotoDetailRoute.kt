@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photodetail
+package cord.eoeo.momentwo.feature.photo.impl.photodetail
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -22,7 +22,7 @@ import cord.eoeo.momentwo.core.designsystem.theme.backgroundDark
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun PhotoDetailRoute(
+internal fun PhotoDetailRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     insetsController: WindowInsetsControllerCompat,

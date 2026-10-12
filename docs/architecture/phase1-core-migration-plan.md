@@ -4,6 +4,40 @@
 
 ---
 
+## 완료 기록 (2026-10-02)
+
+Phase 1의 Core 11개 분리와 Dispatcher 후속 작업은 구현·병합 완료다. 아래 본문은 당시 실행 계획의 기록이며, 현재 작업은 [Phase 2 재개 계획](phase2-feature-migration-plan.md)을 따른다.
+
+| 모듈 | 종료된 하위 이슈 | 병합 PR |
+|---|---|---|
+| designsystem | #117 | #129 |
+| model | #111 | #141 (#130 대체) |
+| common | #112 | #131 |
+| ui | #118 | #132 |
+| datastore | #114 | #133 |
+| network | #113 | #134 |
+| database | #115 | #135 |
+| data | #116 | #136 |
+| domain | #119 | #137 |
+| navigation | #120 | #138 |
+| testing | #121 | #139 |
+
+실제 구현에서 확정된 변경:
+
+- DTO/Service는 network 대신 **core:data**에 배치(PR #136). DTO 비공개화는 완료하지 않았고, SignUp의 User 입력 타입 등 공개 경계는 후속 작업이다.
+- common은 BaseViewModel/lifecycle을 포함하는 Android library다. Dispatcher 실제 주입 전환은 이동 PR 이후 **#140**에서 완료했다.
+- navigation은 통합 직렬화 키만 분리했다. 현재 필요하지 않은 커스텀 NavType/FeatureNavGraphBuilder는 만들지 않았다(PR #138).
+- testing은 MainDispatcherRule을 제공한다. Fake Repository나 실제 MVI 테스트가 완료된 것은 아니다.
+- network→datastore 및 domain→datastore의 실제 의존을 유지한다.
+
+검증: `develop`의 `c67f368`에서 2026-10-02 `./gradlew :app:assembleDebug :app:lintDebug :app:testDebugUnitTest` 성공(증분 빌드). 마지막 후속 병합은 Scaffold Lint 수정 #142다. 현재 단위 테스트는 기본 산술 예제이며 MVI 회귀 검증 결과로 해석하지 않는다.
+
+app의 의존성에 포함되지 않는 `core:testing`도 `./gradlew :core:testing:assembleDebug`로 별도 확인했고 성공했다(8s, 증분 빌드).
+
+기기 골든 패스와 clean 전체 빌드는 이번 점검에서 수행하지 않았다. 상위 #108은 구현 완료로 정리하며, 기기 기준 동작 확인은 #109의 Phase 2 사전 게이트로, 전체 clean 검증은 Phase 2 종료 게이트로 이관한다.
+
+---
+
 ## 1. 배경 (Context)
 
 Phase 0(PR [#105](https://github.com/Momentwo/Momentwo/pull/105))에서 convention plugin 9개, version catalog, `:app` 리팩터링, `settings.gradle.kts` `includeBuild` 기반이 완료됐다. Phase 1은 `:app`의 `data / domain / ui / di` 코드를 **11개 `:core:*` 모듈**로 분리한다. "PR 당 하나의 이슈" 원칙에 따라 모듈마다 별도 PR로 진행한다.

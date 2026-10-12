@@ -2,11 +2,13 @@
 
 > 본 문서는 Android 공식 권장 아키텍처([Guide to app architecture](https://developer.android.com/topic/architecture), [Architecture recommendations](https://developer.android.com/topic/architecture/recommendations))와 [Now in Android](https://github.com/android/nowinandroid)(이하 NIA) 구현을 참고해, Momentwo 앱을 단일 모듈에서 멀티모듈로 전환하기 위한 실행 계획이다. GitHub Wiki 이관을 전제로 작성한다.
 
+> **2026-10-02 진행 상태:** Phase 0 및 Phase 1 구현·병합 완료. 현재 app + Core 11개, Feature 분리 미착수. Phase 1 자동 검증은 통과했으며 기기 골든 패스 확인은 Phase 2의 사전 게이트로 이관한다. 다음 실행 기준은 [Phase 2 재개 계획](phase2-feature-migration-plan.md)이다.
+
 ---
 
 ## 1. 배경 (Context)
 
-Momentwo는 현재 `:app` 단일 모듈로 구성된 Android 앱이다. 패키지 단계에서는 이미 `data / domain / ui / di` 3계층 분리와 도메인별 폴더 구조(album, photo, friend, subalbum 등)가 갖춰져 있어 공식 권장 아키텍처에 큰 무리 없이 부합한다.
+Momentwo는 마이그레이션 시작 시 `:app` 단일 모듈로 구성된 Android 앱이었다. 현재는 Core 11개 분리가 완료됐고, 화면 코드는 `:app`에 남아 있다. 아래 배경은 최초 계획 수립 당시의 문제를 설명한다.
 
 그러나 단일 모듈에서 비롯되는 한계가 누적되고 있다.
 
@@ -37,19 +39,19 @@ build-logic/                      ← includeBuild
   └─ convention/                  ← 모든 convention plugin
 
 :core:model                       ← 순수 Kotlin. 도메인 모델(AlbumItem, PhotoItem 등)
-:core:common                      ← Dispatcher, Result, 공통 확장
+:core:common                      ← Android library. BaseViewModel, Dispatcher, 공통 확장
 :core:network                     ← Retrofit, OkHttp, AuthInterceptor, MomentwoApi
-:core:database                    ← Room(MomentwoDatabase, Dao, Entity, RemoteMediator)
+:core:database                    ← Room(MomentwoDatabase, Dao, Entity, RemoteKey)
 :core:datastore                   ← PreferenceRepository(토큰/세션)
-:core:data                        ← Repository 인터페이스 + Impl, 데이터 소스 통합
+:core:data                        ← Repository 인터페이스 + Impl, Service/DTO/DataSource/RemoteMediator
 :core:domain                      ← UseCase
 :core:designsystem                ← Theme, Color, Type, 기본 컴포넌트
 :core:ui                          ← 도메인성 공유 Composable(AlbumItemCard, UserItemBox 등)
-:core:navigation                  ← Route 키, 공통 NavType, NavGraph 빌더 인터페이스
+:core:navigation                  ← 현재 통합 Route 키; Phase 2에서 feature:api로 이관
 :core:testing                     ← FakeRepository, MainDispatcherRule 등
 
-:feature:auth:api                 ← LoginRoute, SignUpRoute (NavKey만)
-:feature:auth:impl                ← Login/SignUp Screen+VM+Contract
+:feature:auth:api                 ← Login/SignUp/Profile destination 키만
+:feature:auth:impl                ← Login/SignUp/Profile Screen+VM+Contract
 :feature:album:api
 :feature:album:impl               ← Album, CreateAlbum
 :feature:album-detail:api
@@ -68,10 +70,10 @@ build-logic/                      ← includeBuild
 
 | 기존 UI 폴더 | 흡수 대상 |
 |---|---|
-| `login`, `signup` | `:feature:auth` |
+| `login`, `signup`, `profile` | `:feature:auth` (계정 화면) |
 | `album`, `createalbum` | `:feature:album` |
 | `albumdetail`, `albumsetting`, `changeimage`, `member` | `:feature:album-detail` |
-| `subalbumlist` | `:feature:subalbum` |
+| `albumdetail/subalbumlist` | `:feature:subalbum` (stateless UI, 상태 소유는 album-detail) |
 | `photolist`, `photodetail`, comment/like/description 부속 | `:feature:photo` |
 | `friend`, `friendrequest`, `friendlist` | `:feature:friend` |
 
@@ -87,6 +89,8 @@ build-logic/                      ← includeBuild
 :core:data ───────► :core:network, :core:database, :core:datastore, :core:model
 :core:ui ─────────► :core:designsystem, :core:model
 ```
+
+Phase 1 구현 조정: `:core:network → :core:datastore`, `:core:domain → :core:datastore`를 사용한다. 현재 domain은 common을 직접 사용하지 않는다. Phase 2의 중첩 화면 연결은 app이 주입하는 Composable slot으로 조립해 impl 간 의존을 피한다.
 
 **금지**:
 - `:core:* → :feature:*` (절대)
@@ -188,7 +192,7 @@ NIA의 16개를 다음 **9개**로 축약한다.
 | `momentwo.android.hilt` | Hilt 필요 모듈 | hilt plugin + dagger-hilt + ksp |
 | `momentwo.android.room` | `:core:database` | room plugin + schema 디렉토리 |
 | `momentwo.android.network` | `:core:network` | retrofit + okhttp + moshi 묶음 |
-| `momentwo.jvm.library` | `:core:model`, `:core:common` | 순수 Kotlin JVM 모듈 |
+| `momentwo.jvm.library` | `:core:model` | 순수 Kotlin JVM 모듈 (`:core:common`은 Android library) |
 
 `gradle/libs.versions.toml`에 plugin 카탈로그 추가: `momentwo-android-application`, `momentwo-android-library`, … (NIA `libs.plugins.nowinandroid.*` 패턴 모방.)
 
@@ -206,36 +210,40 @@ NIA의 16개를 다음 **9개**로 축약한다.
 
 ### Phase 1 — Core 분리 (PR 2~12, 모듈당 1 PR)
 
+**구현 완료.** 실제 순서와 변경 결정은 [Phase 1 문서의 완료 기록](phase1-core-migration-plan.md)을 따른다. 아래 목록은 모듈별 책임을 설명한다.
+
 의존이 가장 적은 것부터:
 
 1. `:core:model` — `ui/model/*` + `data/model/*` 중 도메인 모델 이동. JVM library.
 2. `:core:common` — Dispatcher, Result, 공통 확장(필요 시 신설).
-3. `:core:network` — `data/MomentwoApi.kt`, `data/authentication/AuthInterceptor`, `AuthAuthenticator`, ApiModule 이동. DTO는 모듈 내부에만 보관(외부 노출 X), `:core:model` 모델로 매핑.
+3. `:core:network` — `data/MomentwoApi.kt`, `data/authentication/AuthInterceptor`, `AuthAuthenticator`, ApiModule 이동. Service/DTO는 응집도를 위해 `:core:data`에 둔다(PR #136).
 4. `:core:datastore` — `data/authentication/PreferenceRepository*`, `PreferenceKeys` 이동.
 5. `:core:database` — `data/MomentwoDatabase`, 각 도메인의 `local/*Dao`, `*Entity`, `RemoteKey*` 이동.
 6. `:core:data` — 모든 `*RepositoryImpl`, `*DataSource`, `*RemoteMediator` 이동. Repository 인터페이스도 함께. di 모듈(`AlbumModule` 등)도 이관.
 7. `:core:designsystem` — `ui/theme/Color.kt`, `Type.kt`, `Theme.kt` + 기본 컴포넌트.
 8. `:core:ui` — `ui/composable/*` (AlbumItemCard, CircleAsyncImage, UserItemBox 등).
 9. `:core:domain` — 모든 UseCase 이동(`GetAlbumListUseCase`, `DownloadPhotoUseCase`, `ChangeSubAlbumTitleUseCase` 등).
-10. `:core:navigation` — `MomentwoNavGraph`/`MomentwoNavigation`의 Route 키 + 공용 NavType + `FeatureNavGraphBuilder` 인터페이스만 분리. NavHost 본체는 `:app`에 잔존.
-11. `:core:testing` — Fake 더블, 공용 테스트 유틸 (필요 시 마지막).
+10. `:core:navigation` — 통합 Route 키 분리. 커스텀 NavType/Builder 인터페이스는 현재 필요하지 않아 만들지 않았다(PR #138). NavHost 본체는 `:app`에 잔존.
+11. `:core:testing` — MainDispatcherRule을 제공하는 최소 테스트 기반. Fake Repository와 실제 MVI 테스트는 후속 작업.
 
-각 PR 검증: `./gradlew :core:<x>:assembleDebug :app:assembleDebug` 통과 + 앱 골든 패스 수동 확인.
+각 PR 검증: Android Core는 `:core:<x>:assembleDebug`, JVM model은 `:core:model:assemble`과 `:app:assembleDebug`를 사용한다. 수동 골든 패스의 이번 점검 결과는 미확인이며 Phase 2 사전 검증으로 남긴다.
 
 ### Phase 2 — Feature 분리 (PR 13~18, feature당 1 PR)
 
+**미착수.** [Phase 2 실행 계획](phase2-feature-migration-plan.md)의 준비 PR부터 재개한다. Profile은 auth에 포함하며 기존 6개 Feature/24개 모듈 목표를 유지한다. PR 13~18은 계획상 순번이며 준비 PR은 별도다.
+
 의존이 단순한 것부터:
 
-1. `:feature:auth` — `:core:data`만 의존, cross-feature 의존 없음. 가장 안전.
+1. `:feature:auth` — Login/SignUp/Profile. core:domain의 로그인 UseCase 및 core:data의 기존 Repository를 사용. cross-feature 이동은 app callback으로 연결.
 2. `:feature:friend`
-3. `:feature:subalbum`
-4. `:feature:album-detail` (`:feature:subalbum:api`, `:feature:photo:api` 필요 → 둘은 빈 api 스텁으로 먼저 분리)
-5. `:feature:album` (`:feature:album-detail:api` 필요)
+3. `:feature:subalbum` — stateless UI 분리. 상태·이벤트는 AlbumDetail에 유지하고 app이 slot으로 연결.
+4. `:feature:album-detail` — subalbum:api의 내부 경로 키 사용. SubAlbum 구현은 app slot으로 연결, Photo 이동도 callback으로 유지.
+5. `:feature:album` — 상세/친구/Profile 이동은 app callback으로 연결.
 6. `:feature:photo`
 
 각 feature는 동시에 `:api`와 `:impl` 두 모듈로 떼어낸다.
-- `:feature:X:api` — `XRoute.kt`(NavKey, `@Serializable` data class) + Route 인자 모델만.
-- `:feature:X:impl` — `momentwo.android.feature` plugin 적용, `NavGraphBuilder.xScreen()` 확장 함수로 그래프 등록.
+- `:feature:X:api` — 독립 `@Serializable` destination 키 + Route 인자 모델만. 현재 core:navigation에 있는 해당 키를 이관.
+- `:feature:X:impl` — 기존 `*Route.kt` Composable 진입점/Screen/VM/Contract를 이관하고 그래프 등록 함수 제공. SubAlbum은 독립 VM 없이 화면 렌더링만 분리.
 
 `:app`은 모든 `:feature:*:impl`에 의존하고 NavHost 안에서 `albumScreen() / photoScreen() / …` 호출.
 
@@ -256,7 +264,7 @@ NIA의 16개를 다음 **9개**로 축약한다.
 | `data/authentication/AuthInterceptor`, `AuthAuthenticator` | `:core:network` |
 | `data/authentication/Preference*` | `:core:datastore` |
 | `data/*/`(repo impl, datasource) | `:core:data` |
-| `data/model/`(DTO) | `:core:network` (모듈 내부) |
+| `data/model/`(DTO) | `:core:data` (Service/DataSource와 함께, PR #136 결정) |
 | `data/*/local/`(Dao, Entity) | `:core:database` |
 | `data/*/local/RemoteKey*` | `:core:database` |
 | `data/*/RemoteMediator*` | `:core:data` |
@@ -267,7 +275,8 @@ NIA의 16개를 다음 **9개**로 축약한다.
 | `ui/model/` | `:core:model` |
 | `ui/MomentwoNavGraph.kt` (Route 키) | `:core:navigation` |
 | `ui/MomentwoNavGraph.kt` (NavHost) | `:app` |
-| `ui/<feature>/*Route.kt` | `:feature:<feature>:api` |
+| `core/navigation/MomentwoDestination`의 해당 키 | `:feature:<feature>:api` |
+| `ui/<feature>/*Route.kt` (Composable) | `:feature:<feature>:impl` |
 | `ui/<feature>/*Screen.kt`, `*ViewModel.kt`, `*Contract.kt` | `:feature:<feature>:impl` |
 | `di/ApiModule`, `AuthModule` | `:core:network` |
 | `di/DatabaseModule` | `:core:database` |
@@ -286,9 +295,9 @@ NIA의 16개를 다음 **9개**로 축약한다.
 ## 8. 검증 절차
 
 **빌드**:
-- `./gradlew clean assembleDebug` — 전체 모듈 빌드 통과
+- `./gradlew clean :core:model:assemble assembleDebug` — JVM model과 Android 모듈 빌드 통과
 - `./gradlew :app:installDebug` — 앱 설치
-- `./gradlew lintDebug ktlintCheck detekt` (현재 도구 기준)
+- `./gradlew :app:lintDebug :app:testDebugUnitTest` — 현재 구성된 검사. ktlint/detekt는 아직 미구성.
 
 **런타임 (수동 골든 패스)**:
 1. 신규 회원가입 → 로그인 (`:feature:auth`)
@@ -309,7 +318,7 @@ NIA의 16개를 다음 **9개**로 축약한다.
 | DTO ↔ Model 매핑 누락 | 현재 `data/model/*`이 UI 모델과 혼재할 수 있음. Phase 1 step 3~6 사이 매퍼 함수 정리 |
 | Type-safe Navigation Route 직렬화 | `:core:navigation`의 Route data class에 `@Serializable` 적용, `kotlinx-serialization`을 catalog에 명시 |
 | 빌드 시간 일시적 증가 | `gradle.properties`에 `org.gradle.configuration-cache=true`, `org.gradle.caching=true`, `org.gradle.parallel=true` 확인 |
-| 순환 의존 발생 | feature 분리 시 의존하는 다른 feature의 `:api` 스텁을 먼저 만든 뒤 본 feature를 분리 |
+| 순환 의존 발생 | 이동은 app callback, 중첩 화면은 app 주입 slot으로 조립. 키 직접 참조가 필요한 경우에만 다른 feature:api 사용 |
 
 ## 10. 후속 문서 (선택)
 

@@ -201,7 +201,7 @@ dependencies {
 
 `:feature:*:impl`이 반드시 갖춰야 하는 최소 의존을 한 곳에 모은 메타 plugin. 다른 convention plugin을 조합(`apply("momentwo.android.library")` …)해서 빌드 블록 한 줄로 “Feature 모듈”을 정의한다.
 
-> Phase 1에서 `:core:*`가 분리되는 시점에 `:core:ui`, `:core:designsystem`, `:core:domain`, `:core:navigation` 의존을 이 plugin에 함께 추가할 예정이다. 현재는 모듈이 없어 누락된 상태이며, 의도된 단계적 도입이다.
+> 2026-10-12 Phase 2 준비 브랜치에서 `:core:ui`, `:core:designsystem`, `:core:domain`, `:core:navigation` 기본 의존성을 추가했다. `core:common/model/data` 및 Coil/Paging 등은 각 Feature가 실제 사용하는 경우 직접 선언한다. serialization 런타임과 compiler plugin은 별개이며, 직렬화 키를 선언하는 모듈에는 `kotlinSerialization` plugin도 적용한다. 진행 상태는 [Phase 2 실행 계획](phase2-feature-migration-plan.md)을 따른다.
 
 ### 4.6 `momentwo.android.hilt`
 

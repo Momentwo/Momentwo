@@ -27,4 +27,5 @@ include(":core:data")
 include(":core:domain")
 include(":core:navigation")
 include(":core:testing")
- 
+include(":feature:auth:api")
+include(":feature:auth:impl")

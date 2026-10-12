@@ -180,7 +180,7 @@ P6 병합 후 Phase 2 종료 검증까지 완료하면 #110을 **별도 새 브�
 - [ ] 기존 골든 패스 6개와 Profile 진입 확인
 - [ ] 기존 실패·미구현 기능은 별도 기록하여 이동으로 생긴 회귀와 구별
 
-백엔드나 테스트 계정이 없으면 정적 구현 작업은 진행할 수 있으나, 해당 API 골든 패스를 검증 완료로 표시하거나 통과로 간주해 병합하지 않는다.
+2026-10-12 사용자가 백엔드 배포 중단 상태를 확인하고 **빌드·Lint·자동 테스트와 가능한 기기 확인 후 병합하며 계속 진행**하도록 승인했다. 이 작업에서는 해당 기준을 병합 게이트로 사용한다. API 골든 패스는 미확인으로 명시해 배포 복구 후 검증 항목으로 남기며, 실행하지 않은 API 경로를 통과로 표시하지 않는다.
 
 ### 각 Feature PR
 
@@ -228,3 +228,17 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - Android CLI 환경과 연결 기기 확인: Samsung SM_N976N, Android API 31. 에뮬레이터 목록은 비어 있다.
 - 생성된 BuildConfig의 실제 BASE_URL 연결 확인: `ConnectionRefusedError` (errno 61). 주소나 인증 정보를 문서에 기록하지 않는다.
 - 빌드·Lint·단위 테스트 및 가능한 기기 화면 확인 결과는 준비 PR에 기록한다. 로그인 이후 API 골든 패스는 백엔드 연결이 복구되기 전까지 미확인이다.
+- 사용자가 백엔드 배포 중단을 확인하고 빌드·Lint·자동 테스트 및 가능한 기기 확인을 기준으로 병합/계속 진행하도록 승인했다. 이 기준을 이후 모든 PR에 적용한다.
+- 준비 app 빌드·Lint·단위 테스트 성공(3m 4s). 저장소에 포함하지 않는 임시 Feature 모듈에 플러그인을 실제 적용해 Core API 참조와 AAR 빌드도 확인했다(5s).
+- 기존 앱의 debug 서명 불일치를 피하기 위해 임시 Gradle init script로 `cord.eoeo.momentwo.migrationcheck` 패키지를 별도 빌드·설치했다(11s). 원본 앱 데이터는 변경하지 않았다.
+- 별도 설치 앱의 로그인 화면 및 회원가입 진입을 Android CLI layout으로 확인했다. API 연결을 사용하는 경로는 사용자 승인에 따라 미확인으로 유지한다.
+- 준비 PR: [#143](https://github.com/Momentwo/Momentwo/pull/143). 이후 진행/병합 상태와 검증 결과는 #109에 기록한다.
+
+### 2026-10-12 — P1 Auth 구현 및 검증
+
+- 준비 PR #143 병합 후 최신 develop에서 `refactor/feature-auth`를 생성했다. 준비 PR 생성 후 추가 push를 거부하는 저장소 규칙에 따라 마지막 검증 기록 커밋은 Auth 브랜치에 보존했다. 이후 PR은 모든 구현·검증·기록을 마친 뒤 최초 push한다.
+- auth:api/impl 두 모듈을 추가했다. Login/SignUp/Profile 키는 api로, UI 14개 파일은 impl로 이동했다. app은 공개 `authScreens()`만 호출하며 내부 화면·VM·Contract는 internal로 제한했다.
+- `@SerialName`으로 기존 경로의 직렬화 이름을 유지했다. nullable Profile 인자와 `SavedStateHandle.toRoute`도 새 api 타입으로 갱신했다.
+- Auth API 테스트 2개 및 ViewModel 동작 테스트 8개 통과: 로그인 성공·실패/세션 저장, 자동 로그인, 회원가입 이동·입력 검증·정규화·요청 매핑.
+- SM_N976N/API 31 별도 테스트 패키지에서 실제 app 그래프/Hilt를 사용하는 계측 테스트 2개 통과: 로그인→회원가입→뒤로가기, nullable Profile 진입→뒤로가기(최종 2m 12s).
+- 실제 API 응답·로그인 이후 데이터 동작은 백엔드 배포 중단으로 미확인이다. 사용자가 승인한 자동/기기 확인 기준으로 진행한다.

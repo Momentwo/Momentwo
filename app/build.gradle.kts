@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:subalbum:api"))
+    implementation(project(":feature:subalbum:impl"))
     implementation(project(":feature:friend:api"))
     implementation(project(":feature:friend:impl"))
     implementation(project(":feature:auth:api"))

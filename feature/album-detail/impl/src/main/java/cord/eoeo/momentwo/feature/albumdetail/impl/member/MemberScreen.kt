@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail.member
+package cord.eoeo.momentwo.feature.albumdetail.impl.member
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +11,7 @@ import cord.eoeo.momentwo.core.common.START_EFFECTS_KEY
 import cord.eoeo.momentwo.core.model.MemberItem
 
 @Composable
-fun MemberScreen(
+internal fun MemberScreen(
     memberList: () -> List<MemberItem>,
     isEditMode: () -> Boolean,
     getMembers: () -> Unit,

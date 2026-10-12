@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.albumdetail
+package cord.eoeo.momentwo.feature.albumdetail.impl
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlbumDetailRoute(
+internal fun AlbumDetailRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     popBackStack: () -> Unit,

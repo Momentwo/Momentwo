@@ -2,8 +2,8 @@ package cord.eoeo.momentwo.ui
 
 import androidx.compose.runtime.Composable
 import coil.ImageLoader
-import cord.eoeo.momentwo.ui.albumdetail.SubAlbumContentState
-import cord.eoeo.momentwo.ui.albumdetail.SubAlbumContentActions
+import cord.eoeo.momentwo.feature.albumdetail.impl.SubAlbumContentState
+import cord.eoeo.momentwo.feature.albumdetail.impl.SubAlbumContentActions
 import cord.eoeo.momentwo.feature.subalbum.impl.SubAlbumListScreen
 
 @Composable

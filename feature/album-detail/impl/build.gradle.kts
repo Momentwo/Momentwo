@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.junit)
     implementation(project(":feature:subalbum:api"))
     implementation(project(":feature:album-detail:api"))
     implementation(project(":core:common"))

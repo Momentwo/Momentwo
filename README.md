@@ -225,7 +225,40 @@
 
 ---
 
-## 시스템 구성도 (이미지) 예정
+## 모듈 구조와 개발
+
+2026-10-12 기준 `app` 1개 + Core 11개 + Feature api/impl 12개 = **24개 모듈**로 구성합니다. Convention plugin은 `build-logic`의 별도 included build에서 관리합니다.
+
+| 영역 | 책임 |
+|---|---|
+| app | Application/Activity, Theme, 루트 Navigation·이동 콜백·SubAlbum 화면 슬롯 조립 |
+| Core | 모델·MVI 기반·공용 UI·네트워크·Room·세션·Repository·UseCase·테스트 기반 |
+| auth | 로그인·회원가입·Profile |
+| friend | 친구 목록·검색·요청 및 내부 탭 |
+| subalbum | 목록·카드 렌더링 (상태·편집·CRUD는 album-detail 소유) |
+| album-detail | 상세·멤버·설정·대표 이미지 및 내부 그래프 |
+| album | 앨범 목록·생성 |
+| photo | 사진 목록·상세·댓글·설명·몰입 모드 |
+
+Feature API는 `@Serializable` 경로 키·인자만 공개합니다. 화면·ViewModel·Contract는 impl에 두고 app에서 그래프 등록 함수와 콜백으로 연결합니다. Feature 간 impl 의존과 Core→Feature 의존은 금지합니다. 상세와 SubAlbum은 app의 Composable 슬롯으로 연결합니다.
+
+MVI는 `core:common`의 `BaseViewModel`을 사용하는 기존 구현을 유지합니다. ViewModel 9개가 StateFlow 상태·SharedFlow 이벤트·Channel 효과를 사용하며 UI는 lifecycle에 맞춰 상태를 수집합니다.
+
+```bash
+./gradlew clean :core:model:assemble assembleDebug :app:lintDebug testDebugUnitTest
+./gradlew :app:connectedDebugAndroidTest
+```
+
+빌드 환경은 JDK 17과 Android SDK, `local.properties`의 기존 `sdk.dir`/`BASE_URL` 설정을 사용합니다. BASE_URL의 BuildConfig는 `core:network`가 생성합니다. 비밀 설정은 커밋하지 않습니다.
+
+실기기 Navigation 테스트는 `AppNavigationSmokeTest`에서 실제 app 그래프/Hilt와 화면 전환을 확인합니다. 기본 명령은 기존 설치 앱과 동일한 applicationId를 쓰므로 서명이 맞는 테스트 설치 환경에서 실행합니다. 마이그레이션 검증은 원본 앱을 보존하도록 임시 init script의 별도 applicationId로 수행했으며, 그 설정은 제품 코드에 포함하지 않았습니다.
+
+백엔드는 현재 배포 중단 상태입니다. 자동 테스트와 기기 화면 연결 검증의 범위, 배포 복구 후 실제 API·업데이트·복원 확인 항목은 [회귀 이슈 #150](https://github.com/Momentwo/Momentwo/issues/150)에서 추적합니다.
+
+- [마이그레이션 결과와 단계별 계획](docs/architecture/multi-module-migration-plan.md)
+- [Phase 2 실행·검증 기록](docs/architecture/phase2-feature-migration-plan.md)
+- [실제 모듈 의존성](docs/architecture/module-graph.md)
+- [Convention plugin 가이드](docs/architecture/build-logic-convention.md)
 
 ---
 
@@ -237,6 +270,6 @@
 | App Architecture | MVI (Model-View-Intent), AAC ViewModel, Lifecycle                 |
 | UI               | Jetpack Compose, Navigation Compose, Material3                    |
 | DI               | Hilt                                                              |
-| Local Storage    | DataStore                                                         |
+| Local Storage    | Room, DataStore                                                         |
 | Asynchronous     | Coroutines, Flow                                                  |
-| Others           | Retrofit(HTTP client), Paging3, Coil(Image), Moshi(Serialization) |
+| Others           | Retrofit(HTTP client), Paging3, Coil(Image), Moshi(HTTP JSON), Kotlinx Serialization(Navigation) |

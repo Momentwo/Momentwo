@@ -2,18 +2,17 @@ package cord.eoeo.momentwo.ui
 
 import androidx.navigation.NavHostController
 import cord.eoeo.momentwo.core.model.AlbumItem
-import cord.eoeo.momentwo.feature.friend.api.FriendDestination
-import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.feature.album.api.AlbumDestination
 import cord.eoeo.momentwo.feature.album.api.CreateAlbumDestination
-import cord.eoeo.momentwo.feature.photo.api.PhotoListDestination
-import cord.eoeo.momentwo.feature.photo.api.PhotoDetailDestination
-import cord.eoeo.momentwo.core.navigation.MomentwoDestination
+import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
-import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
 import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
+import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
+import cord.eoeo.momentwo.feature.friend.api.FriendDestination
+import cord.eoeo.momentwo.feature.photo.api.PhotoDetailDestination
+import cord.eoeo.momentwo.feature.photo.api.PhotoListDestination
 
-class MomentwoNavigationActions(
+internal class MomentwoNavigationActions(
     navController: NavHostController,
 ) {
     val popBackStack: () -> Unit = {

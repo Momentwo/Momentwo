@@ -5,6 +5,22 @@
 > 상위 이슈: [#109](https://github.com/Momentwo/Momentwo/issues/109). 전체 계획: [multi-module-migration-plan.md](multi-module-migration-plan.md).
 > 이 문서는 현재 코드에 맞춘 Phase 2 실행 기준이다. 기존 하위 이슈의 Route 이동 설명과 다른 부분은 아래 결정에 따른다.
 
+## 현재 완료 상태 (2026-10-12)
+
+| 단계 | 병합 PR | 상태 |
+|---|---|---|
+| P0 준비 | [#143](https://github.com/Momentwo/Momentwo/pull/143) | 완료 |
+| P1 Auth | [#144](https://github.com/Momentwo/Momentwo/pull/144) | 완료, #122 종료 |
+| P2 Friend | [#145](https://github.com/Momentwo/Momentwo/pull/145) | 완료, #123 종료 |
+| P3 SubAlbum | [#146](https://github.com/Momentwo/Momentwo/pull/146) | 완료, #124 종료 |
+| P4 AlbumDetail | [#147](https://github.com/Momentwo/Momentwo/pull/147) | 완료, #125 종료 |
+| P5 Album | [#148](https://github.com/Momentwo/Momentwo/pull/148) | 완료, #126 종료 |
+| P6 Photo | [#149](https://github.com/Momentwo/Momentwo/pull/149) | 완료, #127 종료 |
+
+Phase 2 종료 검증: develop/b913d8d에서 clean 전체 빌드·app Lint·전체 Android 단위 테스트 통과(48s). Feature 테스트 18개와 당시 app 예제 1개가 통과했다. 기기 Navigation 테스트 7개 통과, 모듈 경계 감사에서 24개 include·Feature VM 9개·app main 파일 6개와 금지 의존 없음 확인. #109는 종료하고 빈 legacy 타입·app 의존/플러그인/문서 정리를 #110의 별도 refactor/app-slimming에 인계했다.
+
+아래 계획의 초기 상태/미래형 설명은 재개 전 기준 기록이다. 실제 API 골든 패스와 정식 업데이트·프로세스 복원은 미확인으로 [후속 회귀 #150](https://github.com/Momentwo/Momentwo/issues/150)에 남긴다. 전체 마이그레이션 결과는 [현재 아키텍처](multi-module-migration-plan.md)와 [실제 의존 표](module-graph.md)를 따른다.
+
 ## 1. 재개 기준과 범위
 
 - Phase 0: convention plugin 9개 도입 완료(PR #105).
@@ -287,3 +303,14 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - api/impl 및 app 빌드·Lint·단위 테스트 통과(14s). app main 소스에는 앱 시작/루트 조립 파일 6개만 남았다.
 - 실제 API 및 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.
 - SM_N976N/API 31 기기 테스트 7개 통과(2m 46s): 기존 6개와 PhotoList/PhotoDetail 인자 복원·몰입 모드 전환·목록/루트 복귀.
+
+### 2026-10-12 — Phase 3 app 슬림화 및 최종 검증
+
+- Photo PR #149 병합 및 Phase 2 종료 검증 후 develop/b913d8d에서 별도 `refactor/app-slimming`을 생성했다.
+- app의 Room/serialization 플러그인과 BuildConfig 생성 설정, 불필요한 Core/데이터·네트워크·Paging·Lifecycle·아이콘·Coil Compose 직접 의존 제거. 실제 루트 조립에 필요한 의존과 coroutines-core 직접 선언만 유지했다.
+- app main 소스 6개는 앱 시작·루트 Navigation·슬롯 조립만 담당한다. 빈 legacy MomentwoDestination과 core:navigation serialization 설정, 미사용 색상·예제 테스트를 제거했다. core:navigation은 기존 모듈 계약을 유지한다.
+- README/전체 계획/convention 가이드를 현재 코드로 갱신하고 module-graph.md에 실제 실행·테스트 프로젝트 의존을 기록했다.
+- 변경 후 app 빌드·Lint 통과(13s). 최종 clean 전체 빌드·app Lint·전체 Android 단위 테스트 통과(39s), 실제 Feature 테스트 18개 통과. app의 산술 예제 대신 실제 그래프 계측 테스트를 사용한다.
+- 금지 프로젝트 의존/타 impl 및 app import 없음, 24개 include/Feature ViewModel 9개/app main 파일 6개 확인.
+- 백엔드 API와 정식 업데이트·프로세스 복원·회전/백그라운드 통합 회귀는 후속 #150에서 확인한다.
+- 최종 SM_N976N/API 31 별도 패키지 기기 테스트 7개 통과(2m 37s). app 의존/플러그인 제거 후에도 실제 Hilt/Navigation/슬롯/몰입 모드와 백스택 회귀를 확인했다.

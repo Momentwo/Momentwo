@@ -4,8 +4,4 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class MomentwoApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-    }
-}
+class MomentwoApplication : Application()

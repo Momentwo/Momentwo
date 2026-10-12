@@ -189,6 +189,10 @@ with(pluginManager) {
     apply("momentwo.android.hilt")
 }
 dependencies {
+    add("implementation", project(":core:ui"))
+    add("implementation", project(":core:designsystem"))
+    add("implementation", project(":core:domain"))
+    add("implementation", project(":core:navigation"))
     add("implementation", libs.findLibrary("lifecycle-runtime").get())
     add("implementation", libs.findLibrary("lifecycle-runtime-compose").get())
     add("implementation", libs.findLibrary("lifecycle-viewmodel").get())
@@ -276,8 +280,6 @@ plugins {
     alias(libs.plugins.momentwo.android.application)
     alias(libs.plugins.momentwo.android.application.compose)
     alias(libs.plugins.momentwo.android.hilt)
-    alias(libs.plugins.momentwo.android.room)
-    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -286,13 +288,13 @@ android {
         applicationId = "cord.eoeo.momentwo"
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "BASE_URL", getLocalProperty("BASE_URL"))
     }
-    buildFeatures { buildConfig = true }
 }
 ```
 
-### 6.2 `:feature:photo:impl` (예정)
+app에는 Room/serialization 플러그인과 BASE_URL/BuildConfig 생성이 필요하지 않다. Room은 core:database, BASE_URL은 core:network, 경로 직렬화 compiler는 각 Feature API와 내부 직렬화 키가 있는 album-detail:impl이 소유한다.
+
+### 6.2 `:feature:photo:impl` (현재, 주요 의존 발췌)
 
 ```kotlin
 plugins {
@@ -304,14 +306,14 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.data)
-    implementation(projects.feature.photo.api)
+    implementation(project(":core:data"))
+    implementation(project(":feature:photo:api"))
 }
 ```
 
 `momentwo.android.feature` 한 줄로 library + compose + hilt + lifecycle + navigation-compose + serialization이 모두 들어온다.
 
-### 6.3 `:core:network` (예정)
+### 6.3 `:core:network` (현재, 플러그인 발췌)
 
 ```kotlin
 plugins {
@@ -323,7 +325,7 @@ plugins {
 android { namespace = "cord.eoeo.momentwo.core.network" }
 ```
 
-### 6.4 `:core:model` (예정)
+### 6.4 `:core:model` (현재)
 
 ```kotlin
 plugins {
@@ -337,7 +339,7 @@ plugins {
 compileSdk, minSdk, Java 버전, Kotlin JVM target, Compose 옵션, Hilt/Room 적용 방식이 **`build-logic` 한 곳**에 정의된다. SDK 버전을 올릴 때 `KotlinAndroid.kt` 한 파일만 수정하면 24개 모듈이 일괄 반영된다.
 
 ### 7.2 모듈 build.gradle.kts 슬림화
-적용 전 `:app/build.gradle.kts`는 약 110줄 — Compose BOM, lifecycle, room 의존성이 모두 펼쳐져 있었다. 적용 후 65줄로 줄었고, 새 feature 모듈은 평균 10~20줄에 수렴한다. 모듈 파일에 남는 것은 **그 모듈만의 특이사항**뿐이다.
+적용 전 `:app/build.gradle.kts`는 약 110줄 — Compose BOM, lifecycle, room 의존성이 모두 펼쳐져 있었다. Phase 3에서 app의 데이터/UI 구현 의존을 제거했으며, 새 feature 모듈에는 실제 사용하는 의존만 명시한다. 모듈 파일에 남는 것은 **그 모듈만의 특이사항**뿐이다.
 
 ### 7.3 일관성과 표준화
 “Compose 모듈인데 Compose BOM을 빠뜨림”, “Hilt 모듈인데 KSP를 적용하지 않음” 같은 사람 실수를 plugin 단위로 봉쇄한다. 어떤 모듈이 어떤 능력을 갖는지가 plugin id만 보면 한눈에 드러난다.
@@ -365,14 +367,14 @@ Phase 1~2에서 23개 모듈을 새로 만들어야 한다. 새 `build.gradle.kt
 - **`version = "unspecified"`의 의미**: includeBuild plugin의 관용적 표기다. 메인 빌드와 빌드 시점이 동일하므로 SemVer 관리가 무의미하다. version catalog가 “버전 미지정”을 허용한다는 점을 알아두면 충분하다.
 - **순환 의존**: convention plugin 안에서 다른 convention plugin을 `apply("momentwo.android.library")` 식으로 적용할 수 있지만, plugin 간 순환 의존이 생기지 않도록 조심한다. 본 구성에서는 `feature → library + library.compose + hilt`의 단방향 호출만 사용한다.
 
-## 9. 향후 확장 계획
+## 9. 마이그레이션 적용 결과
 
-Phase 1~2에서 다음 작업이 예정되어 있다.
+Phase 1~3에서 다음 설정을 적용했다.
 
-- `momentwo.android.feature`에 `:core:ui`, `:core:designsystem`, `:core:domain`, `:core:navigation` 의존 추가.
-- `momentwo.android.room`이 `:app`에서 `:core:database`로 이전.
-- `momentwo.android.network`이 `:core:network`에 적용.
-- `momentwo.jvm.library`가 `:core:model`, `:core:common`에 적용.
+- `momentwo.android.feature`에 `:core:ui`, `:core:designsystem`, `:core:domain`, `:core:navigation` 기본 의존을 추가했다.
+- `momentwo.android.room`은 `:core:database`에 적용하며 app에서는 제거했다.
+- `momentwo.android.network`은 `:core:network`에 적용한다.
+- `momentwo.jvm.library`는 순수 Kotlin `:core:model`에 적용한다. BaseViewModel을 사용하는 `:core:common`은 Android library다.
 
 Plugin 수는 9개로 고정해두고, 의존성 디테일만 catalog/plugin 내부에서 조정한다. 새 plugin을 추가하는 결정은 “이 plugin이 3개 이상 모듈에 동일하게 적용되는가?”를 기준으로 한다.
 

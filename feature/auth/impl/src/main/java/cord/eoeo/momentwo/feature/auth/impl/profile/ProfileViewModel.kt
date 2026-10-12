@@ -1,22 +1,22 @@
-package cord.eoeo.momentwo.ui.profile
+package cord.eoeo.momentwo.feature.auth.impl.profile
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
 import cord.eoeo.momentwo.core.data.profile.ProfileRepository
 import cord.eoeo.momentwo.core.common.BaseViewModel
-import cord.eoeo.momentwo.core.navigation.MomentwoDestination
+import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel
+internal class ProfileViewModel
     @Inject
     constructor(
         private val profileRepository: ProfileRepository,
         savedStateHandle: SavedStateHandle,
     ) : BaseViewModel<ProfileContract.State, ProfileContract.Event, ProfileContract.Effect>() {
         init {
-            val (nickname) = savedStateHandle.toRoute<MomentwoDestination.Profile>()
+            val (nickname) = savedStateHandle.toRoute<ProfileDestination>()
             setState(uiState.value.copy(nickname = nickname))
         }
 

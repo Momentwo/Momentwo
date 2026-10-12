@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.signup
+package cord.eoeo.momentwo.feature.auth.impl.signup
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SignUpViewModel @Inject constructor(
+internal class SignUpViewModel @Inject constructor(
     private val signUpRepository: SignUpRepository
 ) : BaseViewModel<SignUpContract.State, SignUpContract.Event, SignUpContract.Effect>() {
     private val emailRegex = Regex("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$")

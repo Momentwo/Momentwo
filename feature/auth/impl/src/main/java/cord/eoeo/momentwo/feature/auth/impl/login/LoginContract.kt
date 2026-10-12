@@ -1,25 +1,42 @@
-package cord.eoeo.momentwo.ui.profile
+package cord.eoeo.momentwo.feature.auth.impl.login
 
 import cord.eoeo.momentwo.core.common.UiEffect
 import cord.eoeo.momentwo.core.common.UiEvent
 import cord.eoeo.momentwo.core.common.UiState
 
-class ProfileContract {
+internal class LoginContract {
     data class State(
-        val nickname: String? = null,
+        val email: String = "",
+        val password: String = "",
         val isLoading: Boolean = false,
         val isSuccess: Boolean = false,
         val isError: Boolean = false,
     ) : UiState
 
     sealed interface Event : UiEvent {
+        data class OnEmailEntered(
+            val email: String,
+        ) : Event
+
+        data class OnPasswordEntered(
+            val password: String,
+        ) : Event
+
+        data object OnLoginClicked : Event
+
+        data object OnSignUpClicked : Event
+
+        data object OnRequestAutoLogin : Event
+
         data class OnError(
             val errorMessage: String,
         ) : Event
     }
 
     sealed interface Effect : UiEffect {
-        data object PopBackStack : Effect
+        data object NavigateToAlbum : Effect
+
+        data object NavigateToSignUp : Effect
 
         data class ShowSnackbar(
             val message: String,

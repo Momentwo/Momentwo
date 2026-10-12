@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.login
+package cord.eoeo.momentwo.feature.auth.impl.profile
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -7,26 +7,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.ImageLoader
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun LoginRoute(
+internal fun ProfileRoute(
     coroutineScope: CoroutineScope,
-    navigateToAlbum: () -> Unit,
-    navigateToSignUp: () -> Unit,
+    imageLoader: ImageLoader,
+    popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = hiltViewModel(),
 ) {
-    val uiState: LoginContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState: ProfileContract.State by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LoginScreen(
+    ProfileScreen(
         coroutineScope = coroutineScope,
+        imageLoader = imageLoader,
         uiState = { uiState },
         effectFlow = { viewModel.effect },
         onEvent = { event -> viewModel.setEvent(event) },
         snackbarHostState = { snackbarHostState },
-        navigateToAlbum = navigateToAlbum,
-        navigateToSignUp = navigateToSignUp,
+        popBackStack = popBackStack,
     )
 }

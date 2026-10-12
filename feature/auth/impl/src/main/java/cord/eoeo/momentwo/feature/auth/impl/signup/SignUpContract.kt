@@ -1,11 +1,11 @@
-package cord.eoeo.momentwo.ui.signup
+package cord.eoeo.momentwo.feature.auth.impl.signup
 
 import cord.eoeo.momentwo.core.data.model.User
 import cord.eoeo.momentwo.core.common.UiEffect
 import cord.eoeo.momentwo.core.common.UiEvent
 import cord.eoeo.momentwo.core.common.UiState
 
-class SignUpContract {
+internal class SignUpContract {
     data class State(
         val email: InfoState = InfoState(),
         val password: InfoState = InfoState(),

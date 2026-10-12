@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.signup.transformation
+package cord.eoeo.momentwo.feature.auth.impl.signup.transformation
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping

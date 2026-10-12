@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.ui
 import cord.eoeo.momentwo.core.navigation.MomentwoDestination
+import cord.eoeo.momentwo.feature.auth.api.LoginDestination
+import cord.eoeo.momentwo.feature.auth.impl.authScreens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,11 +14,8 @@ import cord.eoeo.momentwo.ui.album.AlbumRoute
 import cord.eoeo.momentwo.ui.albumdetail.AlbumDetailRoute
 import cord.eoeo.momentwo.ui.createalbum.CreateAlbumRoute
 import cord.eoeo.momentwo.ui.friend.FriendRoute
-import cord.eoeo.momentwo.ui.login.LoginRoute
 import cord.eoeo.momentwo.ui.photodetail.PhotoDetailRoute
 import cord.eoeo.momentwo.ui.photolist.PhotoListRoute
-import cord.eoeo.momentwo.ui.profile.ProfileRoute
-import cord.eoeo.momentwo.ui.signup.SignUpRoute
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -29,24 +28,17 @@ fun MomentwoNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = MomentwoDestination.Login,
+        startDestination = LoginDestination,
         modifier = Modifier,
     ) {
-        composable<MomentwoDestination.Login> {
-            LoginRoute(
-                coroutineScope = coroutineScope,
-                navigateToAlbum = navActions.navigateToAlbum,
-                navigateToSignUp = navActions.navigateToSignUp,
-            )
-        }
-
-        composable<MomentwoDestination.SignUp> {
-            SignUpRoute(
-                coroutineScope = coroutineScope,
-                popBackStack = navActions.popBackStack,
-                navigateToLogin = navActions.navigateToLogin,
-            )
-        }
+        authScreens(
+            coroutineScope = coroutineScope,
+            imageLoader = imageLoader,
+            popBackStack = navActions.popBackStack,
+            navigateToAlbum = navActions.navigateToAlbum,
+            navigateToSignUp = navActions.navigateToSignUp,
+            navigateToLogin = navActions.navigateToLogin,
+        )
 
         composable<MomentwoDestination.Album> {
             AlbumRoute(
@@ -90,14 +82,6 @@ fun MomentwoNavGraph(
             CreateAlbumRoute(
                 coroutineScope = coroutineScope,
                 popBackStack = navActions.popBackStack,
-            )
-        }
-
-        composable<MomentwoDestination.Profile> {
-            ProfileRoute(
-                coroutineScope = coroutineScope,
-                popBackStack = navActions.popBackStack,
-                imageLoader = imageLoader,
             )
         }
 

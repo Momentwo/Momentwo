@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.signup
+package cord.eoeo.momentwo.feature.auth.impl.signup
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.rememberPagerState
@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SignUpRoute(
+internal fun SignUpRoute(
     coroutineScope: CoroutineScope,
     popBackStack: () -> Unit,
     navigateToLogin: () -> Unit,

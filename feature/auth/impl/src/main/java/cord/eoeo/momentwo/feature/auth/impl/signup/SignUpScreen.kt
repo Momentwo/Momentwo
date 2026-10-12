@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.signup
+package cord.eoeo.momentwo.feature.auth.impl.signup
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -31,8 +31,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
-import cord.eoeo.momentwo.ui.signup.transformation.DateVisualTransformation
-import cord.eoeo.momentwo.ui.signup.transformation.PhoneVisualTransformation
+import cord.eoeo.momentwo.feature.auth.impl.signup.transformation.DateVisualTransformation
+import cord.eoeo.momentwo.feature.auth.impl.signup.transformation.PhoneVisualTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SignUpScreen(
+internal fun SignUpScreen(
     coroutineScope: CoroutineScope,
     pagerState: () -> PagerState,
     uiState: () -> SignUpContract.State,
@@ -139,7 +139,7 @@ fun SignUpScreen(
 }
 
 @Composable
-fun FirstSignUpPage(
+internal fun FirstSignUpPage(
     email: () -> SignUpContract.InfoState,
     password: () -> SignUpContract.InfoState,
     passwordCheck: () -> SignUpContract.InfoState,
@@ -188,7 +188,7 @@ fun FirstSignUpPage(
 }
 
 @Composable
-fun SecondSignUpPage(
+internal fun SecondSignUpPage(
     nickname: () -> SignUpContract.InfoState,
     name: () -> SignUpContract.InfoState,
     birthday: () -> SignUpContract.InfoState,
@@ -247,7 +247,7 @@ fun SecondSignUpPage(
 }
 
 @Composable
-fun ItemText(
+internal fun ItemText(
     text: () -> String,
     modifier: Modifier = Modifier
 ) {
@@ -260,7 +260,7 @@ fun ItemText(
 }
 
 @Composable
-fun ItemTextField(
+internal fun ItemTextField(
     value: () -> String,
     placeholder: () -> String,
     keyboardType: () -> KeyboardType = { KeyboardType.Text },

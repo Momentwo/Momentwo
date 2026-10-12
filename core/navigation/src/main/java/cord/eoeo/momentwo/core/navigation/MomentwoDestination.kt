@@ -4,12 +4,6 @@ import kotlinx.serialization.Serializable
 
 sealed interface MomentwoDestination {
     @Serializable
-    data object Login : MomentwoDestination
-
-    @Serializable
-    data object SignUp : MomentwoDestination
-
-    @Serializable
     data object Album : MomentwoDestination
 
     @Serializable
@@ -38,11 +32,6 @@ sealed interface MomentwoDestination {
 
     @Serializable
     data object CreateAlbum : MomentwoDestination
-
-    @Serializable
-    data class Profile(
-        val nickname: String?,
-    ) : MomentwoDestination
 
     @Serializable
     data object Friend : MomentwoDestination

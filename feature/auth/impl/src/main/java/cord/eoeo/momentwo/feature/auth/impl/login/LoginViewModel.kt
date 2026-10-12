@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.login
+package cord.eoeo.momentwo.feature.auth.impl.login
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel
+internal class LoginViewModel
     @Inject
     constructor(
         private val requestLoginUseCase: RequestLoginUseCase,

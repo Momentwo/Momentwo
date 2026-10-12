@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.login
+package cord.eoeo.momentwo.feature.auth.impl.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun LoginScreen(
+internal fun LoginScreen(
     coroutineScope: CoroutineScope,
     uiState: () -> LoginContract.State,
     effectFlow: () -> Flow<LoginContract.Effect>,

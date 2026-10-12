@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.profile
+package cord.eoeo.momentwo.feature.auth.impl.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @Composable
-fun ProfileScreen(
+internal fun ProfileScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     uiState: () -> ProfileContract.State,

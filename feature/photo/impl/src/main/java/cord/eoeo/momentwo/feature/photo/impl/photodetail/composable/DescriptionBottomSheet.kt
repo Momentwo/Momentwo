@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photodetail.composable
+package cord.eoeo.momentwo.feature.photo.impl.photodetail.composable
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.MutatePriority
@@ -68,7 +68,7 @@ import cord.eoeo.momentwo.core.model.DescriptionItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun DescriptionBottomSheet(
+internal fun DescriptionBottomSheet(
     imageLoader: ImageLoader,
     descriptionItem: () -> DescriptionItem,
     isWriteDescMode: () -> Boolean,
@@ -127,7 +127,7 @@ fun DescriptionBottomSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DescriptionBottomSheetScreen(
+internal fun DescriptionBottomSheetScreen(
     imageLoader: ImageLoader,
     bottomSheetState: () -> SheetState,
     scrollState: () -> ScrollState,
@@ -265,7 +265,7 @@ fun DescriptionBottomSheetScreen(
 }
 
 @Composable
-fun DescriptionScreen(
+internal fun DescriptionScreen(
     imageLoader: ImageLoader,
     scrollState: () -> ScrollState,
     nestedScrollConnection: () -> NestedScrollConnection,
@@ -422,7 +422,7 @@ fun DescriptionScreen(
 }
 
 @Composable
-fun WriteDescriptionScreen(
+internal fun WriteDescriptionScreen(
     title: () -> TextFieldValue,
     contents: () -> TextFieldValue,
     onTitleChange: (TextFieldValue) -> Unit,

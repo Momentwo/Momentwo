@@ -6,6 +6,8 @@ import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.feature.album.api.AlbumDestination
 import cord.eoeo.momentwo.feature.album.api.CreateAlbumDestination
+import cord.eoeo.momentwo.feature.photo.api.PhotoListDestination
+import cord.eoeo.momentwo.feature.photo.api.PhotoDetailDestination
 import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
@@ -36,10 +38,10 @@ class MomentwoNavigationActions(
         navController.navigate(AlbumDetailDestination(id, title, subTitle, imageUrl))
     }
     val navigateToPhotoList: (Int, Int, String, String) -> Unit = { albumId, subAlbumId, albumTitle, subAlbumTitle ->
-        navController.navigate(MomentwoDestination.PhotoList(albumId, subAlbumId, albumTitle, subAlbumTitle))
+        navController.navigate(PhotoListDestination(albumId, subAlbumId, albumTitle, subAlbumTitle))
     }
     val navigateToPhotoDetail: (Int, Int, String, Boolean) -> Unit = { albumId, photoId, photoUrl, isLiked ->
-        navController.navigate(MomentwoDestination.PhotoDetail(albumId, photoId, photoUrl, isLiked))
+        navController.navigate(PhotoDetailDestination(albumId, photoId, photoUrl, isLiked))
     }
     val navigateToCreateAlbum: () -> Unit = {
         navController.navigate(CreateAlbumDestination)

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photolist
+package cord.eoeo.momentwo.feature.photo.impl.photolist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,7 +29,7 @@ import cord.eoeo.momentwo.core.designsystem.theme.favoriteBorder
 import cord.eoeo.momentwo.core.designsystem.theme.primaryDark
 
 @Composable
-fun PhotoListItemBox(
+internal fun PhotoListItemBox(
     imageLoader: ImageLoader,
     photoItem: () -> PhotoItem,
     isEditMode: () -> Boolean,

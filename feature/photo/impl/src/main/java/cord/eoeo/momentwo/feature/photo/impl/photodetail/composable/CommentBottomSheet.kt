@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photodetail.composable
+package cord.eoeo.momentwo.feature.photo.impl.photodetail.composable
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -72,7 +72,7 @@ import cord.eoeo.momentwo.core.model.CommentItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun CommentBottomSheet(
+internal fun CommentBottomSheet(
     imageLoader: ImageLoader,
     commentPagingData: () -> LazyPagingItems<CommentItem>,
     lazyListState: () -> LazyListState,
@@ -124,7 +124,7 @@ fun CommentBottomSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommentBottomSheetScreen(
+internal fun CommentBottomSheetScreen(
     imageLoader: ImageLoader,
     bottomSheetState: () -> SheetState,
     commentPagingData: () -> LazyPagingItems<CommentItem>,
@@ -261,7 +261,7 @@ fun CommentBottomSheetScreen(
 }
 
 @Composable
-fun CommentListItem(
+internal fun CommentListItem(
     imageLoader: ImageLoader,
     commentItem: () -> CommentItem,
     onChangeIsDialogOpened: (Boolean) -> Unit,
@@ -296,7 +296,7 @@ fun CommentListItem(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CommentListItemScreen(
+internal fun CommentListItemScreen(
     imageLoader: ImageLoader,
     isMenuExpanded: () -> Boolean,
     commentItem: () -> CommentItem,

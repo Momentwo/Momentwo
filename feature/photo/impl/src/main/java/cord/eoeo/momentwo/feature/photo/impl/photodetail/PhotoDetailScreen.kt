@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photodetail
+package cord.eoeo.momentwo.feature.photo.impl.photodetail
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -49,8 +49,8 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
 import cord.eoeo.momentwo.core.model.CommentItem
-import cord.eoeo.momentwo.ui.photodetail.composable.CommentBottomSheet
-import cord.eoeo.momentwo.ui.photodetail.composable.DescriptionBottomSheet
+import cord.eoeo.momentwo.feature.photo.impl.photodetail.composable.CommentBottomSheet
+import cord.eoeo.momentwo.feature.photo.impl.photodetail.composable.DescriptionBottomSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -59,7 +59,7 @@ import kotlinx.coroutines.flow.onEach
 // 몰입형 전체화면 사진 뷰어 — 바(AnimatedVisibility)가 오버레이되며 사진은 edge-to-edge full-bleed 유지
 @Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PhotoDetailScreen(
+internal fun PhotoDetailScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     insetsController: WindowInsetsControllerCompat,
@@ -210,7 +210,7 @@ fun PhotoDetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoDetailTopAppBar(
+internal fun PhotoDetailTopAppBar(
     onBack: () -> Unit,
 ) {
     TopAppBar(
@@ -225,7 +225,7 @@ fun PhotoDetailTopAppBar(
 }
 
 @Composable
-fun PhotoDetailBottomBar(
+internal fun PhotoDetailBottomBar(
     likeCount: () -> Int,
     isLiked: () -> Boolean,
     onClickDescription: () -> Unit,

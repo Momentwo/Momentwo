@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.photodetail
+package cord.eoeo.momentwo.feature.photo.impl.photodetail
 
 import androidx.paging.PagingData
 import cord.eoeo.momentwo.core.common.UiEffect
@@ -9,7 +9,7 @@ import cord.eoeo.momentwo.core.model.DescriptionItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-class PhotoDetailContract {
+internal class PhotoDetailContract {
     data class State(
         val albumId: Int = -1,
         val photoId: Int = -1,

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.createalbum
+package cord.eoeo.momentwo.feature.album.impl.createalbum
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun CreateAlbumScreen(
+internal fun CreateAlbumScreen(
     coroutineScope: CoroutineScope,
     title: () -> String,
     onTitleChange: (String) -> Unit,
@@ -170,7 +170,7 @@ fun CreateAlbumScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAlbumTopAppBar(onClickNavigation: () -> Unit) {
+internal fun CreateAlbumTopAppBar(onClickNavigation: () -> Unit) {
     TopAppBar(
         title = {
             Text(
@@ -187,7 +187,7 @@ fun CreateAlbumTopAppBar(onClickNavigation: () -> Unit) {
 }
 
 @Composable
-fun TitleText(text: () -> String) {
+internal fun TitleText(text: () -> String) {
     Text(
         text = text(),
         fontWeight = FontWeight.Bold,
@@ -197,7 +197,7 @@ fun TitleText(text: () -> String) {
 }
 
 @Composable
-fun CaptionText(text: () -> String) {
+internal fun CaptionText(text: () -> String) {
     Text(
         text = text(),
         fontWeight = FontWeight.Light,
@@ -208,7 +208,7 @@ fun CaptionText(text: () -> String) {
 }
 
 @Composable
-fun ConfirmExtendedFAB(
+internal fun ConfirmExtendedFAB(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

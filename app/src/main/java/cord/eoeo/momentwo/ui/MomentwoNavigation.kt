@@ -4,6 +4,8 @@ import androidx.navigation.NavHostController
 import cord.eoeo.momentwo.core.model.AlbumItem
 import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
+import cord.eoeo.momentwo.feature.album.api.AlbumDestination
+import cord.eoeo.momentwo.feature.album.api.CreateAlbumDestination
 import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
@@ -25,7 +27,7 @@ class MomentwoNavigationActions(
         navController.navigate(SignUpDestination)
     }
     val navigateToAlbum: () -> Unit = {
-        navController.navigate(MomentwoDestination.Album) {
+        navController.navigate(AlbumDestination) {
             launchSingleTop = true
             popUpTo(navController.graph.id)
         }
@@ -40,7 +42,7 @@ class MomentwoNavigationActions(
         navController.navigate(MomentwoDestination.PhotoDetail(albumId, photoId, photoUrl, isLiked))
     }
     val navigateToCreateAlbum: () -> Unit = {
-        navController.navigate(MomentwoDestination.CreateAlbum)
+        navController.navigate(CreateAlbumDestination)
     }
     val navigateToProfile: (String?) -> Unit = { nickname ->
         navController.navigate(ProfileDestination(nickname))

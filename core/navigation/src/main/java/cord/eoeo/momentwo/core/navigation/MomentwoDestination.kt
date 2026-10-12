@@ -4,9 +4,6 @@ import kotlinx.serialization.Serializable
 
 sealed interface MomentwoDestination {
     @Serializable
-    data object Album : MomentwoDestination
-
-    @Serializable
     data class PhotoList(
         val albumId: Int,
         val subAlbumId: Int,
@@ -21,8 +18,5 @@ sealed interface MomentwoDestination {
         val photoUrl: String,
         val isLiked: Boolean,
     ) : MomentwoDestination
-
-    @Serializable
-    data object CreateAlbum : MomentwoDestination
 
 }

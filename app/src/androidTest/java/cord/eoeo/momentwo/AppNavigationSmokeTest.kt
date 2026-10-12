@@ -20,6 +20,8 @@ import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
+import cord.eoeo.momentwo.feature.album.api.AlbumDestination
+import cord.eoeo.momentwo.feature.album.api.CreateAlbumDestination
 import cord.eoeo.momentwo.ui.MainActivity
 import cord.eoeo.momentwo.ui.SubAlbumContentAdapter
 import cord.eoeo.momentwo.feature.albumdetail.impl.SubAlbumContentState
@@ -158,6 +160,27 @@ class AppNavigationSmokeTest {
             assertEquals(true to 7, selected)
             assertEquals(null, clicked)
         }
+    }
+
+    @Test
+    fun albumAndCreateAlbumGraphsRestoreTheirBackStack() {
+        compose.runOnIdle { navController.navigate(AlbumDestination) }
+        compose.waitForIdle()
+        compose.onNodeWithText("Album").assertExists()
+        compose.runOnIdle { navController.navigate(CreateAlbumDestination) }
+        compose.waitForIdle()
+        compose.onNodeWithText("앨범명").assertExists()
+        compose.runOnIdle {
+            assertEquals(CreateAlbumDestination, navController.currentBackStackEntry!!.toRoute<CreateAlbumDestination>())
+            navController.popBackStack()
+        }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertEquals(AlbumDestination, navController.currentBackStackEntry!!.toRoute<AlbumDestination>())
+            navController.popBackStack()
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Momentwo").assertExists()
     }
 
 }

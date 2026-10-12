@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.createalbum
+package cord.eoeo.momentwo.feature.album.impl.createalbum
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -13,7 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun CreateAlbumRoute(
+internal fun CreateAlbumRoute(
     coroutineScope: CoroutineScope,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,

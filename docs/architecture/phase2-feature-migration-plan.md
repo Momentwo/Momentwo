@@ -270,3 +270,11 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - api/impl 및 app 빌드·Lint·단위 테스트 통과(최종 6s). 루트 인자 왕복과 내부 키 3개 호환성 테스트 각 1개 통과.
 - 실제 API 및 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.
 - SM_N976N/API 31 기기 테스트 5개 통과(2m 39s): 상세 SavedStateHandle 인자 복원·멤버/설정/SubAlbum 탭 전환, 슬롯 콜백, 기존 Auth/Friend 회귀.
+
+### 2026-10-12 — P5 Album 구현 및 검증
+
+- AlbumDetail PR #147 병합 후 develop/09a7bad에서 `refactor/feature-album`를 생성했다.
+- album:api/impl 추가, Album/CreateAlbum UI/MVI 8개 파일과 경로 키 이관. app은 공개 albumScreens()와 기존 callback으로 연결한다.
+- 두 키의 기존 직렬화 이름 유지. API 직렬화·JSON 왕복 테스트 2개 통과.
+- api/impl 및 app 빌드·Lint·단위 테스트 통과(17s). 실제 API 및 배포 앱 업데이트/저장 백스택 복원은 미확인으로 유지한다.
+- SM_N976N/API 31 기기 테스트 6개 통과(2m 44s): 기존 5개와 Album→CreateAlbum→목록→루트 복귀.

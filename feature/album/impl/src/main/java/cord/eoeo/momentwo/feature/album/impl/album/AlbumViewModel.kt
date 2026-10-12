@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.album
+package cord.eoeo.momentwo.feature.album.impl.album
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AlbumViewModel
+internal class AlbumViewModel
     @Inject
     constructor(
         private val getAlbumListUseCase: GetAlbumListUseCase,

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.createalbum
+package cord.eoeo.momentwo.feature.album.impl.createalbum
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateAlbumViewModel
+internal class CreateAlbumViewModel
     @Inject
     constructor(
         private val requestCreateAlbumUseCase: RequestCreateAlbumUseCase,

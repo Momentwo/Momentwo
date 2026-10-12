@@ -231,45 +231,19 @@
 
 ### 구조도
 
-화살표는 프로젝트 의존 방향입니다. 아래는 주요 실행 의존을 보여주며, 모듈별 전체 의존과 테스트 의존은 [실제 모듈 의존성](docs/architecture/module-graph.md)에서 확인할 수 있습니다.
+앱 조립, 화면 구현, 공통 기능의 세 영역으로 나눕니다. app이 Feature를 연결하고, Feature impl이 필요한 Core 모듈을 사용합니다.
 
 ```mermaid
-flowchart TB
+flowchart LR
     app["app<br/>앱 시작 · 화면 조립"]
+    feature["Feature × 6<br/>api · impl<br/>화면 · MVI"]
+    core["Core × 11<br/>공유 UI · 도메인<br/>데이터 · 테스트"]
 
-    subgraph feature["Feature × 6"]
-        impl["impl × 6<br/>UI · MVI · 그래프"]
-        api["api × 6<br/>경로 키 · 이동 인자"]
-    end
-
-    subgraph core["Core · 주요 실행 모듈"]
-        ui["core:ui<br/>공유 Composable"]
-        designsystem["core:designsystem<br/>Theme · 디자인 토큰"]
-        domain["core:domain<br/>UseCase"]
-        data["core:data<br/>Repository · DTO · Service · DataSource"]
-        network["core:network<br/>HTTP 클라이언트 · 인증"]
-        database["core:database<br/>Room · DAO · Entity"]
-        datastore["core:datastore<br/>토큰 · 세션 설정"]
-        model["core:model<br/>공용 Kotlin 모델"]
-    end
-
-    app -->|"키를 사용하는 API 5개"| api
-    app --> impl
-    impl -->|"자신의 API"| api
-    impl --> ui
-    impl --> domain
-    impl -->|"데이터를 사용하는 Feature"| data
-    ui --> designsystem
-    domain --> data
-    data --> network
-    data --> database
-    data --> datastore
-    data --> model
-    network --> datastore
-    database --> model
+    app -->|"화면 연결"| feature
+    feature -->|"공통 기능 사용"| core
 ```
 
-각 impl은 convention plugin으로 `core:ui`, `core:designsystem`, `core:domain`, `core:navigation`에 기본 의존합니다. `core:common`, `core:model`, `core:data`와 Coil·Paging 등은 실제 사용에 따라 직접 선언합니다. 위 구조도에서는 공통 기반·테스트 모듈과 일부 의존을 생략했습니다.
+app은 Theme·공용 모델에도 직접 의존합니다. 모듈별 전체 의존과 테스트 의존은 [실제 모듈 의존성](docs/architecture/module-graph.md)에서 확인할 수 있습니다.
 
 ### 디렉터리 구성
 
@@ -330,21 +304,27 @@ Momentwo/
 
 `subalbum`은 독립 ViewModel 없이 화면을 렌더링합니다. 목록·선택·편집 상태와 API 요청은 `album-detail`이 소유하고, app의 `SubAlbumContentAdapter`가 두 impl을 Composable 슬롯으로 연결합니다.
 
+<details>
+<summary>SubAlbum 화면 연결 상세</summary>
+
 ```mermaid
 flowchart LR
-    app["app<br/>SubAlbumContentAdapter"]
-    detail["album-detail:impl<br/>상태 · 내부 그래프"]
-    subapi["subalbum:api<br/>SubAlbumListDestination"]
-    subimpl["subalbum:impl<br/>목록 · 카드 렌더링"]
+    app["app<br/>슬롯 조립"]
+    detail["album-detail<br/>상태 · 이벤트"]
+    subalbum["subalbum<br/>목록 · 카드"]
 
-    app -->|"Composable 슬롯 주입"| detail
-    app -->|"상태 조각 · 콜백으로 화면 호출"| subimpl
-    detail -->|"내부 목적지 키"| subapi
+    app -->|"슬롯 주입"| detail
+    app -->|"화면 호출"| subalbum
 ```
+
+AlbumDetail이 전달한 목록·선택 상태와 콜백을 app의 어댑터가 SubAlbum 화면에 연결합니다. 내부 목적지 키는 `subalbum:api`를 사용하며, 두 impl은 서로 의존하지 않습니다.
+
+</details>
 
 ### 의존성과 MVI 규칙
 
 - app이 루트 NavHost, 화면 이동 콜백, Feature 간 화면 조립을 담당합니다.
+- Feature convention plugin의 기본 Core 의존은 `ui`, `designsystem`, `domain`, `navigation`입니다. `common`, `model`, `data`와 Coil·Paging 등은 실제 사용에 따라 직접 선언합니다.
 - Feature impl은 자신의 API와 필요한 Core에 의존합니다. 다른 Feature를 직접 참조할 때는 API만 사용합니다. 현재 서로 다른 Feature 사이의 직접 의존은 `album-detail:impl → subalbum:api`입니다.
 - `Core → Feature`, `Feature → app`, `impl → 다른 Feature impl`, `api → impl/data` 의존은 금지합니다. 현재 모든 Feature API는 serialization 런타임만 사용하며 Core 의존이 없습니다.
 - Repository 인터페이스는 `core:data`, UseCase는 `core:domain`, UI 공용 모델은 `core:model`에 둡니다.

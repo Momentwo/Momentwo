@@ -1,23 +1,21 @@
 package cord.eoeo.momentwo.ui
-import cord.eoeo.momentwo.core.navigation.MomentwoDestination
-import cord.eoeo.momentwo.feature.auth.api.LoginDestination
-import cord.eoeo.momentwo.feature.friend.impl.friendScreen
-import cord.eoeo.momentwo.feature.albumdetail.impl.albumDetailScreen
-import cord.eoeo.momentwo.feature.album.impl.albumScreens
-import cord.eoeo.momentwo.feature.photo.impl.photoScreens
-import cord.eoeo.momentwo.feature.auth.impl.authScreens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import coil.ImageLoader
+import cord.eoeo.momentwo.feature.album.impl.albumScreens
+import cord.eoeo.momentwo.feature.albumdetail.impl.albumDetailScreen
+import cord.eoeo.momentwo.feature.auth.api.LoginDestination
+import cord.eoeo.momentwo.feature.auth.impl.authScreens
+import cord.eoeo.momentwo.feature.friend.impl.friendScreen
+import cord.eoeo.momentwo.feature.photo.impl.photoScreens
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun MomentwoNavGraph(
+internal fun MomentwoNavGraph(
     coroutineScope: CoroutineScope,
     navController: NavHostController,
     navActions: MomentwoNavigationActions,
@@ -69,6 +67,5 @@ fun MomentwoNavGraph(
             navigateToSignUp = navActions.navigateToSignUp,
             navigateToLogin = navActions.navigateToLogin,
         )
-
     }
 }

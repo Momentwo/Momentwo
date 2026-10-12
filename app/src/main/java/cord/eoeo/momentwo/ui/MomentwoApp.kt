@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 
 @Composable
-fun MomentwoApp(
+internal fun MomentwoApp(
     imageLoader: ImageLoader,
     insetsController: WindowInsetsControllerCompat,
     modifier: Modifier = Modifier,

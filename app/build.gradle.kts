@@ -2,8 +2,6 @@ plugins {
     alias(libs.plugins.momentwo.android.application)
     alias(libs.plugins.momentwo.android.application.compose)
     alias(libs.plugins.momentwo.android.hilt)
-    alias(libs.plugins.momentwo.android.room)
-    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -27,10 +25,6 @@ android {
         }
     }
 
-    buildFeatures {
-        buildConfig = true
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -39,70 +33,27 @@ android {
 }
 
 dependencies {
-    implementation(project(":feature:photo:api"))
-    implementation(project(":feature:photo:impl"))
-    implementation(project(":feature:album:api"))
-    implementation(project(":feature:album:impl"))
-    implementation(project(":feature:album-detail:api"))
-    implementation(project(":feature:album-detail:impl"))
-    implementation(project(":feature:subalbum:api"))
-    implementation(project(":feature:subalbum:impl"))
-    implementation(project(":feature:friend:api"))
-    implementation(project(":feature:friend:impl"))
+    // The app owns root navigation and composition across features.
     implementation(project(":feature:auth:api"))
     implementation(project(":feature:auth:impl"))
+    implementation(project(":feature:friend:api"))
+    implementation(project(":feature:friend:impl"))
+    implementation(project(":feature:subalbum:impl"))
+    implementation(project(":feature:album-detail:api"))
+    implementation(project(":feature:album-detail:impl"))
+    implementation(project(":feature:album:api"))
+    implementation(project(":feature:album:impl"))
+    implementation(project(":feature:photo:api"))
+    implementation(project(":feature:photo:impl"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
-    implementation(project(":core:common"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:datastore"))
-    implementation(project(":core:network"))
-    implementation(project(":core:database"))
-    implementation(project(":core:data"))
-    implementation(project(":core:domain"))
-    implementation(project(":core:navigation"))
 
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)
-    implementation(libs.icons)
-    implementation(libs.icons.extended)
-
-    // Lifecycle
-    implementation(libs.lifecycle.runtime)
-    implementation(libs.lifecycle.runtime.compose)
-    implementation(libs.lifecycle.viewmodel)
-    implementation(libs.lifecycle.viewmodel.compose)
-    implementation(libs.lifecycle.viewmodel.savedstate)
-
-    // Navigation Compose
     implementation(libs.navigation.compose)
-
-    // Hilt navigation compose (hilt-android / compiler 는 momentwo.android.hilt 가 추가)
-    implementation(libs.hilt.compose)
-
-    // Retrofit / OkHttp / Moshi
-    implementation(libs.retrofit)
-    implementation(libs.moshi)
-    implementation(libs.moshi.converter)
-    implementation(platform(libs.okhttp.bom))
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
-
-    // Coil
     implementation(libs.coil)
-    implementation(libs.coil.compose)
+    implementation(libs.coroutines.core)
 
-    // DataStore
-    implementation(libs.datastore)
-
-    // Kotlin Serialization
-    implementation(libs.kotlin.serialization)
-
-    // Paging3 (room-paging 은 momentwo.android.room 이 추가)
-    implementation(libs.paging)
-    implementation(libs.paging.compose)
-
-    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ui.test.junit4)

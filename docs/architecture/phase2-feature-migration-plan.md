@@ -233,3 +233,12 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - 기존 앱의 debug 서명 불일치를 피하기 위해 임시 Gradle init script로 `cord.eoeo.momentwo.migrationcheck` 패키지를 별도 빌드·설치했다(11s). 원본 앱 데이터는 변경하지 않았다.
 - 별도 설치 앱의 로그인 화면 및 회원가입 진입을 Android CLI layout으로 확인했다. API 연결을 사용하는 경로는 사용자 승인에 따라 미확인으로 유지한다.
 - 준비 PR: [#143](https://github.com/Momentwo/Momentwo/pull/143). 이후 진행/병합 상태와 검증 결과는 #109에 기록한다.
+
+### 2026-10-12 — P1 Auth 구현 및 검증
+
+- 준비 PR #143 병합 후 최신 develop에서 `refactor/feature-auth`를 생성했다. 준비 PR 생성 후 추가 push를 거부하는 저장소 규칙에 따라 마지막 검증 기록 커밋은 Auth 브랜치에 보존했다. 이후 PR은 모든 구현·검증·기록을 마친 뒤 최초 push한다.
+- auth:api/impl 두 모듈을 추가했다. Login/SignUp/Profile 키는 api로, UI 14개 파일은 impl로 이동했다. app은 공개 `authScreens()`만 호출하며 내부 화면·VM·Contract는 internal로 제한했다.
+- `@SerialName`으로 기존 경로의 직렬화 이름을 유지했다. nullable Profile 인자와 `SavedStateHandle.toRoute`도 새 api 타입으로 갱신했다.
+- Auth API 테스트 2개 및 ViewModel 동작 테스트 8개 통과: 로그인 성공·실패/세션 저장, 자동 로그인, 회원가입 이동·입력 검증·정규화·요청 매핑.
+- SM_N976N/API 31 별도 테스트 패키지에서 실제 app 그래프/Hilt를 사용하는 계측 테스트 2개 통과: 로그인→회원가입→뒤로가기, nullable Profile 진입→뒤로가기(최종 2m 12s).
+- 실제 API 응답·로그인 이후 데이터 동작은 백엔드 배포 중단으로 미확인이다. 사용자가 승인한 자동/기기 확인 기준으로 진행한다.

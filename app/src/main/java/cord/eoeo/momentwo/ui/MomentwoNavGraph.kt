@@ -1,6 +1,7 @@
 package cord.eoeo.momentwo.ui
 import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
+import cord.eoeo.momentwo.feature.friend.impl.friendScreen
 import cord.eoeo.momentwo.feature.auth.impl.authScreens
 
 import androidx.compose.runtime.Composable
@@ -13,7 +14,6 @@ import coil.ImageLoader
 import cord.eoeo.momentwo.ui.album.AlbumRoute
 import cord.eoeo.momentwo.ui.albumdetail.AlbumDetailRoute
 import cord.eoeo.momentwo.ui.createalbum.CreateAlbumRoute
-import cord.eoeo.momentwo.ui.friend.FriendRoute
 import cord.eoeo.momentwo.ui.photodetail.PhotoDetailRoute
 import cord.eoeo.momentwo.ui.photolist.PhotoListRoute
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +31,12 @@ fun MomentwoNavGraph(
         startDestination = LoginDestination,
         modifier = Modifier,
     ) {
+        friendScreen(
+            coroutineScope = coroutineScope,
+            imageLoader = imageLoader,
+            popBackStack = navActions.popBackStack,
+        )
+
         authScreens(
             coroutineScope = coroutineScope,
             imageLoader = imageLoader,
@@ -85,12 +91,5 @@ fun MomentwoNavGraph(
             )
         }
 
-        composable<MomentwoDestination.Friend> {
-            FriendRoute(
-                coroutineScope = coroutineScope,
-                popBackStack = navActions.popBackStack,
-                imageLoader = imageLoader,
-            )
-        }
     }
 }

@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend.friendrequest
+package cord.eoeo.momentwo.feature.friend.impl.friendrequest
 
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -8,7 +8,7 @@ import cord.eoeo.momentwo.core.model.FriendRequestItem
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun FriendRequestRoute(
+internal fun FriendRequestRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     receivedRequests: () -> List<FriendRequestItem>,

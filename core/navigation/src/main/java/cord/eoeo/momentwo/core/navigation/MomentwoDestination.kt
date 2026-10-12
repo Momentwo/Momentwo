@@ -33,6 +33,4 @@ sealed interface MomentwoDestination {
     @Serializable
     data object CreateAlbum : MomentwoDestination
 
-    @Serializable
-    data object Friend : MomentwoDestination
 }

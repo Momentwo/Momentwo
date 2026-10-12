@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend
+package cord.eoeo.momentwo.feature.friend.impl
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -15,7 +15,7 @@ import cord.eoeo.momentwo.core.model.FriendItem
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun FriendRoute(
+internal fun FriendRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     popBackStack: () -> Unit,

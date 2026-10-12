@@ -1,4 +1,4 @@
-package cord.eoeo.momentwo.ui.friend.friendlist
+package cord.eoeo.momentwo.feature.friend.impl.friendlist
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +10,7 @@ import coil.ImageLoader
 import cord.eoeo.momentwo.core.model.FriendItem
 
 @Composable
-fun FriendListScreen(
+internal fun FriendListScreen(
     imageLoader: ImageLoader,
     friendPagingData: () -> LazyPagingItems<FriendItem>,
     isFriendListChanged: () -> Boolean,

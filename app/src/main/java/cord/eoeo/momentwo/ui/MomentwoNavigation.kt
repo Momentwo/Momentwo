@@ -2,6 +2,7 @@ package cord.eoeo.momentwo.ui
 
 import androidx.navigation.NavHostController
 import cord.eoeo.momentwo.core.model.AlbumItem
+import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.core.navigation.MomentwoDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
@@ -44,6 +45,6 @@ class MomentwoNavigationActions(
         navController.navigate(ProfileDestination(nickname))
     }
     val navigateToFriend: () -> Unit = {
-        navController.navigate(MomentwoDestination.Friend)
+        navController.navigate(FriendDestination)
     }
 }

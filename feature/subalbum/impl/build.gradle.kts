@@ -12,4 +12,5 @@ dependencies {
     implementation(project(":core:model"))
     implementation(libs.activity.compose)
     implementation(libs.coil)
+    implementation(libs.coil.compose)
 }

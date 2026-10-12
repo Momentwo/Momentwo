@@ -2,11 +2,9 @@ package cord.eoeo.momentwo.ui.albumdetail
 
 import androidx.navigation.NavHostController
 import kotlinx.serialization.Serializable
+import cord.eoeo.momentwo.feature.subalbum.api.SubAlbumListDestination
 
 sealed interface AlbumDetailDestination {
-    @Serializable
-    data object SubAlbumList : AlbumDetailDestination
-
     @Serializable
     data object Member : AlbumDetailDestination
 
@@ -24,7 +22,7 @@ class AlbumDetailNavigationActions(
         navController.popBackStack()
     }
     val navigateToSubAlbumList: () -> Unit = {
-        navController.navigate(AlbumDetailDestination.SubAlbumList) {
+        navController.navigate(SubAlbumListDestination) {
             launchSingleTop = true
         }
     }

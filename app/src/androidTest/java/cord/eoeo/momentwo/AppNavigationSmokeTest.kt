@@ -12,6 +12,7 @@ import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import coil.imageLoader
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
+import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination
@@ -71,6 +72,21 @@ class AppNavigationSmokeTest {
         compose.runOnIdle {
             assertEquals(ProfileDestination(null), navController.currentBackStackEntry!!.toRoute<ProfileDestination>())
         }
+        compose.runOnIdle { navController.popBackStack() }
+        compose.waitForIdle()
+        compose.onNodeWithText("Momentwo").assertExists()
+    }
+
+    @Test
+    fun friendGraphAndRequestTabAreReachableWithoutBackend() {
+        compose.runOnIdle { navController.navigate(FriendDestination) }
+        compose.waitForIdle()
+        compose.runOnIdle {
+            assertEquals(FriendDestination, navController.currentBackStackEntry!!.toRoute<FriendDestination>())
+        }
+        compose.onNodeWithText("친구 요청").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("받은 요청").assertExists()
         compose.runOnIdle { navController.popBackStack() }
         compose.waitForIdle()
         compose.onNodeWithText("Momentwo").assertExists()

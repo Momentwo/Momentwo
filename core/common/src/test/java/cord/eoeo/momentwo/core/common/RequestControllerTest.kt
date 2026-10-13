@@ -53,6 +53,25 @@ class RequestControllerTest {
         runCurrent()
     }
 
+    @Test fun reentrantSubmissionCannotReplaceReservedLazyWrite() = runTest {
+        val controller = RequestController(backgroundScope)
+        var calls = 0
+        var reserved = false
+        var duplicate: Job? = null
+        controller.launchRequest(Key.First, RequestPolicy.IgnoreWhileRunning,
+            request = { calls++; Result.success(Unit) },
+            onStarted = {
+                reserved = controller.isRunning(Key.First)
+                duplicate = controller.launchRequest(Key.First, RequestPolicy.IgnoreWhileRunning,
+                    request = { calls++; Result.success(Unit) }, onSuccess = {}, onFailure = {})
+            }, onSuccess = {}, onFailure = {})
+        assertTrue(reserved)
+        assertNull(duplicate)
+        runCurrent()
+        assertEquals(1, calls)
+        assertFalse(controller.isRunning(Key.First))
+    }
+
     @Test fun differentKeysRunIndependently() = runTest {
         val controller = RequestController(backgroundScope)
         val response = CompletableDeferred<Unit>()

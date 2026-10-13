@@ -35,6 +35,21 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
 
 각 PR에서 영향 모듈 테스트·빌드·Lint를 수행하고 마지막 PR에서 전체 검사와 가능한 기기 확인을 수행한다. 별도 applicationId로 설치하여 기존 앱을 보존한다. 백엔드 미배포로 API 골든 패스는 미확인이다.
 
+## 완료 단계
+
+| 단계 | PR | 내용 |
+|---|---|---|
+| 1 | [#164](https://github.com/Momentwo/Momentwo/pull/164) | 취소 보존 함수와 하위 계층 |
+| 2 | [#165](https://github.com/Momentwo/Momentwo/pull/165) | 공통 Reducer·State·요청·Effect, Login |
+| 3 | [#166](https://github.com/Momentwo/Momentwo/pull/166) | SignUp 검증·폼 보존, Profile 기반 |
+| 4 | [#167](https://github.com/Momentwo/Momentwo/pull/167) | Friend 탭·ID 처리, 마지막 페이지 |
+| 5 | [#168](https://github.com/Momentwo/Momentwo/pull/168) | AlbumDetail 권한·Content·역할별 Reducer |
+| 6 | [#169](https://github.com/Momentwo/Momentwo/pull/169) | Album·CreateAlbum |
+| 7 | [#170](https://github.com/Momentwo/Momentwo/pull/170) | Photo·Paging·낙관적 갱신 |
+| 8 | 최종 PR | 구 기반 제거·가이드·전체 검증 |
+
+현재 구현 규칙은 [MVI 구현 가이드](mvi-guide.md)를 따른다.
+
 ## 진행 기록
 
 - 단계 1: 취소를 실패로 변환하던 suspend runCatching을 전환하고 연속 로그인 저장 작업의 취소 전파와 프로필 저장 실패 처리를 보강한다.
@@ -50,7 +65,7 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
 - `onEvent`와 요청 등록은 Main에서 실행한다. Reducer의 update는 재실행될 수 있어 상태 외 부수 효과를 금지한다.
 - `launchRequest`는 Result를 getOrThrow로 해제한 요청 부분만 runSuspendCatching으로 감싼다. 성공/실패 콜백의 프로그래밍 오류는 요청 오류로 바꾸지 않는다.
 - 요청 키는 기능별 RequestKey 구현과 대상 ID로 구성한다. 새 토큰을 등록한 뒤 기존 작업을 취소하여 이전 완료 정리가 최신 pending을 해제하지 않게 한다.
-- 화면 초기화는 Route의 LaunchedEffect(viewModel)에서 멱등 initialize를 호출한다. Effect 수집과 분리한다.
+- 화면 초기화는 Route에서 멱등 initialize를 호출한다. 최초 진입은 LaunchedEffect(viewModel), 무효화된 자식 화면 복귀는 LifecycleStartEffect를 사용하며 Effect 수집과 분리한다.
 - Snackbar와 애니메이션은 CollectEffect의 STARTED CoroutineScope에서 launch한다. 동기 Navigation 처리는 직접 수행한다.
 - ScreenContent는 전체 본문을 Loading/Success/Error로 분기한다. Success의 refresh만 진행/실패를 표시하며 동일 조회 오류를 Snackbar로 중복 발행하지 않는다.
 
@@ -81,3 +96,17 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
   Photo Mediator를 Pager별 immutable 인자로 생성하며 마지막 페이지·실제 좋아요 값을 저장한다. 사진/커서 저장은 앨범/서브앨범 범위의 Room 트랜잭션으로 수행하며 스키마는 유지한다.
   Photo 15개 및 Photo Mediator 6개 회귀, 영향 모듈 빌드·Lint 통과. 시스템 바는 지속 State와 lifecycle로 적용/복원한다.
   SM_N976N API 31 별도 앱 기기 6개 통과: 사진 초기 상태/경로, ScreenContent, Effect 복귀/순서, 시스템 바 pause/resume/dispose, 실제 Room 저장 범위/취소 롤백.
+
+- 단계 7 병합: #170. 새 자동 회귀 21개 및 기기 6개 통과.
+- 단계 8: 9개 ViewModel의 새 기반 사용을 확인하고 BaseViewModel·SharedFlow 이벤트 기반과 미사용 lifecycle 키를 제거했다.
+  LAZY 예약 중 재진입 요청의 중복 차단과 Presigned 연속 작업의 중첩 Result/삼킨 취소 전파를 추가 검증했다. README·모듈 의존성·구현 가이드를 현재 구조로 갱신했다.
+  최종 clean 전체 debug 빌드·전체 Android 모듈 Lint·단위 테스트 123개·기기 테스트 APK 빌드 통과(1m 14s). 기존 API 직렬화와 라이브러리 버전·24개 모듈 경계를 유지한다.
+  기기 테스트의 재구성/Navigation 그래프 준비 대기 조건을 명시한 뒤 SM_N976N API 31 별도 앱 전체 13개 통과(59s): 경로/Hilt/탭/슬롯/뒤로가기, 필수 데이터 비노출·refresh 보존, 숨겨진 본문의 Paging 수집·빈 Success 재조회, Effect STARTED 복귀·최신 handler, 실제 시스템 바 표시/숨김·복원, Room 저장 범위·취소 롤백.
+
+## 최종 검증 결과 (2026-10-13)
+
+- 전체 clean debug 빌드, 전체 Android 모듈 Lint 및 전체 단위 테스트 123개 통과. 실패·오류·skip 0.
+- 별도 패키지의 실제 기기 회귀 13개 통과. 원본 앱과 제품 applicationId는 보존한다.
+- 9개 ViewModel 모두 Reducer 기반. 구 BaseViewModel/SharedFlow 이벤트 및 하위 계층의 직접 suspend runCatching 잔존 없음. runCatching은 취소 보존 함수 내부에서만 사용한다.
+- app main 소스 6개와 모듈 24개 유지. 금지 모듈/소스 의존 없음. 기존 API·모델·경로 직렬화 및 라이브러리 버전 변경 없음.
+- 실제 API·정식 업데이트/프로세스 복원은 #150에서 별도로 확인한다. #156~#163과 HTTP 인증 재설계는 이번 완료 범위에 포함하지 않는다.

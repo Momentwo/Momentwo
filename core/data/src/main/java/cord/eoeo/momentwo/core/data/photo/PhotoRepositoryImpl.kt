@@ -18,6 +18,7 @@ import cord.eoeo.momentwo.core.data.model.PresignedRequest
 import cord.eoeo.momentwo.core.data.model.UploadPhoto
 import cord.eoeo.momentwo.core.data.model.UriRequestBody
 import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
+import cord.eoeo.momentwo.core.data.presigned.commitPresignedUpload
 import cord.eoeo.momentwo.core.common.runSuspendCatching
 import cord.eoeo.momentwo.core.data.CommittedWriteException
 import cord.eoeo.momentwo.core.data.photo.PhotoRepository
@@ -62,35 +63,13 @@ class PhotoRepositoryImpl(
         albumId: Int,
         subAlbumId: Int,
         image: Uri,
-    ): Result<Unit> {
-        val uriRequestBody = UriRequestBody(contentResolver, image)
-
-        photoRemoteDataSource
-            .requestPresignedUrl(
-                PresignedRequest(albumId, uriRequestBody.contentType()?.subtype ?: ""),
-            ).map { it.presignedUrl }
-            .onSuccess { presignedUrl ->
-                val filename =
-                    presignedUrl
-                        .split("?")
-                        .first()
-                        .split("/")
-                        .drop(3)
-                        .joinToString("/")
-
-                presignedRemoteDataSource
-                    .uploadPhoto(presignedUrl, uriRequestBody)
-                    .onSuccess {
-                        return photoRemoteDataSource.requestUploadPhoto(
-                            UploadPhoto(albumId, subAlbumId, filename),
-                        )
-                    }.onFailure {
-                        return Result.failure(Exception("Presigned Upload Failure"))
-                    }
-            }.onFailure {
-                return Result.failure(Exception("Presigned URL Failure"))
-            }
-        return Result.failure(Exception("Upload Photo Failure: Unknown Error"))
+    ): Result<Unit> = runSuspendCatching {
+        val body = UriRequestBody(contentResolver, image)
+        commitPresignedUpload(
+            requestUrl = { photoRemoteDataSource.requestPresignedUrl(PresignedRequest(albumId, body.contentType()?.subtype ?: "")).map { it.presignedUrl } },
+            upload = { url -> presignedRemoteDataSource.uploadPhoto(url, body) },
+            commit = { filename -> photoRemoteDataSource.requestUploadPhoto(UploadPhoto(albumId, subAlbumId, filename)) },
+        ).getOrThrow()
     }
 
     override suspend fun deletePhotos(

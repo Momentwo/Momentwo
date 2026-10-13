@@ -314,3 +314,7 @@ app에는 Application/Activity, 루트 NavHost와 navigation actions, Theme 적�
 - 금지 프로젝트 의존/타 impl 및 app import 없음, 24개 include/Feature ViewModel 9개/app main 파일 6개 확인.
 - 백엔드 API와 정식 업데이트·프로세스 복원·회전/백그라운드 통합 회귀는 후속 #150에서 확인한다.
 - 최종 SM_N976N/API 31 별도 패키지 기기 테스트 7개 통과(2m 37s). app 의존/플러그인 제거 후에도 실제 Hilt/Navigation/슬롯/몰입 모드와 백스택 회귀를 확인했다.
+
+## 후속 MVI 개선
+
+#155의 Reducer·Sealed State 전환은 모듈 이동 후 별도 PR로 수행했다. 현재 구현 규칙은 [MVI 구현 가이드](mvi-guide.md), 진행·검증 결과는 [MVI 개선 기록](mvi-improvement-plan.md)을 따른다. 위 Phase 2/3 기록은 당시 검증 결과로 보존한다.

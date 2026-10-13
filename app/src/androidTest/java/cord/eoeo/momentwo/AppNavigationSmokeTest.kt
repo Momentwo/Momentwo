@@ -2,6 +2,16 @@ package cord.eoeo.momentwo
 
 import android.view.WindowManager
 import androidx.compose.material3.Text
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import androidx.paging.compose.collectAsLazyPagingItems
+import cord.eoeo.momentwo.core.ui.rememberPagingScreenState
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CompletableDeferred
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import cord.eoeo.momentwo.core.common.ScreenState
@@ -75,8 +85,11 @@ class AppNavigationSmokeTest {
                 }
             }
         }
-        // Waking a locked device is asynchronous; wait until this window can receive input.
-        compose.waitUntil(timeoutMillis = 10_000) { compose.activity.hasWindowFocus() }
+        // Focus can arrive before setContent's first composition registers its test root.
+        compose.waitUntil(timeoutMillis = 10_000) {
+            ::navController.isInitialized && navController.currentBackStackEntry != null && compose.activity.hasWindowFocus() &&
+                compose.activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+        }
         compose.waitForIdle()
     }
 
@@ -249,8 +262,9 @@ class AppNavigationSmokeTest {
         val generation = mutableStateOf(0)
         compose.runOnUiThread {
             compose.activity.setContent {
+                val offset = generation.value * 10
                 Text("generation ${generation.value}")
-                CollectEffect(flow) { delivered.add(it + generation.value * 10) }
+                CollectEffect(flow) { delivered.add(it + offset) }
             }
         }
         compose.waitForIdle()
@@ -263,6 +277,9 @@ class AppNavigationSmokeTest {
         compose.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
         compose.waitUntil { delivered.toList() == listOf(1, 2) }
         compose.runOnIdle { generation.value = 1 }
+        // The new handler exists only after this composition has committed.
+        compose.waitForIdle()
+        compose.onNodeWithText("generation 1").assertExists()
         channel.trySend(3).getOrThrow()
         compose.waitUntil { delivered.toList() == listOf(1, 2, 13) }
         channel.close()
@@ -277,16 +294,54 @@ class AppNavigationSmokeTest {
             compose.activity.setContent { if (enabled.value) SystemBarsEffect(controller, visible.value) }
         }
         compose.waitForIdle()
+        compose.waitUntil(timeoutMillis = 10_000) { ViewCompat.getRootWindowInsets(compose.activity.window.decorView)?.isVisible(WindowInsetsCompat.Type.statusBars()) == false }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE, controller.systemBarsBehavior) }
         compose.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
         compose.activityRule.scenario.onActivity { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior) }
         compose.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
         compose.waitForIdle()
+        compose.waitUntil(timeoutMillis = 10_000) { ViewCompat.getRootWindowInsets(compose.activity.window.decorView)?.isVisible(WindowInsetsCompat.Type.statusBars()) == false }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE, controller.systemBarsBehavior) }
         compose.runOnIdle { visible.value = true }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior); visible.value = false }
         compose.runOnIdle { enabled.value = false }
+        compose.waitUntil(timeoutMillis = 10_000) { ViewCompat.getRootWindowInsets(compose.activity.window.decorView)?.isVisible(WindowInsetsCompat.Type.statusBars()) == true }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior) }
+    }
+
+    @Test
+    fun pagingCollectsBehindLoadingAndKeepsSuccessfulEmptyBodyDuringRefresh() {
+        val initial = CompletableDeferred<Unit>()
+        val refreshed = CompletableDeferred<Unit>()
+        val calls = AtomicInteger()
+        val flow = Pager(PagingConfig(10)) {
+            object : PagingSource<Int, String>() {
+                override fun getRefreshKey(state: PagingState<Int, String>): Int? = null
+                override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
+                    if (calls.incrementAndGet() == 1) initial.await() else refreshed.await()
+                    return LoadResult.Page(emptyList(), null, null)
+                }
+            }
+        }.flow
+        var refresh: () -> Unit = {}
+        compose.runOnUiThread {
+            compose.activity.setContent {
+                val items = flow.collectAsLazyPagingItems()
+                refresh = { items.refresh() }
+                val state = rememberPagingScreenState(items) { UiError.Network }
+                MomentwoTheme { ScreenContent(state, { items.retry() }) { Text("Empty paging fixture") } }
+            }
+        }
+        compose.waitUntil(timeoutMillis = 10_000) { calls.get() == 1 }
+        compose.onNodeWithText("Empty paging fixture").assertDoesNotExist()
+        initial.complete(Unit)
+        compose.waitUntil(timeoutMillis = 10_000) { compose.onAllNodes(androidx.compose.ui.test.hasText("Empty paging fixture")).fetchSemanticsNodes().isNotEmpty() }
+        compose.runOnIdle { refresh() }
+        compose.waitUntil(timeoutMillis = 10_000) { calls.get() == 2 }
+        compose.onNodeWithText("Empty paging fixture").assertExists()
+        refreshed.complete(Unit)
+        compose.waitForIdle()
+        compose.onNodeWithText("Empty paging fixture").assertExists()
     }
 
 }

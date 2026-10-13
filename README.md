@@ -278,7 +278,7 @@ Momentwo/
 | 모듈 | 책임 |
 |---|---|
 | `core:model` | AlbumItem·PhotoItem 등 공용 모델. Android에 의존하지 않는 Kotlin JVM 모듈 |
-| `core:common` | BaseViewModel, State/Event/Effect 인터페이스, Coroutine Dispatcher |
+| `core:common` | ReducerViewModel·순수 Reducer, ScreenState·요청·취소 기반, Coroutine Dispatcher |
 | `core:designsystem` | Compose Theme, 색상·타이포그래피 등 디자인 토큰 |
 | `core:ui` | AlbumItemCard·UserItemBox·Dialog 등 도메인 공유 Composable |
 | `core:domain` | 여러 화면에서 사용하는 UseCase |
@@ -291,7 +291,7 @@ Momentwo/
 
 ### Feature 모듈의 책임
 
-각 Feature의 `api`는 `@Serializable` 경로 키와 이동 인자를 공개합니다. `impl`은 화면·Composable Route·ViewModel·MVI Contract·내부 그래프를 소유합니다. app은 공개 그래프 등록 함수와 콜백으로 화면을 연결합니다.
+각 Feature의 `api`는 `@Serializable` 경로 키와 이동 인자를 공개합니다. `impl`은 화면·Composable Route·ViewModel·분리된 MVI State/Event/Action/Effect·내부 그래프를 소유합니다. app은 공개 그래프 등록 함수와 콜백으로 화면을 연결합니다.
 
 | Feature | 화면과 기능 |
 |---|---|
@@ -329,7 +329,9 @@ AlbumDetail이 전달한 목록·선택 상태와 콜백을 app의 어댑터가 
 - `Core → Feature`, `Feature → app`, `impl → 다른 Feature impl`, `api → impl/data` 의존은 금지합니다. 현재 모든 Feature API는 serialization 런타임만 사용하며 Core 의존이 없습니다.
 - Repository 인터페이스는 `core:data`, UseCase는 `core:domain`, UI 공용 모델은 `core:model`에 둡니다.
 
-MVI는 `core:common`의 자체 `BaseViewModel`을 사용합니다. Feature ViewModel 9개가 `StateFlow` 상태, `SharedFlow` 이벤트, `Channel` 기반 Effect를 노출합니다. 화면은 `collectAsStateWithLifecycle()`로 상태를 수집하며 이동·Snackbar 등 Effect를 처리합니다. SubAlbum의 상태 소유권은 AlbumDetail에 유지합니다.
+MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다. Feature ViewModel 9개가 UI Event를 Main에서 처리하고 Action으로 최신 State를 갱신합니다. 최초 데이터는 `ScreenState`의 Loading/Success/Error로 구분하며 새로고침 중에는 기존 콘텐츠와 입력·선택을 유지합니다.
+
+화면은 `StateFlow`를 `collectAsStateWithLifecycle()`로 수집하고, `Channel(BUFFERED)` Effect를 STARTED에서 처리합니다. 조회는 최신 요청만 반영하고 동일 쓰기는 중복 차단합니다. 취소는 오류 UI로 변환하지 않습니다. Paging 표시 상태는 LoadState에서 파생하며 SubAlbum 상태는 AlbumDetail이 소유합니다. 세부 규칙과 한계는 [MVI 구현 가이드](docs/architecture/mvi-guide.md)에 정리했습니다.
 
 ---
 
@@ -338,17 +340,17 @@ MVI는 `core:common`의 자체 `BaseViewModel`을 사용합니다. Feature ViewM
 | 분류 | 기술 | 사용처 |
 |---|---|---|
 | Language | Kotlin | 앱·Core·Feature 및 Gradle Kotlin DSL |
-| Architecture | 멀티모듈, Feature api/impl, MVI, ViewModel | 모듈 경계와 화면별 State/Event/Effect |
+| Architecture | 멀티모듈, Feature api/impl, MVI, ViewModel | 모듈 경계, 순수 Reducer와 State/Event/Action/Effect |
 | UI | Jetpack Compose, Material 3 | 선언형 UI, Theme·공유 컴포넌트 |
 | Navigation | Navigation Compose, SavedStateHandle | 타입 기반 경로·인자 복원, 루트/중첩 NavHost |
-| Async | Kotlin Coroutines, Flow | 비동기 요청, 상태·이벤트 스트림 |
+| Async | Kotlin Coroutines, Flow | 취소 보존 요청, StateFlow·Paging Flow·Channel Effect |
 | Dependency Injection | Hilt, KSP | Repository·UseCase·ViewModel 주입과 코드 생성 |
 | Network | Retrofit, OkHttp | HTTP API, 인증 Interceptor/Authenticator |
 | Serialization | Moshi, Kotlinx Serialization | HTTP JSON 변환 / Navigation 경로 직렬화 |
 | Local Storage | Room, Preferences DataStore | 데이터 캐시·Paging / 토큰·세션 설정 |
 | Paging | Paging 3, RemoteMediator | 페이지 단위 로딩과 Room/원격 데이터 연동 |
 | Image | Coil, Coil Compose | 이미지 로딩·Compose 표시 |
-| Testing | JUnit 4, Coroutines Test, AndroidX Test, Compose UI Test | ViewModel 상태·효과, 경로 직렬화, 실제 화면 그래프 회귀 |
+| Testing | JUnit 4, Coroutines Test, AndroidX Test, Compose UI Test | Reducer·요청·취소 회귀, 경로·lifecycle·Paging·Room 기기 검증 |
 | Build | Gradle Kotlin DSL, Version Catalog, Convention Plugins | 의존성·버전·공통 Android/Compose/Hilt 설정 관리 |
 
 라이브러리와 plugin 버전 선언은 [gradle/libs.versions.toml](gradle/libs.versions.toml), 공통 빌드 설정은 [build-logic/convention](build-logic/convention)에서 관리합니다.
@@ -369,7 +371,7 @@ MVI는 `core:common`의 자체 `BaseViewModel`을 사용합니다. Feature ViewM
 ### 빌드·Lint·단위 테스트
 
 ```bash
-./gradlew clean :core:model:assemble assembleDebug :app:lintDebug testDebugUnitTest
+./gradlew clean :core:model:assemble assembleDebug lintDebug testDebugUnitTest
 ```
 
 ### 기기 Navigation 테스트
@@ -378,12 +380,16 @@ MVI는 `core:common`의 자체 `BaseViewModel`을 사용합니다. Feature ViewM
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-연결된 테스트 기기에서 `AppNavigationSmokeTest`가 실제 app 그래프·Hilt·SavedStateHandle·탭·백스택·SubAlbum 슬롯·몰입 모드를 확인합니다. 기본 명령은 제품과 동일한 applicationId를 사용하므로 서명이 맞는 테스트 설치 환경에서 실행합니다. 원본 앱을 보존한 별도 패키지 검증 과정은 [Phase 2 실행 기록](docs/architecture/phase2-feature-migration-plan.md)에 정리했습니다.
+연결된 테스트 기기에서 `AppNavigationSmokeTest`가 실제 app 그래프·Hilt·경로·탭·백스택·SubAlbum 슬롯, 상태별 UI·Paging·Effect lifecycle·시스템 바를 확인합니다. `PhotoCacheTransactionSmokeTest`는 별도 in-memory DB에서 Room 저장 범위와 취소 롤백을 검증합니다. 기본 명령은 제품과 동일한 applicationId를 사용하므로 서명이 맞는 테스트 설치 환경에서 실행합니다. 원본 앱을 보존한 별도 패키지 검증 과정은 [Phase 2 실행 기록](docs/architecture/phase2-feature-migration-plan.md)에 정리했습니다.
 
 2026-10-12 마이그레이션 검증은 clean 빌드·Lint·Feature 단위 테스트 18개·기기 테스트 7개를 통과했습니다. 당시 백엔드 배포 중단으로 실제 API 골든 패스와 정식 업데이트·복원은 미확인이며, [회귀 이슈 #150](https://github.com/Momentwo/Momentwo/issues/150)에서 추적합니다.
 
+2026-10-13 #155 MVI 개선에서는 전체 clean 빌드·Lint·단위 테스트 123개와 SM_N976N API 31 별도 앱 기기 회귀 13개를 통과했습니다. 9개 ViewModel의 Reducer 전환과 구 기반 제거를 완료했으며, API 골든 패스는 계속 #150에서 추적합니다.
+
 ### 아키텍처 문서
 
+- [MVI 구현 가이드](docs/architecture/mvi-guide.md)
+- [MVI 개선·검증 기록](docs/architecture/mvi-improvement-plan.md)
 - [실제 모듈 의존성](docs/architecture/module-graph.md)
 - [멀티모듈 마이그레이션 결과와 계획](docs/architecture/multi-module-migration-plan.md)
 - [Phase 2 구현·검증 기록](docs/architecture/phase2-feature-migration-plan.md)

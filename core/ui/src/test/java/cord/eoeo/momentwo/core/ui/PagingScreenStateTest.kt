@@ -33,4 +33,10 @@ class PagingScreenStateTest {
         assertEquals(expected, render(failure, count = 2))
         assertEquals(expected, render(failure, presented = true))
     }
+    @Test fun appendFailureDoesNotReplaceSuccessfulBodyWithInitialError() {
+        val local = LoadStates(done, done, LoadState.Error(IOException("append")))
+        val combined = CombinedLoadStates(done, done, local.append, local, null)
+        assertEquals(ScreenState.Success(Unit), render(combined, count = 2, presented = true))
+    }
+
 }

@@ -60,6 +60,8 @@ dependencies {
     androidTestImplementation(project(":core:database"))
     androidTestImplementation(libs.room)
     androidTestImplementation(libs.room.ktx)
+    androidTestImplementation(libs.paging)
+    androidTestImplementation(libs.paging.compose)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ui.test.junit4)

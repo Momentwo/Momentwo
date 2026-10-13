@@ -21,7 +21,8 @@ class RequestController(private val scope: CoroutineScope) {
     private var sequence = 0L
     private var closed = false
 
-    fun isRunning(key: RequestKey): Boolean = entries[key]?.job?.isActive == true
+    // LAZY registration is already reserved during onStarted, before job.start().
+    fun isRunning(key: RequestKey): Boolean = entries[key]?.job?.let { !it.isCompleted && !it.isCancelled } == true
 
     fun cancel(key: RequestKey) { entries[key]?.job?.cancel() }
 
@@ -43,7 +44,7 @@ class RequestController(private val scope: CoroutineScope) {
     ): Job? {
         if (closed || !scope.isActive) return null
         val previous = entries[key]
-        if (policy == RequestPolicy.IgnoreWhileRunning && previous?.job?.isActive == true) return null
+        if (policy == RequestPolicy.IgnoreWhileRunning && isRunning(key)) return null
         val id = ++sequence
         val job = scope.launch(start = CoroutineStart.LAZY) {
             // getOrThrow unwraps Result.failure(CancellationException) before it can reach UI callbacks.

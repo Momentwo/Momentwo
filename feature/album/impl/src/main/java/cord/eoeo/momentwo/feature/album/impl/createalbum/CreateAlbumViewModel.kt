@@ -1,167 +1,56 @@
 package cord.eoeo.momentwo.feature.album.impl.createalbum
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.SavedStateHandle
+import cord.eoeo.momentwo.core.common.*
+import cord.eoeo.momentwo.core.data.toUiError
 import cord.eoeo.momentwo.core.domain.album.RequestCreateAlbumUseCase
 import cord.eoeo.momentwo.core.domain.friend.GetFriendListUseCase
-import cord.eoeo.momentwo.core.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class CreateAlbumViewModel
-    @Inject
-    constructor(
-        private val requestCreateAlbumUseCase: RequestCreateAlbumUseCase,
-        private val getFriendListUseCase: GetFriendListUseCase,
-    ) : BaseViewModel<CreateAlbumContract.State, CreateAlbumContract.Event, CreateAlbumContract.Effect>() {
-        override fun createInitialState(): CreateAlbumContract.State = CreateAlbumContract.State()
-
-        override fun handleEvent(newEvent: CreateAlbumContract.Event) {
-            when (newEvent) {
-                is CreateAlbumContract.Event.OnClickInviteFriend -> {
-                    with(uiState.value) {
-                        setState(
-                            copy(
-                                tempSelectedFriendList = selectedFriendList.toList(),
-                                isInviteFriendOpened = true,
-                            ),
-                        )
-                    }
-                }
-
-                is CreateAlbumContract.Event.OnClearFriendItem -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                            val newSelectedList = selectedFriendList.toMutableList()
-                            val newTempMap = tempSelectedFriendMap.toMutableMap()
-
-                            newSelectedList.removeIf { it.nickname == newEvent.nickname }
-                            newTempMap[newEvent.nickname] = false
-
-                            setState(
-                                copy(
-                                    selectedFriendList = newSelectedList,
-                                    tempSelectedFriendList = newSelectedList,
-                                    tempSelectedFriendMap = newTempMap,
-                                ),
-                            )
-                        }
-                    }
-                }
-
-                is CreateAlbumContract.Event.OnCheckedChange -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                            val newTempList = tempSelectedFriendList.toMutableList()
-                            val newTempMap = tempSelectedFriendMap.toMutableMap()
-
-                            if (newEvent.isChecked) {
-                                newTempList.add(newEvent.friendItem)
-                            } else {
-                                newTempList.remove(newEvent.friendItem)
-                            }
-                            newTempMap[newEvent.friendItem.nickname] = newEvent.isChecked
-
-                            setState(
-                                copy(
-                                    tempSelectedFriendList = newTempList,
-                                    tempSelectedFriendMap = newTempMap,
-                                ),
-                            )
-                        }
-                    }
-                }
-
-                is CreateAlbumContract.Event.OnDismissInviteFriend -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                            val newTempMap = friendList.associate { it.nickname to false }.toMutableMap()
-                            selectedFriendList.forEach { newTempMap[it.nickname] = true }
-
-                            setState(
-                                copy(
-                                    tempSelectedFriendList = selectedFriendList.toList(),
-                                    tempSelectedFriendMap = newTempMap,
-                                    isInviteFriendOpened = false,
-                                ),
-                            )
-                        }
-                    }
-                }
-
-                is CreateAlbumContract.Event.OnConfirmInviteFriend -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                            setState(
-                                copy(
-                                    selectedFriendList = tempSelectedFriendList.toList(),
-                                    isInviteFriendOpened = false,
-                                ),
-                            )
-                        }
-                    }
-                }
-
-                is CreateAlbumContract.Event.OnGetFriendList -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                        /*val newFriendList =
-                            listOf(
-                                FriendItem("tester1"),
-                                FriendItem("tester4"),
-                                FriendItem("tester3"),
-                                FriendItem("tester2"),
-                                FriendItem("friend1"),
-                                FriendItem("friend2"),
-                                FriendItem("friend3"),
-                                FriendItem("friend4"),
-                            )
-                        setState(
-                            copy(
-                                friendList = newFriendList,
-                                tempSelectedFriendMap = newFriendList.associate { it.nickname to false },
-                            ),
-                        )*/
-
-                            getFriendListUseCase()
-                                .onSuccess { newFriendList ->
-                                    setState(
-                                        copy(
-                                            friendList = newFriendList,
-                                            tempSelectedFriendMap = newFriendList.associate { it.nickname to false },
-                                        ),
-                                    )
-                                }.onFailure { exception ->
-                                    // TODO: 오류 처리
-                                    Log.e("CreateAlbum", "getFriendList Failure", exception)
-                                }
-                        }
-                    }
-                }
-
-                is CreateAlbumContract.Event.OnRequestCreateAlbum -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                            requestCreateAlbumUseCase(newEvent.title, selectedFriendList.map { it.nickname })
-                                .onSuccess {
-                                    // TODO: 성공 or 실패 Dialog 표시?
-                                    setEffect { CreateAlbumContract.Effect.PopBackStack }
-                                }.onFailure { exception ->
-                                    Log.e("CreateAlbum", "requestCreateAlbum Failure", exception)
-                                }
-                        }
-                    }
-                }
-
-                is CreateAlbumContract.Event.OnBack -> {
-                    setEffect { CreateAlbumContract.Effect.PopBackStack }
-                }
-
-                is CreateAlbumContract.Event.OnError -> {
-                    setEffect { CreateAlbumContract.Effect.ShowSnackbar(newEvent.errorMessage) }
-                }
-            }
+internal class CreateAlbumViewModel @Inject constructor(
+    private val requestCreateAlbumUseCase: RequestCreateAlbumUseCase,
+    private val getFriendListUseCase: GetFriendListUseCase,
+    private val savedStateHandle: SavedStateHandle,
+) : ReducerViewModel<CreateAlbumState, CreateAlbumEvent, CreateAlbumAction, CreateAlbumEffect>(
+    CreateAlbumState(title = savedStateHandle["create_album_title"] ?: ""), CreateAlbumReducer,
+) {
+    private data object Friends : RequestKey
+    private data object Submit : RequestKey
+    override fun handleEvent(event: CreateAlbumEvent) {
+        when (event) {
+            is CreateAlbumEvent.OnTitleChanged -> { savedStateHandle["create_album_title"] = event.title; dispatch(CreateAlbumAction.TitleChanged(event.title)) }
+            CreateAlbumEvent.OnClickInviteFriend -> { dispatch(CreateAlbumAction.OpenInvite); loadFriends() }
+            is CreateAlbumEvent.OnClearFriendItem -> dispatch(CreateAlbumAction.Removed(event.nickname))
+            is CreateAlbumEvent.OnCheckedChange -> dispatch(CreateAlbumAction.Checked(event.isChecked, event.friendItem))
+            CreateAlbumEvent.OnDismissInviteFriend -> dispatch(CreateAlbumAction.DismissInvite)
+            CreateAlbumEvent.OnConfirmInviteFriend -> dispatch(CreateAlbumAction.ConfirmInvite)
+            CreateAlbumEvent.OnGetFriendList -> loadFriends(force = true)
+            is CreateAlbumEvent.OnRequestCreateAlbum -> submit(event.title)
+            CreateAlbumEvent.OnBack -> sendEffect(CreateAlbumEffect.PopBackStack)
+            is CreateAlbumEvent.OnError -> sendEffect(CreateAlbumEffect.ShowSnackbar(event.errorMessage.ifBlank { "앨범을 만들지 못했습니다" }))
         }
     }
+    private fun loadFriends(force: Boolean = false) {
+        if (!force && uiState.value.friends is ScreenState.Success) return
+        requests.launchRequest(Friends, RequestPolicy.LatestWins, request = { getFriendListUseCase() },
+            onStarted = { dispatch(CreateAlbumAction.FriendsStarted) }, onSuccess = { dispatch(CreateAlbumAction.FriendsLoaded(it)) },
+            onFailure = { Log.e("CreateAlbum", "Friend list failed", it); dispatch(CreateAlbumAction.FriendsFailed(it.toUiError())) },
+            onFinished = { dispatch(CreateAlbumAction.FriendsFinished) })
+    }
+    private fun submit(title: String) {
+        val names = uiState.value.selectedFriendList.map { it.nickname }
+        val revision = uiState.value.revision
+        requests.launchRequest(Submit, RequestPolicy.IgnoreWhileRunning, request = { requestCreateAlbumUseCase(title, names) },
+            onStarted = { dispatch(CreateAlbumAction.Started) },
+            onSuccess = {
+                dispatch(CreateAlbumAction.Succeeded)
+                if (uiState.value.revision == revision) emitEffect(CreateAlbumEffect.PopBackStack)
+                else emitEffect(CreateAlbumEffect.ShowSnackbar("요청한 앨범을 만들었습니다"))
+            },
+            onFailure = { Log.e("CreateAlbum", "Creation failed", it); dispatch(CreateAlbumAction.Failed(it.toUiError())); emitEffect(CreateAlbumEffect.ShowSnackbar("앨범을 만들지 못했습니다")) },
+            onFinished = { dispatch(CreateAlbumAction.Finished) })
+    }
+}

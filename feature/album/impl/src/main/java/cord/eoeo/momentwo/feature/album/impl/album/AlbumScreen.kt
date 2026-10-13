@@ -28,56 +28,43 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.ui.EmptyContent
+import kotlinx.coroutines.launch
 import cord.eoeo.momentwo.core.ui.AlbumItemCard
 import cord.eoeo.momentwo.core.model.AlbumItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 
 @Composable
 internal fun AlbumScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
-    uiState: () -> AlbumContract.State,
-    effectFlow: () -> Flow<AlbumContract.Effect>,
-    onEvent: (event: AlbumContract.Event) -> Unit,
+    uiState: () -> AlbumState,
+    effectFlow: () -> Flow<AlbumEffect>,
+    onEvent: (event: AlbumEvent) -> Unit,
     drawerState: () -> DrawerState,
     snackbarHostState: () -> SnackbarHostState,
     onClickDrawer: () -> Unit,
-    onCloseDrawer: () -> Unit,
     navigateToCreateAlbum: () -> Unit,
     navigateToProfile: () -> Unit,
     navigateToFriend: () -> Unit,
     navigateToAlbumDetail: (AlbumItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        onEvent(AlbumContract.Event.OnGetAlbumList)
-
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is AlbumContract.Effect.CloseDrawer -> {
-                        onCloseDrawer()
-                    }
-
-                    is AlbumContract.Effect.ShowSnackbar -> {
-                        snackbarHostState().showSnackbar(
-                            message = effect.message,
-                        )
-                    }
-                }
-            }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            AlbumEffect.CloseDrawer -> launch { drawerState().close() }
+            is AlbumEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
     BackHandler(drawerState().isOpen) {
-        onEvent(AlbumContract.Event.OnCloseDrawer)
+        onEvent(AlbumEvent.OnCloseDrawer)
     }
 
     ModalNavigationDrawer(
@@ -101,15 +88,16 @@ internal fun AlbumScreen(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState()) },
             modifier = Modifier.fillMaxSize(),
         ) { paddingValues ->
+            ScreenContent(uiState().screen, { onEvent(AlbumEvent.OnGetAlbumList) }, Modifier.padding(paddingValues)) { content ->
+                if (content.albums.isEmpty()) EmptyContent() else
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 160.dp),
-                contentPadding = paddingValues,
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .padding(8.dp, 0.dp),
             ) {
-                items(items = uiState().albumList, key = { it.id }) { albumItem ->
+                items(items = content.albums, key = { it.id }) { albumItem ->
                     AlbumItemCard(
                         imageLoader = imageLoader,
                         image = { albumItem.imageUrl },
@@ -119,6 +107,7 @@ internal fun AlbumScreen(
                         modifier = Modifier.animateItem(),
                     )
                 }
+            }
             }
         }
     }

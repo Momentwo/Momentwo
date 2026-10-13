@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.core.data.friend
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -50,37 +51,15 @@ class FriendRemoteMediator(
             }
         }
 
-        friendRemoteDataSource
-            .getFriendPage(pageSize, lastKey?.nextCursor ?: 0)
-            .onSuccess { friendPage ->
-                if (friendPage.nextCursor == null) {
-                    return MediatorResult.Success(endOfPaginationReached = true)
-                }
-                if (loadType == LoadType.REFRESH) {
-                    friendLocalDataSource.deleteAll()
-                    friendLocalDataSource.clearKeys()
-                }
-
-                friendLocalDataSource.insertFriends(
-                    friendPage.friends.map { friendInfo ->
-                        FriendEntity(
-                            nickname = friendInfo.nickname,
-                            userProfileImage = friendInfo.userProfileImage,
-                        )
-                    }
-                )
-
-                friendLocalDataSource.insertKey(
-                    FriendRemoteKeyEntity(
-                        lastUpdated = System.currentTimeMillis(),
-                        nextCursor = friendPage.nextCursor,
-                    )
-                )
-
-                return MediatorResult.Success(endOfPaginationReached = false)
-            }.onFailure { exception ->
-                return MediatorResult.Error(exception)
+        return runSuspendCatching {
+            val page = friendRemoteDataSource.getFriendPage(pageSize, lastKey?.nextCursor ?: 0).getOrThrow()
+            if (loadType == LoadType.REFRESH) {
+                friendLocalDataSource.deleteAll()
+                friendLocalDataSource.clearKeys()
             }
-        return MediatorResult.Error(Exception("Unknown Error"))
+            friendLocalDataSource.insertFriends(page.friends.map { FriendEntity(nickname = it.nickname, userProfileImage = it.userProfileImage) })
+            friendLocalDataSource.insertKey(FriendRemoteKeyEntity(lastUpdated = System.currentTimeMillis(), nextCursor = page.nextCursor))
+            MediatorResult.Success(endOfPaginationReached = page.nextCursor == null)
+        }.getOrElse { MediatorResult.Error(it) }
     }
 }

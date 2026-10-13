@@ -20,14 +20,17 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.ScreenState
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.data.toUiError
+import kotlinx.coroutines.launch
 import cord.eoeo.momentwo.core.ui.SearchUserDialog
 import cord.eoeo.momentwo.feature.friend.impl.friendlist.FriendListScreen
 import cord.eoeo.momentwo.feature.friend.impl.friendrequest.FriendRequestRoute
@@ -35,8 +38,6 @@ import cord.eoeo.momentwo.core.ui.BottomNavigationItem
 import cord.eoeo.momentwo.core.model.FriendItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 
 @Composable
 internal fun FriendScreen(
@@ -44,38 +45,33 @@ internal fun FriendScreen(
     imageLoader: ImageLoader,
     navController: NavHostController,
     navActions: FriendNavigationActions,
-    uiState: () -> FriendContract.State,
-    effectFlow: () -> Flow<FriendContract.Effect>,
-    onEvent: (event: FriendContract.Event) -> Unit,
+    uiState: () -> FriendState,
+    effectFlow: () -> Flow<FriendEffect>,
+    onEvent: (event: FriendEvent) -> Unit,
     friendPagingData: () -> LazyPagingItems<FriendItem>,
+    pagingState: () -> ScreenState<Unit>,
+    retryPagingSource: () -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is FriendContract.Effect.PopBackStack -> {
-                        popBackStack()
-                    }
-
-                    is FriendContract.Effect.ShowSnackbar -> {
-                        snackbarHostState().showSnackbar(
-                            message = effect.message,
-                        )
-                    }
-                }
-            }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            FriendEffect.PopBackStack -> popBackStack()
+            is FriendEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
     if (uiState().isRequestDialogOpened) {
         SearchUserDialog(
             imageLoader = imageLoader,
             searchResult = { uiState().searchUserPagingData },
-            onSearch = { onEvent(FriendContract.Event.OnGetSearchUser(it)) },
-            onDismiss = { onEvent(FriendContract.Event.OnDismissRequestFriend) },
-            onRequestFriend = { onEvent(FriendContract.Event.OnSendFriendRequest(it)) },
+            errorMapper = Throwable::toUiError,
+            onQueryChanged = { onEvent(FriendEvent.OnSearchQueryChanged(it)) },
+            onInteraction = { onEvent(FriendEvent.OnRequestDialogEdited) },
+            onSearch = { onEvent(FriendEvent.OnGetSearchUser(it)) },
+            onDismiss = { onEvent(FriendEvent.OnDismissRequestFriend) },
+            onRequestFriend = { onEvent(FriendEvent.OnSendFriendRequest(it)) },
         )
     }
 
@@ -99,15 +95,15 @@ internal fun FriendScreen(
         topBar = {
             FriendTopAppBar(
                 selectedNavIndex = { uiState().selectedNavIndex },
-                onClickBack = { onEvent(FriendContract.Event.OnBack) },
-                onClickAdd = { onEvent(FriendContract.Event.OnClickRequestFriend) },
+                onClickBack = { onEvent(FriendEvent.OnBack) },
+                onClickAdd = { onEvent(FriendEvent.OnClickRequestFriend) },
             )
         },
         bottomBar = {
             FriendNavigationBar(
                 items = { items },
                 selectedNavIndex = { uiState().selectedNavIndex },
-                onChangeNavIndex = { onEvent(FriendContract.Event.OnChangeNavIndex(it)) },
+                onChangeNavIndex = { onEvent(FriendEvent.OnChangeNavIndex(it)) },
             )
         },
         modifier = Modifier.fillMaxSize(),
@@ -118,48 +114,18 @@ internal fun FriendScreen(
                 startDestination = FriendTabDestination.LIST_ROUTE,
             ) {
                 composable(route = FriendTabDestination.LIST_ROUTE) {
-                    FriendListScreen(
-                        imageLoader = imageLoader,
-                        friendPagingData = friendPagingData,
-                        isFriendListChanged = { uiState().isFriendListChanged },
-                    )
+                    ScreenContent(pagingState(), onRetry = {
+                        if (uiState().friendPagingSource is ScreenState.Error) retryPagingSource() else friendPagingData().retry()
+                    }) {
+                        FriendListScreen(imageLoader, friendPagingData)
+                    }
                 }
                 composable(route = FriendTabDestination.REQUEST_ROUTE) {
                     FriendRequestRoute(
                         coroutineScope = coroutineScope,
                         imageLoader = imageLoader,
-                        receivedRequests = { uiState().receivedRequests },
-                        sentRequests = { uiState().sentRequests },
-                        isReceivedListChanged = { uiState().isReceivedListChanged },
-                        isSentListChanged = { uiState().isSentListChanged },
-                        getReceivedRequests = { onEvent(FriendContract.Event.OnGetReceivedRequests) },
-                        getSentRequests = { onEvent(FriendContract.Event.OnGetSentRequests) },
-                        onClickAccept = { index, nickname ->
-                            onEvent(
-                                FriendContract.Event.OnResponseFriendRequest(
-                                    index,
-                                    nickname,
-                                    true,
-                                ),
-                            )
-                        },
-                        onClickReject = { index, nickname ->
-                            onEvent(
-                                FriendContract.Event.OnResponseFriendRequest(
-                                    index,
-                                    nickname,
-                                    false,
-                                ),
-                            )
-                        },
-                        onClickCancel = { index, userId ->
-                            onEvent(
-                                FriendContract.Event.OnCancelFriendRequest(
-                                    index,
-                                    userId,
-                                ),
-                            )
-                        },
+                        uiState = uiState,
+                        onEvent = onEvent,
                     )
                 }
             }

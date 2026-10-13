@@ -27,77 +27,60 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LifecycleStartEffect
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
-import cord.eoeo.momentwo.core.common.START_EFFECTS_KEY
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.common.ScreenState
+import androidx.compose.ui.window.Dialog
 import cord.eoeo.momentwo.core.ui.InviteDialog
 import cord.eoeo.momentwo.core.ui.UserItemBox
 import cord.eoeo.momentwo.core.model.UserItem
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 
 @Composable
 internal fun CreateAlbumScreen(
     coroutineScope: CoroutineScope,
     title: () -> String,
     onTitleChange: (String) -> Unit,
-    uiState: () -> CreateAlbumContract.State,
-    effectFlow: () -> Flow<CreateAlbumContract.Effect>,
-    onEvent: (event: CreateAlbumContract.Event) -> Unit,
+    uiState: () -> CreateAlbumState,
+    effectFlow: () -> Flow<CreateAlbumEffect>,
+    onEvent: (event: CreateAlbumEvent) -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LifecycleStartEffect(START_EFFECTS_KEY) {
-        onEvent(CreateAlbumContract.Event.OnGetFriendList)
-        onStopOrDispose { }
-    }
-
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is CreateAlbumContract.Effect.PopBackStack -> {
-                        popBackStack()
-                    }
-
-                    is CreateAlbumContract.Effect.ShowSnackbar -> {
-                        snackbarHostState().showSnackbar(
-                            message = effect.message,
-                        )
-                    }
-                }
-            }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            CreateAlbumEffect.PopBackStack -> popBackStack()
+            is CreateAlbumEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
     if (uiState().isInviteFriendOpened) {
-        InviteDialog(
-            friendItemList = { uiState().friendList },
-            selectedFriendList = { uiState().tempSelectedFriendList },
-            onCheckedChange = { isChecked, friendItem ->
-                onEvent(
-                    CreateAlbumContract.Event.OnCheckedChange(
-                        isChecked,
-                        friendItem,
-                    ),
-                )
-            },
-            getIsChecked = { uiState().tempSelectedFriendMap[it.nickname] == true },
-            onDismiss = { onEvent(CreateAlbumContract.Event.OnDismissInviteFriend) },
-            onConfirm = { onEvent(CreateAlbumContract.Event.OnConfirmInviteFriend) },
-        )
+        when (val friends = uiState().friends) {
+            ScreenState.Loading, is ScreenState.Error -> Dialog(onDismissRequest = { onEvent(CreateAlbumEvent.OnDismissInviteFriend) }) {
+                ScreenContent(friends, { onEvent(CreateAlbumEvent.OnGetFriendList) }, Modifier.fillMaxSize()) { }
+            }
+            is ScreenState.Success -> InviteDialog(
+                friendItemList = { friends.content }, selectedFriendList = { uiState().tempSelectedFriendList },
+                onCheckedChange = { checked, friend -> onEvent(CreateAlbumEvent.OnCheckedChange(checked, friend)) },
+                onDismiss = { onEvent(CreateAlbumEvent.OnDismissInviteFriend) },
+                onConfirm = { onEvent(CreateAlbumEvent.OnConfirmInviteFriend) },
+                getIsChecked = { uiState().isChecked(it) },
+            )
+        }
     }
 
     Scaffold(
-        topBar = { CreateAlbumTopAppBar(onClickNavigation = { onEvent(CreateAlbumContract.Event.OnBack) }) },
+        topBar = { CreateAlbumTopAppBar(onClickNavigation = { onEvent(CreateAlbumEvent.OnBack) }) },
         modifier = Modifier.fillMaxSize(),
     ) { paddingValues ->
         Column(
@@ -127,7 +110,7 @@ internal fun CreateAlbumScreen(
                     CaptionText(text = { "앨범을 같이 사용할 친구를 초대하세요" })
                 }
                 ElevatedButton(
-                    onClick = { onEvent(CreateAlbumContract.Event.OnClickInviteFriend) },
+                    onClick = { onEvent(CreateAlbumEvent.OnClickInviteFriend) },
                     modifier =
                         Modifier
                             .align(Alignment.CenterVertically),
@@ -148,7 +131,7 @@ internal fun CreateAlbumScreen(
                 items(items = uiState().selectedFriendList, key = { it.nickname }) { friendItem ->
                     UserItemBox(
                         userItem = { UserItem(0, friendItem.nickname, friendItem.userProfileImage) },
-                        onClickClear = { onEvent(CreateAlbumContract.Event.OnClearFriendItem(it)) },
+                        onClickClear = { onEvent(CreateAlbumEvent.OnClearFriendItem(it)) },
                         modifier =
                             Modifier
                                 .animateItem()
@@ -158,7 +141,8 @@ internal fun CreateAlbumScreen(
             }
 
             ConfirmExtendedFAB(
-                onClick = { onEvent(CreateAlbumContract.Event.OnRequestCreateAlbum(title())) },
+                enabled = !uiState().isLoading,
+                onClick = { onEvent(CreateAlbumEvent.OnRequestCreateAlbum(title())) },
                 modifier =
                     Modifier
                         .align(Alignment.End)
@@ -210,13 +194,14 @@ internal fun CaptionText(text: () -> String) {
 @Composable
 internal fun ConfirmExtendedFAB(
     onClick: () -> Unit,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     ExtendedFloatingActionButton(
-        text = { Text(text = "완료") },
+        text = { Text(text = if (enabled) "완료" else "생성 중") },
         icon = { Icon(Icons.Default.Check, "") },
-        onClick = onClick,
+        onClick = { if (enabled) onClick() },
         elevation = FloatingActionButtonDefaults.loweredElevation(),
-        modifier = modifier,
+        modifier = modifier.semantics { if (!enabled) disabled() },
     )
 }

@@ -20,16 +20,15 @@ internal fun CreateAlbumRoute(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: CreateAlbumViewModel = hiltViewModel(),
 ) {
-    val uiState: CreateAlbumContract.State by viewModel.uiState.collectAsStateWithLifecycle()
-    var title: String by rememberSaveable { mutableStateOf("") }
+    val uiState: CreateAlbumState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CreateAlbumScreen(
         coroutineScope = coroutineScope,
-        title = { title },
-        onTitleChange = { title = it },
+        title = { uiState.title },
+        onTitleChange = { viewModel.onEvent(CreateAlbumEvent.OnTitleChanged(it)) },
         uiState = { uiState },
         effectFlow = { viewModel.effect },
-        onEvent = { event -> viewModel.setEvent(event) },
+        onEvent = { event -> viewModel.onEvent(event) },
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
     )

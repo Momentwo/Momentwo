@@ -19,7 +19,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
@@ -28,44 +27,28 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 
 @Composable
 internal fun LoginScreen(
     coroutineScope: CoroutineScope,
-    uiState: () -> LoginContract.State,
-    effectFlow: () -> Flow<LoginContract.Effect>,
-    onEvent: (event: LoginContract.Event) -> Unit,
+    uiState: () -> LoginState,
+    effectFlow: () -> Flow<LoginEffect>,
+    onEvent: (event: LoginEvent) -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     navigateToAlbum: () -> Unit,
     navigateToSignUp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        onEvent(LoginContract.Event.OnRequestAutoLogin)
-
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is LoginContract.Effect.NavigateToAlbum -> {
-                        navigateToAlbum()
-                    }
-
-                    is LoginContract.Effect.NavigateToSignUp -> {
-                        navigateToSignUp()
-                    }
-
-                    is LoginContract.Effect.ShowSnackbar -> {
-                        snackbarHostState().showSnackbar(
-                            message = effect.message,
-                        )
-                    }
-                }
-            }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            LoginEffect.NavigateToAlbum -> navigateToAlbum()
+            LoginEffect.NavigateToSignUp -> navigateToSignUp()
+            is LoginEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
     Column(
@@ -99,7 +82,7 @@ internal fun LoginScreen(
                 placeholder = { Text(text = "E-Mail") },
                 leadingIcon = { Icon(Icons.Default.Email, "E-Mail") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                onValueChange = { onEvent(LoginContract.Event.OnEmailEntered(it)) },
+                onValueChange = { onEvent(LoginEvent.OnEmailEntered(it)) },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -111,9 +94,9 @@ internal fun LoginScreen(
                 placeholder = { Text(text = "Password") },
                 leadingIcon = { Icon(Icons.Default.Lock, "Password") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                keyboardActions = KeyboardActions(onDone = { onEvent(LoginContract.Event.OnLoginClicked) }),
+                keyboardActions = KeyboardActions(onDone = { onEvent(LoginEvent.OnLoginClicked) }),
                 visualTransformation = PasswordVisualTransformation(),
-                onValueChange = { onEvent(LoginContract.Event.OnPasswordEntered(it)) },
+                onValueChange = { onEvent(LoginEvent.OnPasswordEntered(it)) },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -121,7 +104,8 @@ internal fun LoginScreen(
             )
 
             Button(
-                onClick = { onEvent(LoginContract.Event.OnLoginClicked) },
+                enabled = !uiState().isSubmittingCredentials,
+                onClick = { onEvent(LoginEvent.OnLoginClicked) },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -142,7 +126,7 @@ internal fun LoginScreen(
                     modifier =
                         Modifier
                             .padding(8.dp, 0.dp)
-                            .clickable { onEvent(LoginContract.Event.OnSignUpClicked) },
+                            .clickable { onEvent(LoginEvent.OnSignUpClicked) },
                 )
                 Text(text = "|", modifier = Modifier.padding(16.dp, 0.dp))
                 Text(

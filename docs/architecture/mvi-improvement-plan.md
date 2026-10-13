@@ -40,3 +40,16 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
 - 단계 1: 취소를 실패로 변환하던 suspend runCatching을 전환하고 연속 로그인 저장 작업의 취소 전파와 프로필 저장 실패 처리를 보강한다.
 
   검증: Common 6개, Domain 2개, DataStore 1개 회귀 테스트와 app 빌드·Lint 및 영향 Core Lint 통과.
+
+- 단계 1 병합: #164. SM_N976N API 31 별도 앱 로그인/회원가입/뒤로가기 smoke 1개 통과.
+- 단계 2: ReducerViewModel, ScreenState/RefreshState/UiError, 요청별 정책과 취소 보존 Result 해제, STARTED 단일 Effect 수집 및 Login 파일 분리.
+  Login의 요청 중 입력 유지·중복 제출 차단·수동 로그인에 의한 자동 로그인 교체·멱등 초기화를 검증한다.
+
+## 공통 기반 사용 규칙
+
+- `onEvent`와 요청 등록은 Main에서 실행한다. Reducer의 update는 재실행될 수 있어 상태 외 부수 효과를 금지한다.
+- `launchRequest`는 Result를 getOrThrow로 해제한 요청 부분만 runSuspendCatching으로 감싼다. 성공/실패 콜백의 프로그래밍 오류는 요청 오류로 바꾸지 않는다.
+- 요청 키는 기능별 RequestKey 구현과 대상 ID로 구성한다. 새 토큰을 등록한 뒤 기존 작업을 취소하여 이전 완료 정리가 최신 pending을 해제하지 않게 한다.
+- 화면 초기화는 Route의 LaunchedEffect(viewModel)에서 멱등 initialize를 호출한다. Effect 수집과 분리한다.
+- Snackbar와 애니메이션은 CollectEffect의 STARTED CoroutineScope에서 launch한다. 동기 Navigation 처리는 직접 수행한다.
+- ScreenContent는 전체 본문을 Loading/Success/Error로 분기한다. Success의 refresh만 진행/실패를 표시하며 동일 조회 오류를 Snackbar로 중복 발행하지 않는다.

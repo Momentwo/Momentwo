@@ -1,73 +1,70 @@
 package cord.eoeo.momentwo.feature.auth.impl.login
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
+import cord.eoeo.momentwo.core.common.ReducerViewModel
+import cord.eoeo.momentwo.core.common.RequestKey
+import cord.eoeo.momentwo.core.common.RequestPolicy
+import cord.eoeo.momentwo.core.data.toUiError
 import cord.eoeo.momentwo.core.domain.login.RequestLoginUseCase
 import cord.eoeo.momentwo.core.domain.login.TryAutoLoginUseCase
-import cord.eoeo.momentwo.core.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class LoginViewModel
-    @Inject
-    constructor(
-        private val requestLoginUseCase: RequestLoginUseCase,
-        private val tryAutoLoginUseCase: TryAutoLoginUseCase,
-    ) : BaseViewModel<LoginContract.State, LoginContract.Event, LoginContract.Effect>() {
-        override fun createInitialState(): LoginContract.State = LoginContract.State()
+internal class LoginViewModel @Inject constructor(
+    private val requestLoginUseCase: RequestLoginUseCase,
+    private val tryAutoLoginUseCase: TryAutoLoginUseCase,
+) : ReducerViewModel<LoginState, LoginEvent, LoginAction, LoginEffect>(LoginState(), LoginReducer) {
+    private data object Authentication : RequestKey
+    private var initialized = false
+    private var manualLoginAttempted = false
 
-        override fun handleEvent(newEvent: LoginContract.Event) {
-            when (newEvent) {
-                is LoginContract.Event.OnEmailEntered -> {
-                    with(uiState.value) { setState(copy(email = newEvent.email)) }
-                }
+    fun initialize() {
+        if (initialized) return
+        initialized = true
+        if (!manualLoginAttempted) authenticate(automatic = true)
+    }
 
-                is LoginContract.Event.OnPasswordEntered -> {
-                    with(uiState.value) { setState(copy(password = newEvent.password)) }
-                }
-
-                is LoginContract.Event.OnLoginClicked -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                            setState(copy(isLoading = true))
-                            requestLoginUseCase(email, password)
-                                .onSuccess {
-                                    setState(copy(isLoading = false, isSuccess = true, isError = false))
-                                    setEffect { LoginContract.Effect.NavigateToAlbum }
-                                }.onFailure { exception ->
-                                    Log.e("LoginFailure", "Login Failure", exception)
-                                    setState(copy(isLoading = false, isSuccess = false, isError = true))
-                                    setEvent(LoginContract.Event.OnError("로그인 요청에 실패했습니다"))
-                                }
-                        }
-                    }
-                }
-
-                is LoginContract.Event.OnSignUpClicked -> {
-                    setEffect { LoginContract.Effect.NavigateToSignUp }
-                }
-
-                is LoginContract.Event.OnRequestAutoLogin -> {
-                    viewModelScope.launch {
-                        with(uiState.value) {
-                            setState(copy(isLoading = true))
-                            tryAutoLoginUseCase()
-                                .onSuccess {
-                                    setState(copy(isLoading = false, isSuccess = true, isError = false))
-                                    setEffect { LoginContract.Effect.NavigateToAlbum }
-                                }.onFailure { exception ->
-                                    Log.e("Login", "AutoLogin Failure", exception)
-                                    setState(copy(isLoading = false))
-                                }
-                        }
-                    }
-                }
-
-                is LoginContract.Event.OnError -> {
-                    setEffect { LoginContract.Effect.ShowSnackbar(newEvent.errorMessage) }
+    override fun handleEvent(event: LoginEvent) {
+        when (event) {
+            is LoginEvent.OnEmailEntered -> dispatch(LoginAction.EmailChanged(event.email))
+            is LoginEvent.OnPasswordEntered -> dispatch(LoginAction.PasswordChanged(event.password))
+            LoginEvent.OnLoginClicked -> {
+                if (!uiState.value.isSubmittingCredentials) {
+                    manualLoginAttempted = true
+                    requests.cancel(Authentication)
+                    authenticate(automatic = false)
                 }
             }
+            LoginEvent.OnRequestAutoLogin -> initialize()
+            LoginEvent.OnSignUpClicked -> {
+                requests.cancel(Authentication)
+                sendEffect(LoginEffect.NavigateToSignUp)
+            }
+            is LoginEvent.OnError -> sendEffect(LoginEffect.ShowSnackbar(event.errorMessage))
         }
     }
+
+    private fun authenticate(automatic: Boolean) {
+        val email = uiState.value.email
+        val password = uiState.value.password
+        requests.launchRequest(
+            key = Authentication,
+            policy = RequestPolicy.IgnoreWhileRunning,
+            request = { if (automatic) tryAutoLoginUseCase() else requestLoginUseCase(email, password) },
+            onStarted = { dispatch(LoginAction.Started(automatic)) },
+            onSuccess = {
+                dispatch(LoginAction.Succeeded)
+                emitEffect(LoginEffect.NavigateToAlbum)
+            },
+            onFailure = { exception ->
+                Log.e("Login", "Login request failed", exception)
+                if (!automatic) {
+                    dispatch(LoginAction.Failed(exception.toUiError()))
+                    emitEffect(LoginEffect.ShowSnackbar("로그인 요청에 실패했습니다"))
+                }
+            },
+            onFinished = { dispatch(LoginAction.Finished) },
+        )
+    }
+}

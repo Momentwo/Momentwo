@@ -45,6 +45,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import coil.imageLoader
+import cord.eoeo.momentwo.core.common.UiError
+import java.io.IOException
 import cord.eoeo.momentwo.core.model.UserItem
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
 import kotlinx.coroutines.delay
@@ -58,6 +60,9 @@ fun SearchUserDialog(
     onSearch: (String) -> Unit,
     onDismiss: () -> Unit,
     onRequestFriend: (String) -> Unit,
+    onQueryChanged: (String) -> Unit = {},
+    onInteraction: () -> Unit = {},
+    errorMapper: (Throwable) -> UiError = { if (it is IOException) UiError.Network else UiError.Unknown },
 ) {
     val lazySearchResult = searchResult().collectAsLazyPagingItems()
     var query: String by rememberSaveable { mutableStateOf("") }
@@ -77,7 +82,8 @@ fun SearchUserDialog(
         query = { query },
         selectedUser = { selectedUser },
         isAlertOpened = { isAlertOpened },
-        onQueryChange = { query = it },
+        errorMapper = errorMapper,
+        onQueryChange = { query = it; onQueryChanged(it) },
         onDismissAlert = { isAlertOpened = false },
         onConfirmAlert = {
             isAlertOpened = false
@@ -86,6 +92,7 @@ fun SearchUserDialog(
         onSearch = onSearch,
         onDismiss = onDismiss,
         onSelectUser = { nickname ->
+            onInteraction()
             selectedUser = nickname
             isAlertOpened = true
         },
@@ -106,7 +113,9 @@ fun SearchUserDialogScreen(
     onSearch: (String) -> Unit,
     onDismiss: () -> Unit,
     onSelectUser: (String) -> Unit,
+    errorMapper: (Throwable) -> UiError = { if (it is IOException) UiError.Network else UiError.Unknown },
 ) {
+    val resultsState = rememberPagingScreenState(lazySearchResult(), errorMapper)
     if (isAlertOpened()) {
         SearchUserAlertDialog(
             nickname = selectedUser,
@@ -149,6 +158,10 @@ fun SearchUserDialogScreen(
                 onExpandedChange = { },
                 modifier = Modifier.fillMaxWidth(),
             ) {
+                if (query().isBlank()) {
+                    EmptyContent()
+                } else ScreenContent(resultsState, onRetry = { lazySearchResult().retry() }) {
+                    if (lazySearchResult().itemCount == 0) EmptyContent() else
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -180,6 +193,7 @@ fun SearchUserDialogScreen(
                             )
                         }
                     }
+                }
                 }
             }
         }

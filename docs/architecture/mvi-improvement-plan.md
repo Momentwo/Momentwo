@@ -57,3 +57,8 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
 - 단계 2 병합: #165. Common 18개 + Auth 13개 테스트, app 빌드·Lint, Common/UI Lint와 기기 smoke 통과.
 - 단계 3: SignUp의 State/Event/Action/Effect/Reducer/Validator/Mapper 분리. 첫 오류 검증 순서·정규화·전송 형식 보존, 입력 변경/중복 제출/취소/실패 회귀 추가.
   Profile은 기존 기능을 확장하지 않고 생성자 경로 초기화 및 새 기반으로 전환한다. 현재 상태 변경 Action이 없어 Reducer의 Action 타입은 Nothing이다.
+
+- 단계 3 병합: #166. Auth 16개 테스트 및 빌드·Lint, 별도 앱 smoke 2개 통과. SignUp ViewModel 최종 62줄.
+- 단계 4: Friend의 요청 탭별 ScreenState·사용자 ID 결과 반영·작업별 pending·다이얼로그 변경 버전 도입.
+  Paging LoadState 기반 표시·빈 성공 보존·cache/refresh/append 오류 처리와 Friend 마지막 페이지 저장 수정.
+  UI 6개 + Data 3개 + Friend 9개 회귀 테스트 및 app/영향 모듈 빌드·Lint 통과.

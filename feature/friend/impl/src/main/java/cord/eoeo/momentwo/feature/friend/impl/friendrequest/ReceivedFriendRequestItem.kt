@@ -35,19 +35,10 @@ internal fun ReceivedFriendRequestItem(
     item: () -> FriendRequestItem,
     onClickAccept: () -> Unit,
     onClickReject: () -> Unit,
+    isAccepted: () -> Boolean = { false },
+    isPending: Boolean = false,
 ) {
-    var isAccepted: Boolean by remember { mutableStateOf(false) }
-
-    ReceivedFriendRequestItemScreen(
-        imageLoader = imageLoader,
-        item = item,
-        isAccepted = { isAccepted },
-        onClickAccept = {
-            isAccepted = true
-            onClickAccept()
-        },
-        onClickReject = onClickReject,
-    )
+    ReceivedFriendRequestItemScreen(imageLoader, item, isAccepted, onClickAccept, onClickReject, isPending)
 }
 
 @Composable
@@ -57,6 +48,7 @@ internal fun ReceivedFriendRequestItemScreen(
     isAccepted: () -> Boolean,
     onClickAccept: () -> Unit,
     onClickReject: () -> Unit,
+    isPending: Boolean = false,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -93,7 +85,7 @@ internal fun ReceivedFriendRequestItemScreen(
         )
 
         if (item().isUpdated.not()) {
-            IconButton(onClick = onClickAccept) {
+            IconButton(onClick = onClickAccept, enabled = !isPending) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "",
@@ -101,7 +93,7 @@ internal fun ReceivedFriendRequestItemScreen(
                 )
             }
 
-            IconButton(onClick = onClickReject) {
+            IconButton(onClick = onClickReject, enabled = !isPending) {
                 Icon(
                     imageVector = Icons.Default.Clear,
                     contentDescription = "",

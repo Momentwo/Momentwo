@@ -8,13 +8,16 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import cord.eoeo.momentwo.core.model.FriendItem
+import cord.eoeo.momentwo.core.ui.EmptyContent
+import cord.eoeo.momentwo.core.ui.PagingAppendContent
+import cord.eoeo.momentwo.core.data.toUiError
 
 @Composable
 internal fun FriendListScreen(
     imageLoader: ImageLoader,
     friendPagingData: () -> LazyPagingItems<FriendItem>,
-    isFriendListChanged: () -> Boolean,
 ) {
+    if (friendPagingData().itemCount == 0) { EmptyContent(); return }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -29,5 +32,6 @@ internal fun FriendListScreen(
                 )
             }
         }
+        item { PagingAppendContent(friendPagingData().loadState.append, Throwable::toUiError, { friendPagingData().retry() }) }
     }
 }

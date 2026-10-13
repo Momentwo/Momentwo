@@ -27,6 +27,7 @@ internal fun SentFriendRequestItem(
     imageLoader: ImageLoader,
     item: () -> FriendRequestItem,
     onClickCancel: () -> Unit,
+    isPending: Boolean = false,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -57,6 +58,7 @@ internal fun SentFriendRequestItem(
         if (item().isUpdated.not()) {
             IconButton(
                 onClick = onClickCancel,
+                enabled = !isPending,
                 modifier = Modifier
                     .fillMaxHeight()
                     .wrapContentHeight(align = Alignment.CenterVertically),

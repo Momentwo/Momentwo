@@ -4,36 +4,16 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import coil.ImageLoader
-import cord.eoeo.momentwo.core.model.FriendRequestItem
+import cord.eoeo.momentwo.feature.friend.impl.FriendState
+import cord.eoeo.momentwo.feature.friend.impl.FriendEvent
+import cord.eoeo.momentwo.feature.friend.impl.RequestTab
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
 internal fun FriendRequestRoute(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
-    receivedRequests: () -> List<FriendRequestItem>,
-    sentRequests: () -> List<FriendRequestItem>,
-    isReceivedListChanged: () -> Boolean,
-    isSentListChanged: () -> Boolean,
-    getReceivedRequests: () -> Unit,
-    getSentRequests: () -> Unit,
-    onClickAccept: (Int, String) -> Unit,
-    onClickReject: (Int, String) -> Unit,
-    onClickCancel: (Int, Int) -> Unit,
-    pagerState: PagerState = rememberPagerState(pageCount = { 2 }),
-) {
-    FriendRequestScreen(
-        coroutineScope = coroutineScope,
-        imageLoader = imageLoader,
-        receivedRequests = receivedRequests,
-        sentRequests = sentRequests,
-        isReceivedListChanged = isReceivedListChanged,
-        isSentListChanged = isSentListChanged,
-        getReceivedRequests = getReceivedRequests,
-        getSentRequests = getSentRequests,
-        onClickAccept = onClickAccept,
-        onClickReject = onClickReject,
-        onClickCancel = onClickCancel,
-        pagerState = { pagerState },
-    )
-}
+    uiState: () -> FriendState,
+    onEvent: (FriendEvent) -> Unit,
+    pagerState: PagerState = rememberPagerState(initialPage = if (uiState().requestTab == RequestTab.Received) 0 else 1, pageCount = { 2 }),
+) { FriendRequestScreen(coroutineScope, imageLoader, uiState, onEvent, { pagerState }) }

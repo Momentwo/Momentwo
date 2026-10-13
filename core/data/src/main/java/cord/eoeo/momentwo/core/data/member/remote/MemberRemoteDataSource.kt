@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.member.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.member.MemberDataSource
 import cord.eoeo.momentwo.core.data.model.AssignAdminToMember
 import cord.eoeo.momentwo.core.data.model.EditMembers
@@ -13,21 +15,21 @@ class MemberRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : MemberDataSource {
     override suspend fun exitFromAlbum(albumId: Int): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 memberService.deleteExitMember(albumId)
             }
         }
 
     override suspend fun requestInviteMembers(inviteMembers: InviteMembers): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 memberService.postInviteMembers(inviteMembers)
             }
         }
 
     override suspend fun getMemberList(albumId: Int): Result<MemberList> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 memberService.getMemberList(albumId)
             }
@@ -37,21 +39,21 @@ class MemberRemoteDataSource(
         albumId: Int,
         kickMemberIds: String,
     ): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 memberService.deleteKickMembers(albumId, kickMemberIds)
             }
         }
 
     override suspend fun assignAdminToMember(assignAdminToMember: AssignAdminToMember): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 memberService.putMemberAssignAdmin(assignAdminToMember)
             }
         }
 
     override suspend fun editMembersPermission(editMembers: EditMembers): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 memberService.putEditMembersPermission(editMembers)
             }

@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.photo.local
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import android.graphics.Bitmap
 import androidx.paging.PagingSource
 import cord.eoeo.momentwo.core.data.photo.PhotoDataSource
@@ -49,7 +51,7 @@ class PhotoLocalDataSource(
     }
 
     override suspend fun downloadPhoto(bitmap: Bitmap, outputStream: OutputStream): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 outputStream.use {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)

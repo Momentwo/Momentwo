@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.friend.local
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import androidx.paging.PagingSource
 import cord.eoeo.momentwo.core.data.friend.FriendDataSource
 import cord.eoeo.momentwo.core.database.FriendDao
@@ -18,7 +20,7 @@ class FriendLocalDataSource(
         friendDao.getFriendPagingSource()
 
     override suspend fun getFriendList(): Result<List<FriendEntity>> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendDao.getFriendList()
             }

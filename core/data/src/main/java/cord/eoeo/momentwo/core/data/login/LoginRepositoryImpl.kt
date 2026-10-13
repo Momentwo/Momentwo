@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.login
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.model.LoginRequest
 import cord.eoeo.momentwo.core.data.login.LoginRepository
 import cord.eoeo.momentwo.core.data.mapper.ProfileMapper
@@ -13,7 +15,7 @@ class LoginRepositoryImpl(
         email: String,
         password: String,
     ): Result<LoginData> =
-        runCatching {
+        runSuspendCatching {
             val loginResponse = loginRemoteDataSource.requestLogin(LoginRequest(email, password))
 
             val accessToken = loginResponse.headers()["Authorization"] ?: throw Exception("Access Token cannot be null")

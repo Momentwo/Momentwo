@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.friend.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.friend.FriendDataSource
 import cord.eoeo.momentwo.core.data.model.FriendPage
 import cord.eoeo.momentwo.core.data.model.FriendRequestResponse
@@ -14,7 +16,7 @@ class FriendRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : FriendDataSource.Remote {
     override suspend fun sendFriendRequest(nickname: String): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendService.postFriendRequest(nickname)
             }
@@ -24,14 +26,14 @@ class FriendRemoteDataSource(
         nickname: String,
         isAccepted: Boolean,
     ): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendService.postResponseFriendRequest(FriendRequestResponse(nickname, isAccepted))
             }
         }
 
     override suspend fun cancelFriendRequest(userId: Int): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendService.deleteFriendRequest(userId)
             }
@@ -41,21 +43,21 @@ class FriendRemoteDataSource(
         size: Int,
         cursor: Int,
     ): Result<FriendPage> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendService.getFriendList(size, cursor)
             }
         }
 
     override suspend fun getSentRequests(): Result<SentFriendRequestList> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendService.getSentRequests()
             }
         }
 
     override suspend fun getReceivedRequests(): Result<ReceivedFriendRequestList> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendService.getReceivedRequests()
             }
@@ -66,7 +68,7 @@ class FriendRemoteDataSource(
         page: Int,
         size: Int,
     ): Result<SearchUser> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 friendService.getSearchUsers(nickname, page, size)
             }

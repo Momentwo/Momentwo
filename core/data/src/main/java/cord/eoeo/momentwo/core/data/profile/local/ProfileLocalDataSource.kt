@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.profile.local
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.profile.ProfileDataSource
 import cord.eoeo.momentwo.core.database.ProfileDao
 import cord.eoeo.momentwo.core.database.ProfileEntity
@@ -11,14 +13,14 @@ class ProfileLocalDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : ProfileDataSource.Local {
     override suspend fun storeProfile(profile: ProfileEntity): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 profileDao.insertUser(profile)
             }
         }
 
     override suspend fun getProfile(): Result<ProfileEntity> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 profileDao.getProfile()
             }

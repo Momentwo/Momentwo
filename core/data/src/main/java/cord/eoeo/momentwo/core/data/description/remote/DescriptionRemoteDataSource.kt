@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.description.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.description.DescriptionDataSource
 import cord.eoeo.momentwo.core.data.model.CreateDescription
 import cord.eoeo.momentwo.core.data.model.Description
@@ -12,14 +14,14 @@ class DescriptionRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : DescriptionDataSource {
     override suspend fun createDescription(createDescription: CreateDescription): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 descriptionService.postCreateDescription(createDescription)
             }
         }
 
     override suspend fun editDescription(editDescription: EditDescription): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 descriptionService.putEditDescription(editDescription)
             }
@@ -29,7 +31,7 @@ class DescriptionRemoteDataSource(
         albumId: Int,
         photoId: Int,
     ): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 descriptionService.deleteDescription(albumId, photoId)
             }
@@ -39,7 +41,7 @@ class DescriptionRemoteDataSource(
         albumId: Int,
         photoId: Int,
     ): Result<Description> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 descriptionService.getDescription(albumId, photoId)
             }

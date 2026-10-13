@@ -1,4 +1,8 @@
 package cord.eoeo.momentwo.core.domain.login
+
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import javax.inject.Inject
 import cord.eoeo.momentwo.core.data.login.LoginRepository
 
@@ -14,11 +18,14 @@ class RequestLoginUseCase @Inject constructor(
         email: String,
         password: String,
     ): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             val loginData = loginRepository.requestLogin(email, password).getOrThrow()
 
+            currentCoroutineContext().ensureActive()
             preferenceRepository.storeAccessToken(loginData.accessToken)
+            currentCoroutineContext().ensureActive()
             preferenceRepository.storeRefreshToken(loginData.refreshToken)
-            profileRepository.storeProfile(loginData.profile)
+            currentCoroutineContext().ensureActive()
+            profileRepository.storeProfile(loginData.profile).getOrThrow()
         }
 }

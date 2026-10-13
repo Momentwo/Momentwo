@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.album.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.album.AlbumDataSource
 import cord.eoeo.momentwo.core.data.model.AlbumImage
 import cord.eoeo.momentwo.core.data.model.AlbumInfoList
@@ -17,70 +19,70 @@ class AlbumRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : AlbumDataSource {
     override suspend fun requestCreateAlbum(createAlbumInfo: CreateAlbumInfo): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.postCreateAlbum(createAlbumInfo)
             }
         }
 
     override suspend fun deleteAlbum(albumId: Int): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.deleteAlbum(albumId)
             }
         }
 
     override suspend fun requestPresignedUrl(presignedRequest: PresignedRequest): Result<PresignedUrl> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.postAlbumPresigned(presignedRequest)
             }
         }
 
     override suspend fun changeAlbumImage(albumImage: AlbumImage): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.putAlbumImage(albumImage)
             }
         }
 
     override suspend fun deleteAlbumImage(albumId: Int): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.deleteAlbumImage(albumId)
             }
         }
 
     override suspend fun changeAlbumSubTitle(albumSubTitle: AlbumSubTitle): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.putAlbumSubTitle(albumSubTitle)
             }
         }
 
     override suspend fun deleteAlbumSubTitle(albumId: Int): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.deleteAlbumSubTitle(albumId)
             }
         }
 
     override suspend fun changeAlbumTitle(editTitle: EditAlbumTitle): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.putAlbumTitle(editTitle)
             }
         }
 
     override suspend fun getAlbumList(): Result<AlbumInfoList> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.getAlbumList()
             }
         }
 
     override suspend fun getAlbumRole(albumId: Int): Result<AlbumRole> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 albumService.getAlbumRole(albumId)
             }

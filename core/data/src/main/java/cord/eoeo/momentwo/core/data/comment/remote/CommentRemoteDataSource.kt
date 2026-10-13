@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.comment.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.comment.CommentDataSource
 import cord.eoeo.momentwo.core.data.model.CommentPage
 import cord.eoeo.momentwo.core.data.model.CreateComment
@@ -12,14 +14,14 @@ class CommentRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : CommentDataSource {
     override suspend fun createComment(createComment: CreateComment): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 commentService.postCreateComment(createComment)
             }
         }
 
     override suspend fun editComment(editComment: EditComment): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 commentService.putEditComment(editComment)
             }
@@ -29,7 +31,7 @@ class CommentRemoteDataSource(
         albumId: Int,
         commentId: Int,
     ): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 commentService.deleteComment(albumId, commentId)
             }
@@ -41,7 +43,7 @@ class CommentRemoteDataSource(
         size: Int,
         cursor: Int,
     ): Result<CommentPage> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 commentService.getCommentPage(albumId, photoId, size, cursor)
             }

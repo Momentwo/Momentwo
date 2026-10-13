@@ -19,14 +19,14 @@ internal fun ProfileRoute(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
-    val uiState: ProfileContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState: ProfileState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ProfileScreen(
         coroutineScope = coroutineScope,
         imageLoader = imageLoader,
         uiState = { uiState },
         effectFlow = { viewModel.effect },
-        onEvent = { event -> viewModel.setEvent(event) },
+        onEvent = { event -> viewModel.onEvent(event) },
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
     )

@@ -21,7 +21,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -30,13 +29,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.ui.CollectEffect
 import cord.eoeo.momentwo.feature.auth.impl.signup.transformation.DateVisualTransformation
 import cord.eoeo.momentwo.feature.auth.impl.signup.transformation.PhoneVisualTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -44,43 +41,28 @@ import kotlinx.coroutines.launch
 internal fun SignUpScreen(
     coroutineScope: CoroutineScope,
     pagerState: () -> PagerState,
-    uiState: () -> SignUpContract.State,
-    effectFlow: () -> Flow<SignUpContract.Effect>,
-    onEvent: (event: SignUpContract.Event) -> Unit,
+    uiState: () -> SignUpState,
+    effectFlow: () -> Flow<SignUpEffect>,
+    onEvent: (event: SignUpEvent) -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     navigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow().onEach { effect ->
-            when (effect) {
-                is SignUpContract.Effect.ScrollToNextPage -> {
-                    launch { pagerState().animateScrollToPage(page = 1) }
-                }
-
-                is SignUpContract.Effect.ScrollToPreviousPage -> {
-                    launch { pagerState().animateScrollToPage(page = 0) }
-                }
-
-                is SignUpContract.Effect.NavigateToLogin -> {
-                    navigateToLogin()
-                }
-
-                is SignUpContract.Effect.ShowSnackbar -> {
-                    snackbarHostState().showSnackbar(
-                        message = effect.message,
-                    )
-                }
-            }
-        }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            SignUpEffect.ScrollToNextPage -> launch { pagerState().animateScrollToPage(1) }
+            SignUpEffect.ScrollToPreviousPage -> launch { pagerState().animateScrollToPage(0) }
+            SignUpEffect.NavigateToLogin -> navigateToLogin()
+            is SignUpEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
     BackHandler {
         if (pagerState().currentPage == 0) {
             popBackStack()
         } else {
-            onEvent(SignUpContract.Event.OnBack)
+            onEvent(SignUpEvent.OnBack)
         }
     }
 
@@ -119,11 +101,12 @@ internal fun SignUpScreen(
                 verticalAlignment = Alignment.Bottom,
             ) {
                 Button(
+                    enabled = !uiState().isLoading,
                     onClick = {
                         if (pagerState().currentPage == 0) {
-                            onEvent(SignUpContract.Event.OnNextClicked)
+                            onEvent(SignUpEvent.OnNextClicked)
                         } else {
-                            onEvent(SignUpContract.Event.OnAcceptClicked)
+                            onEvent(SignUpEvent.OnAcceptClicked)
                         }
                     },
                 ) {
@@ -140,10 +123,10 @@ internal fun SignUpScreen(
 
 @Composable
 internal fun FirstSignUpPage(
-    email: () -> SignUpContract.InfoState,
-    password: () -> SignUpContract.InfoState,
-    passwordCheck: () -> SignUpContract.InfoState,
-    onEvent: (event: SignUpContract.Event) -> Unit
+    email: () -> SignUpFieldState,
+    password: () -> SignUpFieldState,
+    passwordCheck: () -> SignUpFieldState,
+    onEvent: (event: SignUpEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -158,7 +141,7 @@ internal fun FirstSignUpPage(
             isError = { email().isError },
             errorMessage = { email().errorMessage },
         ) {
-            onEvent(SignUpContract.Event.OnEmailEntered(it))
+            onEvent(SignUpEvent.OnEmailEntered(it))
         }
 
         ItemText(text = { "비밀번호" })
@@ -170,7 +153,7 @@ internal fun FirstSignUpPage(
             isError = { password().isError },
             errorMessage = { password().errorMessage },
         ) {
-            onEvent(SignUpContract.Event.OnPasswordEntered(it))
+            onEvent(SignUpEvent.OnPasswordEntered(it))
         }
 
         ItemText(text = { "비밀번호 재입력" })
@@ -182,18 +165,18 @@ internal fun FirstSignUpPage(
             isError = { passwordCheck().isError },
             errorMessage = { passwordCheck().errorMessage },
         ) {
-            onEvent(SignUpContract.Event.OnPasswordCheckEntered(it))
+            onEvent(SignUpEvent.OnPasswordCheckEntered(it))
         }
     }
 }
 
 @Composable
 internal fun SecondSignUpPage(
-    nickname: () -> SignUpContract.InfoState,
-    name: () -> SignUpContract.InfoState,
-    birthday: () -> SignUpContract.InfoState,
-    phone: () -> SignUpContract.InfoState,
-    onEvent: (event: SignUpContract.Event) -> Unit
+    nickname: () -> SignUpFieldState,
+    name: () -> SignUpFieldState,
+    birthday: () -> SignUpFieldState,
+    phone: () -> SignUpFieldState,
+    onEvent: (event: SignUpEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -207,7 +190,7 @@ internal fun SecondSignUpPage(
             isError = { nickname().isError },
             errorMessage = { nickname().errorMessage },
         ) {
-            onEvent(SignUpContract.Event.OnNicknameEntered(it))
+            onEvent(SignUpEvent.OnNicknameEntered(it))
         }
 
         ItemText(text = { "이름" })
@@ -217,7 +200,7 @@ internal fun SecondSignUpPage(
             isError = { name().isError },
             errorMessage = { name().errorMessage },
         ) {
-            onEvent(SignUpContract.Event.OnNameEntered(it))
+            onEvent(SignUpEvent.OnNameEntered(it))
         }
 
         ItemText(text = { "생년월일" })
@@ -229,7 +212,7 @@ internal fun SecondSignUpPage(
             isError = { birthday().isError },
             errorMessage = { birthday().errorMessage },
         ) {
-            onEvent(SignUpContract.Event.OnBirthdayEntered(it))
+            onEvent(SignUpEvent.OnBirthdayEntered(it))
         }
 
         ItemText(text = { "전화번호" })
@@ -241,7 +224,7 @@ internal fun SecondSignUpPage(
             isError = { phone().isError },
             errorMessage = { phone().errorMessage },
         ) {
-            onEvent(SignUpContract.Event.OnPhoneEntered(it))
+            onEvent(SignUpEvent.OnPhoneEntered(it))
         }
     }
 }

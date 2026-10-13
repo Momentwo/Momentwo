@@ -7,7 +7,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -15,43 +14,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.imageLoader
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.ui.CollectEffect
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @Composable
 internal fun ProfileScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
-    uiState: () -> ProfileContract.State,
-    effectFlow: () -> Flow<ProfileContract.Effect>,
-    onEvent: (event: ProfileContract.Event) -> Unit,
+    uiState: () -> ProfileState,
+    effectFlow: () -> Flow<ProfileEffect>,
+    onEvent: (event: ProfileEvent) -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is ProfileContract.Effect.PopBackStack -> {
-                        popBackStack()
-                    }
-
-                    is ProfileContract.Effect.ShowSnackbar -> {
-                        coroutineScope.launch {
-                            snackbarHostState().showSnackbar(
-                                message = effect.message,
-                            )
-                        }
-                    }
-                }
-            }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            ProfileEffect.PopBackStack -> popBackStack()
+            is ProfileEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
     Scaffold(
@@ -75,7 +60,7 @@ private fun ProfileScreenPreview() {
         ProfileScreen(
             coroutineScope = rememberCoroutineScope(),
             imageLoader = LocalContext.current.imageLoader,
-            uiState = { ProfileContract.State() },
+            uiState = { ProfileState() },
             effectFlow = { emptyFlow() },
             onEvent = { },
             snackbarHostState = { SnackbarHostState() },

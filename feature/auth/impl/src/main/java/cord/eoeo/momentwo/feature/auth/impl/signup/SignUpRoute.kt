@@ -22,14 +22,14 @@ internal fun SignUpRoute(
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val pagerState = rememberPagerState(pageCount = { 2 })
-    val uiState: SignUpContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState: SignUpState by viewModel.uiState.collectAsStateWithLifecycle()
 
     SignUpScreen(
         coroutineScope = coroutineScope,
         pagerState = { pagerState },
         uiState = { uiState },
         effectFlow = { viewModel.effect },
-        onEvent = { event -> viewModel.setEvent(event) },
+        onEvent = { event -> viewModel.onEvent(event) },
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
         navigateToLogin = navigateToLogin,

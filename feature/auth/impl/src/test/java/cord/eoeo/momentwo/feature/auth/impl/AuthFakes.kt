@@ -44,10 +44,12 @@ internal class FakeProfileRepository : ProfileRepository {
 }
 
 internal class FakeSignUpRepository : SignUpRepository {
+    var result: Result<Unit> = Result.success(Unit)
+    var response: (suspend () -> Result<Unit>)? = null
     val requests = mutableListOf<User>()
     override suspend fun requestSignUp(user: User): Result<Unit> {
         requests += user
-        return Result.success(Unit)
+        return response?.invoke() ?: result
     }
     override suspend fun checkEmail(email: String) = Result.success(Unit)
     override suspend fun checkNickname(nickname: String) = Result.success(Unit)

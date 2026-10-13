@@ -25,8 +25,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.runtime.key
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -37,7 +37,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.ImageLoader
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.ui.EmptyContent
+import androidx.compose.ui.window.Dialog
 import cord.eoeo.momentwo.feature.albumdetail.impl.albumsetting.AlbumSettingRoute
 import cord.eoeo.momentwo.feature.albumdetail.impl.albumsetting.ChangeImageRoute
 import cord.eoeo.momentwo.feature.albumdetail.impl.member.MemberScreen
@@ -48,10 +51,7 @@ import cord.eoeo.momentwo.core.ui.BottomNavigationItem
 import cord.eoeo.momentwo.core.model.MemberAuth
 import cord.eoeo.momentwo.core.model.TextFieldDialogItem
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,38 +62,25 @@ internal fun AlbumDetailScreen(
     navActions: AlbumDetailNavigationActions,
     scrollBehavior: TopAppBarScrollBehavior,
     imageLoader: ImageLoader,
-    uiState: () -> AlbumDetailContract.State,
-    effectFlow: () -> Flow<AlbumDetailContract.Effect>,
-    onEvent: (event: AlbumDetailContract.Event) -> Unit,
+    uiState: () -> AlbumDetailState,
+    effectFlow: () -> Flow<AlbumDetailEffect>,
+    onEvent: (event: AlbumDetailEvent) -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     navigateToPhotoList: (Int, Int, String, String) -> Unit,
     subAlbumContent: @Composable (SubAlbumContentState, SubAlbumContentActions) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is AlbumDetailContract.Effect.PopBackStack -> {
-                        popBackStack()
-                    }
-
-                    is AlbumDetailContract.Effect.PopBackStackInAlbumDetail -> {
-                        navActions.popBackStack()
-                    }
-
-                    is AlbumDetailContract.Effect.ShowSnackbar -> {
-                        snackbarHostState().showSnackbar(
-                            message = effect.message,
-                        )
-                    }
-                }
-            }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            AlbumDetailEffect.PopBackStack -> popBackStack()
+            AlbumDetailEffect.PopBackStackInAlbumDetail -> navActions.popBackStack()
+            is AlbumDetailEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
     BackHandler {
-        onEvent(AlbumDetailContract.Event.OnBack)
+        onEvent(AlbumDetailEvent.OnBack)
     }
 
     val navItems =
@@ -125,8 +112,8 @@ internal fun AlbumDetailScreen(
                 description = "새 서브앨범의 제목을 입력하세요",
                 onConfirm = {
                     onEvent(
-                        AlbumDetailContract.Event.OnSubAlbumEvents(
-                            AlbumDetailContract.SubAlbumEvents.Create(
+                        AlbumDetailEvent.OnSubAlbumEvents(
+                            SubAlbumEvent.Create(
                                 subAlbumTitle = it,
                             ),
                         ),
@@ -138,8 +125,8 @@ internal fun AlbumDetailScreen(
                 description = "변경할 제목을 입력하세요",
                 onConfirm = {
                     onEvent(
-                        AlbumDetailContract.Event.OnAlbumSettingEvents(
-                            AlbumDetailContract.AlbumSettingEvents.EditTitle(
+                        AlbumDetailEvent.OnAlbumSettingEvents(
+                            AlbumSettingEvent.EditTitle(
                                 title = it,
                             ),
                         ),
@@ -152,8 +139,8 @@ internal fun AlbumDetailScreen(
                 description = "변경할 부제목을 입력하세요",
                 onConfirm = {
                     onEvent(
-                        AlbumDetailContract.Event.OnAlbumSettingEvents(
-                            AlbumDetailContract.AlbumSettingEvents.EditSubTitle(
+                        AlbumDetailEvent.OnAlbumSettingEvents(
+                            AlbumSettingEvent.EditSubTitle(
                                 subTitle = it,
                             ),
                         ),
@@ -164,34 +151,32 @@ internal fun AlbumDetailScreen(
         )
 
     if (uiState().isInviteDialogOpened) {
-        InviteDialog(
-            friendItemList = { uiState().friendList },
-            selectedFriendList = { uiState().selectedFriendList },
-            onCheckedChange = { isChecked, friendItem ->
-                onEvent(
-                    AlbumDetailContract.Event.OnChangeFriendSelected(
-                        isSelected = isChecked,
-                        friendItem = friendItem,
-                    ),
-                )
-            },
-            getIsChecked = { uiState().selectedFriendList.contains(it) },
-            onDismiss = { onEvent(AlbumDetailContract.Event.OnDismissInviteFriend) },
-            onConfirm = { onEvent(AlbumDetailContract.Event.OnConfirmInviteFriend) },
-        )
+        when (val friends = uiState().friends) {
+            cord.eoeo.momentwo.core.common.ScreenState.Loading,
+            is cord.eoeo.momentwo.core.common.ScreenState.Error -> Dialog(onDismissRequest = { onEvent(AlbumDetailEvent.OnDismissInviteFriend) }) {
+                ScreenContent(friends, { onEvent(AlbumDetailEvent.OnGetFriendList) }, Modifier.fillMaxSize()) { }
+            }
+            is cord.eoeo.momentwo.core.common.ScreenState.Success -> InviteDialog(
+                friendItemList = { friends.content }, selectedFriendList = { uiState().selectedFriendList },
+                onCheckedChange = { selected, item -> onEvent(AlbumDetailEvent.OnChangeFriendSelected(selected, item)) },
+                onDismiss = { onEvent(AlbumDetailEvent.OnDismissInviteFriend) },
+                onConfirm = { onEvent(AlbumDetailEvent.OnConfirmInviteFriend) },
+                getIsChecked = { item -> uiState().selectedFriendList.any { it.nickname == item.nickname } },
+            )
+        }
     }
-
-    if (uiState().textFieldDialogIndex >= 0) {
-        val item = textFieldDialogItems[uiState().textFieldDialogIndex]
-
-        TextFieldDialog(
-            titleText = { item.titleText },
-            description = { item.description },
-            onDismiss = { onEvent(AlbumDetailContract.Event.OnDismissTextFieldDialog) },
-            onConfirm = item.onConfirm,
-            placeholder = { item.placeholder },
-        )
+    val dialogItem = when (uiState().dialog) {
+        AlbumDetailDialog.None -> null
+        AlbumDetailDialog.CreateSubAlbum -> textFieldDialogItems[0]
+        AlbumDetailDialog.EditTitle -> textFieldDialogItems[1]
+        AlbumDetailDialog.EditSubtitle -> textFieldDialogItems[2]
     }
+    if (dialogItem != null) key(uiState().dialogSession) { TextFieldDialog(
+        titleText = { dialogItem.titleText }, description = { dialogItem.description },
+        onDismiss = { onEvent(AlbumDetailEvent.OnDismissTextFieldDialog) },
+        onConfirm = dialogItem.onConfirm, placeholder = { dialogItem.placeholder },
+        onValueChanged = { onEvent(AlbumDetailEvent.OnDialogEdited) },
+    ) }
 
     Scaffold(
         topBar = {
@@ -204,23 +189,19 @@ internal fun AlbumDetailScreen(
                 isInChangeImage = { uiState().isInChangeImage },
                 onClickBack = {
                     if (uiState().isInChangeImage) {
-                        onEvent(AlbumDetailContract.Event.OnBackInAlbumDetail)
-                        coroutineScope.launch {
-                            delay(1000)
-                            onEvent(AlbumDetailContract.Event.OnCancelChangeImage)
-                        }
+                        onEvent(AlbumDetailEvent.OnBackInAlbumDetail)
                     } else {
-                        onEvent(AlbumDetailContract.Event.OnBack)
+                        onEvent(AlbumDetailEvent.OnBack)
                     }
                 },
-                onClickAdd = { onEvent(AlbumDetailContract.Event.OnClickAdd) },
-                onClickEdit = { onEvent(AlbumDetailContract.Event.OnClickEdit) },
-                onClickCancel = { onEvent(AlbumDetailContract.Event.OnCancelEdit) },
-                onClickConfirm = { onEvent(AlbumDetailContract.Event.OnConfirmEdit) },
+                onClickAdd = { onEvent(AlbumDetailEvent.OnClickAdd) },
+                onClickEdit = { onEvent(AlbumDetailEvent.OnClickEdit) },
+                onClickCancel = { onEvent(AlbumDetailEvent.OnCancelEdit) },
+                onClickConfirm = { onEvent(AlbumDetailEvent.OnConfirmEdit) },
                 onClickChangeImage = {
                     onEvent(
-                        AlbumDetailContract.Event.OnAlbumSettingEvents(
-                            AlbumDetailContract.AlbumSettingEvents.ChangeImage,
+                        AlbumDetailEvent.OnAlbumSettingEvents(
+                            AlbumSettingEvent.ChangeImage,
                         ),
                     )
                 },
@@ -231,8 +212,8 @@ internal fun AlbumDetailScreen(
             AlbumDetailBottomNavigation(
                 items = { navItems },
                 selectedNavIndex = { uiState().selectedNavIndex },
-                onChangeNavIndex = { onEvent(AlbumDetailContract.Event.OnChangeNavIndex(it)) },
-                onChangeIsInChangeImage = { onEvent(AlbumDetailContract.Event.OnChangeIsInChangeImage(false)) },
+                onChangeNavIndex = { onEvent(AlbumDetailEvent.OnChangeNavIndex(it)) },
+                onChangeIsInChangeImage = { onEvent(AlbumDetailEvent.OnChangeIsInChangeImage(false)) },
             )
         },
         modifier =
@@ -249,37 +230,42 @@ internal fun AlbumDetailScreen(
                     .padding(paddingValues),
         ) {
             composable<SubAlbumListDestination> {
+                ScreenContent(uiState().subAlbums, { onEvent(AlbumDetailEvent.OnRetryTab(DetailTab.SubAlbums)) }) { content ->
                 subAlbumContent(
                     SubAlbumContentState(
-                        items = uiState().subAlbumList,
+                        items = content.items,
                         isEditMode = uiState().isEditMode,
                         selectedIds = uiState().selectedSubAlbumIds,
                     ),
                     SubAlbumContentActions(
-                        getSubAlbums = { onEvent(AlbumDetailContract.Event.OnSubAlbumEvents(AlbumDetailContract.SubAlbumEvents.GetSubAlbums)) },
+                        getSubAlbums = { onEvent(AlbumDetailEvent.OnSubAlbumEvents(SubAlbumEvent.GetSubAlbums)) },
                         onClickItem = { subAlbumId, subAlbumTitle ->
+                            onEvent(AlbumDetailEvent.OnSubAlbumVisited)
                             navigateToPhotoList(uiState().albumItem.id, subAlbumId, uiState().albumItem.title, subAlbumTitle)
                         },
                         onChangeSelected = { isSelected, subAlbumId ->
-                            onEvent(AlbumDetailContract.Event.OnChangeSubAlbumSelected(isSelected, subAlbumId))
+                            onEvent(AlbumDetailEvent.OnChangeSubAlbumSelected(isSelected, subAlbumId))
                         },
                         onBack = {
-                            onEvent(if (uiState().isEditMode) AlbumDetailContract.Event.OnCancelEdit else AlbumDetailContract.Event.OnBack)
+                            onEvent(if (uiState().isEditMode) AlbumDetailEvent.OnCancelEdit else AlbumDetailEvent.OnBack)
                         },
                     ),
                 )
+
+                }
             }
 
             composable<AlbumDetailTabDestination.Member> {
+                ScreenContent(uiState().members, { onEvent(AlbumDetailEvent.OnRetryTab(DetailTab.Members)) }) { content ->
                 MemberScreen(
-                    memberList = { uiState().memberList },
+                    memberList = { content.items },
                     isEditMode = { uiState().isEditMode },
-                    getMembers = { onEvent(AlbumDetailContract.Event.OnMemberEvents(AlbumDetailContract.MemberEvents.GetMembers)) },
-                    getFriends = { onEvent(AlbumDetailContract.Event.OnGetFriendList) },
+                    getMembers = { onEvent(AlbumDetailEvent.OnMemberEvents(MemberEvent.GetMembers)) },
+                    getFriends = { onEvent(AlbumDetailEvent.OnGetFriendList) },
                     getIsSelected = { uiState().selectedMemberIds.contains(it) },
                     onChangeMemberSelected = { isSelected, memberId ->
                         onEvent(
-                            AlbumDetailContract.Event.OnChangeMemberSelected(
+                            AlbumDetailEvent.OnChangeMemberSelected(
                                 isSelected = isSelected,
                                 memberId = memberId,
                             ),
@@ -287,45 +273,48 @@ internal fun AlbumDetailScreen(
                     },
                     onBack = {
                         if (uiState().isEditMode) {
-                            onEvent(AlbumDetailContract.Event.OnCancelEdit)
+                            onEvent(AlbumDetailEvent.OnCancelEdit)
                         } else {
-                            onEvent(AlbumDetailContract.Event.OnBack)
+                            onEvent(AlbumDetailEvent.OnBack)
                         }
                     },
                 )
+
+                }
             }
 
             composable<AlbumDetailTabDestination.AlbumSetting> {
+                ScreenContent(uiState().settings, { onEvent(AlbumDetailEvent.OnRetryTab(DetailTab.Settings)) }) { content ->
                 AlbumSettingRoute(
-                    memberAuth = { uiState().permission },
+                    memberAuth = { content.permission },
                     onClickChangeImage = navActions.navigateToChangeImage,
-                    onOpenTextFieldDialog = { onEvent(AlbumDetailContract.Event.OnOpenTextFieldDialog(it)) },
+                    onOpenTextFieldDialog = { onEvent(AlbumDetailEvent.OnOpenTextFieldDialog(it)) },
                     onDeleteAlbum = {
-                        onEvent(AlbumDetailContract.Event.OnAlbumSettingEvents(AlbumDetailContract.AlbumSettingEvents.DeleteAlbum))
-                        onEvent(AlbumDetailContract.Event.OnBackInAlbumDetail)
+                        onEvent(AlbumDetailEvent.OnAlbumSettingEvents(AlbumSettingEvent.DeleteAlbum))
                     },
-                    onExitAlbum = { onEvent(AlbumDetailContract.Event.OnMemberEvents(AlbumDetailContract.MemberEvents.Exit)) },
-                    onBack = { onEvent(AlbumDetailContract.Event.OnBack) },
+                    onExitAlbum = { onEvent(AlbumDetailEvent.OnMemberEvents(MemberEvent.Exit)) },
+                    onBack = { onEvent(AlbumDetailEvent.OnBack) },
                 )
+
+                }
             }
 
             composable<AlbumDetailTabDestination.ChangeImage> {
+                ScreenContent(uiState().settings, { onEvent(AlbumDetailEvent.OnRetryTab(DetailTab.Settings)) }) { content ->
                 ChangeImageRoute(
                     coroutineScope = coroutineScope,
                     imageLoader = imageLoader,
                     imageUri = { uiState().imageUri },
                     title = { uiState().albumItem.title },
                     subTitle = { uiState().albumItem.subTitle },
-                    onChangeIsInChangeImage = { onEvent(AlbumDetailContract.Event.OnChangeIsInChangeImage(it)) },
-                    onSelectImage = { onEvent(AlbumDetailContract.Event.OnSelectImage(it)) },
+                    onChangeIsInChangeImage = { onEvent(AlbumDetailEvent.OnChangeIsInChangeImage(it)) },
+                    onSelectImage = { onEvent(AlbumDetailEvent.OnSelectImage(it)) },
                     onBack = {
-                        onEvent(AlbumDetailContract.Event.OnBackInAlbumDetail)
-                        coroutineScope.launch {
-                            delay(1000)
-                            onEvent(AlbumDetailContract.Event.OnCancelChangeImage)
-                        }
+                        onEvent(AlbumDetailEvent.OnBackInAlbumDetail)
                     },
                 )
+
+                }
             }
         }
     }
@@ -337,7 +326,7 @@ internal fun AlbumDetailTopAppBar(
     title: () -> String,
     subTitle: () -> String,
     selectedNavIndex: () -> Int,
-    memberAuth: () -> MemberAuth,
+    memberAuth: () -> MemberAuth?,
     isEditMode: () -> Boolean,
     isInChangeImage: () -> Boolean,
     onClickBack: () -> Unit,
@@ -373,7 +362,7 @@ internal fun AlbumDetailTopAppBar(
             }
         },
         actions = {
-            if (isEditMode().not()) {
+            if (memberAuth() != null && isEditMode().not()) {
                 if (selectedNavIndex() != 2) {
                     IconButton(onClick = onClickAdd) {
                         Icon(Icons.Default.Add, "")
@@ -388,7 +377,7 @@ internal fun AlbumDetailTopAppBar(
                         Text(text = "적용", color = MaterialTheme.colorScheme.primary)
                     }
                 }
-            } else {
+            } else if (memberAuth() != null) {
                 TextButton(onClick = onClickCancel) {
                     Text(text = "취소", color = Color.DarkGray)
                 }

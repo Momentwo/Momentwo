@@ -6,8 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.LifecycleStartEffect
-import cord.eoeo.momentwo.core.common.START_EFFECTS_KEY
 import cord.eoeo.momentwo.core.model.MemberItem
 
 @Composable
@@ -20,14 +18,10 @@ internal fun MemberScreen(
     onChangeMemberSelected: (Boolean, Int) -> Unit,
     onBack: () -> Unit,
 ) {
-    LifecycleStartEffect(START_EFFECTS_KEY) {
-        getMembers()
-        getFriends()
-        onStopOrDispose { }
-    }
 
     BackHandler(onBack = onBack)
 
+    if (memberList().isEmpty()) { cord.eoeo.momentwo.core.ui.EmptyContent(); return }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {

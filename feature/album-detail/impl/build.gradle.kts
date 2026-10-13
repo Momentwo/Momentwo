@@ -5,10 +5,12 @@ plugins {
 
 android {
     namespace = "cord.eoeo.momentwo.feature.albumdetail.impl"
+    testOptions.unitTests.isReturnDefaultValues = true
 }
 
 dependencies {
-    testImplementation(libs.junit)
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.paging)
     implementation(project(":feature:subalbum:api"))
     implementation(project(":feature:album-detail:api"))
     implementation(project(":core:common"))

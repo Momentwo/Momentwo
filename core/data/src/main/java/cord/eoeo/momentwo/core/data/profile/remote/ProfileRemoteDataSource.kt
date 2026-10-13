@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.profile.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.model.UserProfile
 import cord.eoeo.momentwo.core.data.profile.ProfileDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -10,7 +12,7 @@ class ProfileRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : ProfileDataSource.Remote {
     override suspend fun getProfile(nickname: String): Result<UserProfile> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 profileService.getProfile(nickname)
             }

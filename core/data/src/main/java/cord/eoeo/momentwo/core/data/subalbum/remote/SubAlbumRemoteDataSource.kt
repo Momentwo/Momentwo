@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.subalbum.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.model.CreateSubAlbumInfo
 import cord.eoeo.momentwo.core.data.model.EditSubAlbumInfo
 import cord.eoeo.momentwo.core.data.model.SubAlbumList
@@ -12,21 +14,21 @@ class SubAlbumRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
 ) : SubAlbumDataSource {
     override suspend fun requestCreateSubAlbum(createSubAlbumInfo: CreateSubAlbumInfo): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 subAlbumService.postCreateSubAlbum(createSubAlbumInfo)
             }
         }
 
     override suspend fun getSubAlbumList(albumId: Int): Result<SubAlbumList> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 subAlbumService.getSubAlbumList(albumId)
             }
         }
 
     override suspend fun changeSubAlbumTitle(editSubAlbumInfo: EditSubAlbumInfo): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 subAlbumService.putEditSubAlbum(editSubAlbumInfo)
             }
@@ -36,7 +38,7 @@ class SubAlbumRemoteDataSource(
         albumId: Int,
         subAlbumIds: String,
     ): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 subAlbumService.deleteSubAlbums(albumId, subAlbumIds)
             }

@@ -8,5 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.coroutines.core)
+    testImplementation(project(":core:testing"))
     implementation(libs.lifecycle.viewmodel)
 }

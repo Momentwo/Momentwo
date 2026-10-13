@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.datastore
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
@@ -34,7 +36,7 @@ class PreferenceRepositoryImpl(
     }
 
     private suspend fun getStringData(key: Preferences.Key<String>): Result<String> =
-        Result.runCatching {
+        runSuspendCatching {
             userDataStore.data
                 .catch { exception ->
                     when (exception) {

@@ -1,5 +1,7 @@
 package cord.eoeo.momentwo.core.data.photo.remote
 
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+
 import cord.eoeo.momentwo.core.data.model.LikedPhotoList
 import cord.eoeo.momentwo.core.data.model.PhotoPage
 import cord.eoeo.momentwo.core.data.model.PresignedRequest
@@ -19,21 +21,21 @@ class PhotoRemoteDataSource(
         pageSize: Int,
         cursor: Int,
     ): Result<PhotoPage> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 photoService.getPhotoPage(albumId, subAlbumId, pageSize, cursor)
             }
         }
 
     override suspend fun requestPresignedUrl(presignedRequest: PresignedRequest): Result<PresignedUrl> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 photoService.postPhotoPresigned(presignedRequest)
             }
         }
 
     override suspend fun requestUploadPhoto(uploadPhoto: UploadPhoto): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 photoService.postPhotoUpload(uploadPhoto)
             }
@@ -44,7 +46,7 @@ class PhotoRemoteDataSource(
         subAlbumId: Int,
         imageIds: String,
     ): Result<Unit> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 photoService.deletePhotos(albumId, subAlbumId, imageIds)
             }
@@ -55,7 +57,7 @@ class PhotoRemoteDataSource(
         minPid: Int,
         maxPid: Int,
     ): Result<LikedPhotoList> =
-        runCatching {
+        runSuspendCatching {
             withContext(dispatcher) {
                 photoService.getLikedPhotos(subAlbumId, minPid, maxPid)
             }

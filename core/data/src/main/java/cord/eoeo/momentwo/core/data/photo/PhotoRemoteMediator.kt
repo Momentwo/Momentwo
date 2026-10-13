@@ -1,124 +1,43 @@
 package cord.eoeo.momentwo.core.data.photo
 
-import android.util.Log
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import androidx.paging.*
+import cord.eoeo.momentwo.core.common.runSuspendCatching
 import cord.eoeo.momentwo.core.database.PhotoEntity
 import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)
-class PhotoRemoteMediator(
-    private val photoRemoteDataSource: PhotoDataSource.Remote,
-    private val photoLocalDataSource: PhotoDataSource.Local,
+class PhotoRemoteMediator private constructor(
+    private val remote: PhotoDataSource.Remote,
+    private val local: PhotoDataSource.Local,
+    private val pageSize: Int,
+    private val albumId: Int,
+    private val subAlbumId: Int,
 ) : RemoteMediator<Int, PhotoEntity>() {
-    private val timeout = TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS)
-    private var pageSize = 20
-    private var albumId = 0
-    private var subAlbumId = 0
-
-    fun setParams(pageSize: Int, albumId: Int, subAlbumId: Int) {
-        this.pageSize = pageSize
-        this.albumId = albumId
-        this.subAlbumId = subAlbumId
+    class Factory(private val remote: PhotoDataSource.Remote, private val local: PhotoDataSource.Local) {
+        fun create(pageSize: Int, albumId: Int, subAlbumId: Int) = PhotoRemoteMediator(remote, local, pageSize, albumId, subAlbumId)
     }
-
     override suspend fun initialize(): InitializeAction {
-        val lastKey = photoLocalDataSource.getLastKey(albumId, subAlbumId)
-
-        return if (
-            lastKey == null ||
-            System.currentTimeMillis() - lastKey.lastUpdated > timeout
-        ) {
-            InitializeAction.LAUNCH_INITIAL_REFRESH
-        } else {
-            InitializeAction.SKIP_INITIAL_REFRESH
-        }
+        val key = local.getLastKey(albumId, subAlbumId)
+        return if (key == null || System.currentTimeMillis() - key.lastUpdated > TimeUnit.DAYS.toMillis(1))
+            InitializeAction.LAUNCH_INITIAL_REFRESH else InitializeAction.SKIP_INITIAL_REFRESH
     }
-
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, PhotoEntity>): MediatorResult {
-        val lastKey = when (loadType) {
-            LoadType.REFRESH -> {
-                Log.d("Photo", "PhotoRemoteMediator LoadType.REFRESH")
-                null
-            }
-
-            LoadType.PREPEND -> {
-                Log.d("Photo", "PhotoRemoteMediator LoadType.PREPEND")
-                return MediatorResult.Success(endOfPaginationReached = true)
-            }
-
-            LoadType.APPEND -> {
-                Log.d("Photo", "PhotoRemoteMediator LoadType.APPEND")
-                val last = photoLocalDataSource.getLastKey(albumId, subAlbumId)
-                if (last?.nextCursor == null) return MediatorResult.Success(endOfPaginationReached = true)
-                last
-            }
-        }
-
-        photoRemoteDataSource
-            .getPhotoPage(albumId, subAlbumId, pageSize, lastKey?.nextCursor ?: 0)
-            .onSuccess { photoPage ->
-                if (photoPage.nextCursor == null) {
-                    photoLocalDataSource.insertKey(
-                        PhotoRemoteKeyEntity(
-                            albumId = albumId,
-                            subAlbumId = subAlbumId,
-                            lastUpdated = System.currentTimeMillis(),
-                            nextCursor = null,
-                        )
-                    )
-                    photoLocalDataSource.deleteByRange(
-                        emptyList(),
-                        lastKey?.nextCursor?.plus(1) ?: 0,
-                        photoLocalDataSource.getLastPhotoId() ?: 0
-                    )
-                    return MediatorResult.Success(endOfPaginationReached = true)
-                }
-                if (loadType == LoadType.REFRESH) {
-                    photoLocalDataSource.clearKeys()
-                }
-
-                photoRemoteDataSource.getLikedPhoto(
-                    subAlbumId,
-                    photoPage.images.first().id,
-                    photoPage.images.last().id
-                ).onSuccess { likedPhotos ->
-                    val likedMap = likedPhotos.likesList.associate { it.photoId to true }
-                    val photoIds = photoPage.images.map { it.id }
-
-                    photoLocalDataSource.deleteByRange(photoIds, photoIds.first(), photoIds.last())
-
-                    photoLocalDataSource.insertPhotos(
-                        photoPage.images.map { photoInfo ->
-                            PhotoEntity(
-                                id = photoInfo.id,
-                                albumId = albumId,
-                                subAlbumId = subAlbumId,
-                                photoUrl = photoInfo.imageUrl,
-                                isLiked = likedMap[photoInfo.id] ?: false,
-                            )
-                        }
-                    )
-
-                    photoLocalDataSource.insertKey(
-                        PhotoRemoteKeyEntity(
-                            albumId = albumId,
-                            subAlbumId = subAlbumId,
-                            lastUpdated = System.currentTimeMillis(),
-                            nextCursor = photoPage.nextCursor,
-                        )
-                    )
-
-                    return MediatorResult.Success(endOfPaginationReached = false)
-                }.onFailure { exception ->
-                    return MediatorResult.Error(exception)
-                }
-            }.onFailure { exception ->
-                return MediatorResult.Error(exception)
-            }
-        return MediatorResult.Error(Exception("Unknown Error"))
-    }
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, PhotoEntity>): MediatorResult = runSuspendCatching {
+        if (loadType == LoadType.PREPEND) return@runSuspendCatching MediatorResult.Success(true)
+        val previous = if (loadType == LoadType.APPEND) local.getLastKey(albumId, subAlbumId) else null
+        if (loadType == LoadType.APPEND && previous?.nextCursor == null) return@runSuspendCatching MediatorResult.Success(true)
+        val cursor = previous?.nextCursor ?: 0
+        val page = remote.getPhotoPage(albumId, subAlbumId, pageSize, cursor).getOrThrow()
+        val ids = page.images.map { it.id }
+        val likes = if (ids.isEmpty()) emptyMap() else remote.getLikedPhoto(subAlbumId, ids.min(), ids.max()).getOrThrow()
+            .likesList.associate { it.photoId to it.likesStatus }
+        val photos = page.images.map { PhotoEntity(it.id, albumId, subAlbumId, it.imageUrl, likes[it.id] ?: false) }
+        val end = if (page.nextCursor == null) maxOf(local.getLastPhotoId(albumId, subAlbumId) ?: 0, ids.maxOrNull() ?: 0)
+            else ids.maxOrNull() ?: cursor
+        // Fetch all required remote data first; rows and cursor then commit together in one scoped transaction.
+        local.replacePage(albumId, subAlbumId, photos, cursor + 1, end,
+            PhotoRemoteKeyEntity(albumId = albumId, subAlbumId = subAlbumId, lastUpdated = System.currentTimeMillis(), nextCursor = page.nextCursor),
+            refresh = loadType == LoadType.REFRESH)
+        MediatorResult.Success(endOfPaginationReached = page.nextCursor == null)
+    }.getOrElse { MediatorResult.Error(it) }
 }

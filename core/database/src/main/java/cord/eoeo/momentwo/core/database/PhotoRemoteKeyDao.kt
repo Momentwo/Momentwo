@@ -14,6 +14,6 @@ interface PhotoRemoteKeyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertKey(key: PhotoRemoteKeyEntity)
 
-    @Query("DELETE FROM photo_key")
-    suspend fun clearKeys()
+    @Query("DELETE FROM photo_key WHERE album_id = :albumId AND sub_album_id = :subAlbumId")
+    suspend fun clearKeys(albumId: Int, subAlbumId: Int)
 }

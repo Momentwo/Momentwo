@@ -2,6 +2,8 @@ package cord.eoeo.momentwo.core.data.photo.local
 
 import cord.eoeo.momentwo.core.common.runSuspendCatching
 
+import androidx.room.withTransaction
+import cord.eoeo.momentwo.core.database.MomentwoDatabase
 import android.graphics.Bitmap
 import androidx.paging.PagingSource
 import cord.eoeo.momentwo.core.data.photo.PhotoDataSource
@@ -16,14 +18,15 @@ import java.io.OutputStream
 class PhotoLocalDataSource(
     private val photoDao: PhotoDao,
     private val photoRemoteKeyDao: PhotoRemoteKeyDao,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val database: MomentwoDatabase,
 ) : PhotoDataSource.Local {
     override fun getPhotoPagingSource(albumId: Int, subAlbumId: Int): PagingSource<Int, PhotoEntity> =
         photoDao.getPhotoPagingSource(albumId, subAlbumId)
 
-    override suspend fun getLastPhotoId(): Int? =
+    override suspend fun getLastPhotoId(albumId: Int, subAlbumId: Int): Int? =
         withContext(dispatcher) {
-            photoDao.getLastPhotoId()
+            photoDao.getLastPhotoId(albumId, subAlbumId)
         }
 
     override suspend fun insertPhotos(photos: List<PhotoEntity>) {
@@ -38,9 +41,9 @@ class PhotoLocalDataSource(
         }
     }
 
-    override suspend fun deleteByRange(photoIds: List<Int>, start: Int, end: Int) {
+    override suspend fun deleteByRange(photoIds: List<Int>, start: Int, end: Int, albumId: Int, subAlbumId: Int) {
         withContext(dispatcher) {
-            photoDao.deleteByRange(photoIds, start, end)
+            photoDao.deleteByRange(photoIds, start, end, albumId, subAlbumId)
         }
     }
 
@@ -72,9 +75,19 @@ class PhotoLocalDataSource(
         }
     }
 
-    override suspend fun clearKeys() {
+    override suspend fun clearKeys(albumId: Int, subAlbumId: Int) {
         withContext(dispatcher) {
-            photoRemoteKeyDao.clearKeys()
+            photoRemoteKeyDao.clearKeys(albumId, subAlbumId)
+        }
+    }
+    override suspend fun replacePage(albumId: Int, subAlbumId: Int, photos: List<PhotoEntity>, start: Int, end: Int, key: PhotoRemoteKeyEntity, refresh: Boolean) {
+        withContext(dispatcher) {
+            database.withTransaction {
+                if (refresh) photoRemoteKeyDao.clearKeys(albumId, subAlbumId)
+                photoDao.deleteByRange(photos.map { it.id }, start, end, albumId, subAlbumId)
+                photoDao.insertAll(*photos.toTypedArray())
+                photoRemoteKeyDao.insertKey(key)
+            }
         }
     }
 }

@@ -26,7 +26,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -34,14 +33,19 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.ImageLoader
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.ScreenState
+import cord.eoeo.momentwo.core.common.RefreshState
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.ui.EmptyContent
+import cord.eoeo.momentwo.core.ui.PagingAppendContent
+import cord.eoeo.momentwo.core.data.toUiError
+import androidx.compose.runtime.key
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import cord.eoeo.momentwo.core.ui.TextFieldDialog
 import cord.eoeo.momentwo.core.model.PhotoItem
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,45 +53,35 @@ import kotlinx.coroutines.launch
 internal fun PhotoListScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
-    uiState: () -> PhotoListContract.State,
-    effectFlow: () -> Flow<PhotoListContract.Effect>,
-    onEvent: (event: PhotoListContract.Event) -> Unit,
+    uiState: () -> PhotoListState,
+    effectFlow: () -> Flow<PhotoListEffect>,
+    onEvent: (event: PhotoListEvent) -> Unit,
     refreshState: () -> PullToRefreshState,
     photoPagingData: () -> LazyPagingItems<PhotoItem>,
+    pagingState: () -> ScreenState<Unit>,
+    retrySource: () -> Unit,
     launchGallery: () -> Unit,
     snackbarHostState: () -> SnackbarHostState,
     popBackStack: () -> Unit,
     navigateToPhotoDetail: (Int, Int, String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is PhotoListContract.Effect.RefreshPagingData -> {
-                        photoPagingData().refresh()
-                    }
-
-                    is PhotoListContract.Effect.PopBackStack -> {
-                        popBackStack()
-                    }
-
-                    is PhotoListContract.Effect.ShowSnackbar -> {
-                        snackbarHostState().showSnackbar(
-                            message = effect.message,
-                        )
-                    }
-                }
-            }.collect()
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            PhotoListEffect.RefreshPagingData -> photoPagingData().refresh()
+            PhotoListEffect.PopBackStack -> popBackStack()
+            is PhotoListEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
 
-    if (uiState().isDialogOpened) {
+    if (uiState().isDialogOpened) key(uiState().dialogSession) {
         TextFieldDialog(
             titleText = { "서브 앨범 제목 변경" },
             description = { "변경할 제목을 입력하세요" },
-            onDismiss = { onEvent(PhotoListContract.Event.OnChangeIsDialogOpened(false)) },
-            onConfirm = { subAlbumTitle -> onEvent(PhotoListContract.Event.OnConfirmDialog(subAlbumTitle)) },
+            onDismiss = { onEvent(PhotoListEvent.OnChangeIsDialogOpened(false)) },
+            onConfirm = { subAlbumTitle -> onEvent(PhotoListEvent.OnConfirmDialog(subAlbumTitle)) },
             placeholder = { uiState().subAlbumTitle },
+            onValueChanged = { onEvent(PhotoListEvent.OnRenameDraftChanged) },
         )
     }
 
@@ -98,41 +92,36 @@ internal fun PhotoListScreen(
                 subAlbumTitle = { uiState().subAlbumTitle },
                 isMenuExpended = { uiState().isMenuExpended },
                 isEditMode = { uiState().isEditMode },
-                onClickBack = { onEvent(PhotoListContract.Event.OnBack) },
+                onClickBack = { onEvent(PhotoListEvent.OnBack) },
                 onClickAdd = launchGallery,
-                onClickMenu = { onEvent(PhotoListContract.Event.OnChangeIsMenuExpended(true)) },
-                onDismissMenu = { onEvent(PhotoListContract.Event.OnChangeIsMenuExpended(false)) },
+                onClickMenu = { onEvent(PhotoListEvent.OnChangeIsMenuExpended(true)) },
+                onDismissMenu = { onEvent(PhotoListEvent.OnChangeIsMenuExpended(false)) },
                 onClickEditTitle = {
-                    onEvent(PhotoListContract.Event.OnChangeIsDialogOpened(true))
-                    onEvent(PhotoListContract.Event.OnChangeIsMenuExpended(false))
+                    onEvent(PhotoListEvent.OnChangeIsDialogOpened(true))
+                    onEvent(PhotoListEvent.OnChangeIsMenuExpended(false))
                 },
                 onClickEditPhoto = {
-                    onEvent(PhotoListContract.Event.OnChangeIsEditMode(true))
-                    onEvent(PhotoListContract.Event.OnChangeIsMenuExpended(false))
+                    onEvent(PhotoListEvent.OnChangeIsEditMode(true))
+                    onEvent(PhotoListEvent.OnChangeIsMenuExpended(false))
                 },
-                onClickCancel = { onEvent(PhotoListContract.Event.OnClickCancelEdit) },
-                onClickDelete = { onEvent(PhotoListContract.Event.OnClickConfirmEdit) },
+                onClickCancel = { onEvent(PhotoListEvent.OnClickCancelEdit) },
+                onClickDelete = { onEvent(PhotoListEvent.OnClickConfirmEdit) },
             )
         },
         modifier = Modifier.fillMaxSize(),
     ) { paddingValue ->
         PullToRefreshBox(
-            isRefreshing = uiState().isRefreshing,
+            isRefreshing = (pagingState() as? ScreenState.Success)?.refresh == RefreshState.Loading,
             state = refreshState(),
-            onRefresh = {
-                onEvent(PhotoListContract.Event.OnChangeIsRefreshing(true))
-                coroutineScope.launch {
-                    onEvent(PhotoListContract.Event.OnRefreshPagingData)
-                    delay(500)
-                    onEvent(PhotoListContract.Event.OnChangeIsRefreshing(false))
-                }
-            },
+            onRefresh = { onEvent(PhotoListEvent.OnRefreshPagingData) },
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(horizontal = 8.dp)
                     .padding(paddingValue),
         ) {
+            ScreenContent(pagingState(), { if (uiState().source is ScreenState.Error) retrySource() else photoPagingData().retry() }) {
+                if (photoPagingData().itemCount == 0) EmptyContent() else
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(100.dp),
                 modifier = Modifier.fillMaxSize(),
@@ -148,7 +137,7 @@ internal fun PhotoListScreen(
                             isEditMode = { uiState().isEditMode },
                             isSelected = { uiState().selectedPhotoIds.contains(photoItem.id) },
                             onChangeSelected = { isSelected ->
-                                onEvent(PhotoListContract.Event.OnChangeIsSelected(isSelected, photoItem.id))
+                                onEvent(PhotoListEvent.OnChangeIsSelected(isSelected, photoItem.id))
                             },
                             onClick = {
                                 navigateToPhotoDetail(
@@ -162,6 +151,8 @@ internal fun PhotoListScreen(
                         )
                     }
                 }
+                item(span = { GridItemSpan(maxLineSpan) }) { PagingAppendContent(photoPagingData().loadState.append, Throwable::toUiError, { photoPagingData().retry() }) }
+            }
             }
         }
     }

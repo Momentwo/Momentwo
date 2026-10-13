@@ -43,7 +43,7 @@ interface PhotoDataSource {
             subAlbumId: Int,
         ): PagingSource<Int, PhotoEntity>
 
-        suspend fun getLastPhotoId(): Int?
+        suspend fun getLastPhotoId(albumId: Int, subAlbumId: Int): Int?
 
         suspend fun insertPhotos(photos: List<PhotoEntity>)
 
@@ -53,6 +53,8 @@ interface PhotoDataSource {
             photoIds: List<Int>,
             start: Int,
             end: Int,
+            albumId: Int,
+            subAlbumId: Int,
         )
 
         suspend fun updateIsLiked(
@@ -72,6 +74,8 @@ interface PhotoDataSource {
 
         suspend fun insertKey(key: PhotoRemoteKeyEntity)
 
-        suspend fun clearKeys()
+        suspend fun clearKeys(albumId: Int, subAlbumId: Int)
+
+        suspend fun replacePage(albumId: Int, subAlbumId: Int, photos: List<PhotoEntity>, start: Int, end: Int, key: PhotoRemoteKeyEntity, refresh: Boolean)
     }
 }

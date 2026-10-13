@@ -34,6 +34,7 @@ fun TextFieldDialog(
     onConfirm: (String) -> Unit,
     initialText: () -> String = { "" },
     placeholder: () -> String = { "" },
+    onValueChanged: (String) -> Unit = {},
 ) {
     var text: TextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(initialText()))
@@ -44,7 +45,7 @@ fun TextFieldDialog(
         description = description,
         text = { text },
         placeholder = placeholder,
-        onTextChange = { text = it },
+        onTextChange = { text = it; onValueChanged(it.text) },
         onDismiss = onDismiss,
         onConfirm = { onConfirm(text.text) },
     )

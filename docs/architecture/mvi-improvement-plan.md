@@ -62,3 +62,10 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
 - 단계 4: Friend의 요청 탭별 ScreenState·사용자 ID 결과 반영·작업별 pending·다이얼로그 변경 버전 도입.
   Paging LoadState 기반 표시·빈 성공 보존·cache/refresh/append 오류 처리와 Friend 마지막 페이지 저장 수정.
   UI 6개 + Data 3개 + Friend 9개 회귀 테스트 및 app/영향 모듈 빌드·Lint 통과.
+
+- 단계 4 병합: #167. 새 회귀 18개 및 빌드·Lint, Friend 기기 smoke 통과.
+- 단계 5: AlbumDetail의 역할별 Reducer, 탭별 필수 Content·권한, 타입화된 다이얼로그와 제출/편집 버전으로 전환.
+  가짜 ADMIN 및 경로에 없는 count=0 헤더 데이터를 제거한다. Hilt 경로 디코딩과 초기 State 주입을 분리하여 업무 로직을 JVM에서 검증한다.
+  삭제/초대는 제출 대상만 정리하고 새 선택·다이얼로그·이미지 초안을 유지한다. 이미지 저장 성공 후 취소는 마지막으로 확인된 저장 이미지로 복원한다.
+  PhotoList 방문 시 서브앨범을 무효화해 복귀 시 재조회하되 초기 콜백/재구성은 중복 조회하지 않는다. 삭제 실패 이전의 UI 강제 이동 및 지연 이미지 정리를 제거한다.
+  AlbumDetail 18개 테스트와 앱/Detail/UI 빌드·Lint 통과.

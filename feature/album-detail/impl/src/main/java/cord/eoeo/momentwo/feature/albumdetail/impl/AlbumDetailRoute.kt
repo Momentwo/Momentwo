@@ -4,6 +4,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,7 +30,9 @@ internal fun AlbumDetailRoute(
     val navController = rememberNavController()
     val navActions = remember(navController) { AlbumDetailNavigationActions(navController) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-    val uiState: AlbumDetailContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState: AlbumDetailState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel) { viewModel.initialize() }
 
     AlbumDetailScreen(
         coroutineScope = coroutineScope,
@@ -39,7 +42,7 @@ internal fun AlbumDetailRoute(
         imageLoader = imageLoader,
         uiState = { uiState },
         effectFlow = { viewModel.effect },
-        onEvent = { event -> viewModel.setEvent(event) },
+        onEvent = { event -> viewModel.onEvent(event) },
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
         navigateToPhotoList = navigateToPhotoList,

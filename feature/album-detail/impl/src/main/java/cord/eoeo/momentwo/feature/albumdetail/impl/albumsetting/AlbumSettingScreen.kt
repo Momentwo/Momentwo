@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cord.eoeo.momentwo.feature.albumdetail.impl.AlbumDetailDialog
 import cord.eoeo.momentwo.core.model.MemberAuth
 
 @Composable
@@ -28,7 +29,7 @@ internal fun AlbumSettingScreen(
     scrollableState: ScrollableState,
     memberAuth: () -> MemberAuth,
     textColor: () -> Color,
-    onOpenTextFieldDialog: (Int) -> Unit,
+    onOpenTextFieldDialog: (AlbumDetailDialog) -> Unit,
     onClickChangeImage: () -> Unit,
     onDeleteAlbum: () -> Unit,
     onExitAlbum: () -> Unit,
@@ -53,13 +54,13 @@ internal fun AlbumSettingScreen(
                 AlbumSettingListItem(
                     text = { "앨범 제목 수정" },
                     onClick = {
-                        onOpenTextFieldDialog(1)
+                        onOpenTextFieldDialog(AlbumDetailDialog.EditTitle)
                     },
                 )
                 AlbumSettingListItem(
                     text = { "앨범 부제목 수정" },
                     onClick = {
-                        onOpenTextFieldDialog(2)
+                        onOpenTextFieldDialog(AlbumDetailDialog.EditSubtitle)
                     },
                 )
                 AlbumSettingListItem(

@@ -4,12 +4,13 @@ import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import cord.eoeo.momentwo.feature.albumdetail.impl.AlbumDetailDialog
 import cord.eoeo.momentwo.core.model.MemberAuth
 
 @Composable
 internal fun AlbumSettingRoute(
     memberAuth: () -> MemberAuth,
-    onOpenTextFieldDialog: (Int) -> Unit,
+    onOpenTextFieldDialog: (AlbumDetailDialog) -> Unit,
     onClickChangeImage: () -> Unit,
     onDeleteAlbum: () -> Unit,
     onExitAlbum: () -> Unit,

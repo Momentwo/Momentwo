@@ -53,3 +53,7 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
 - 화면 초기화는 Route의 LaunchedEffect(viewModel)에서 멱등 initialize를 호출한다. Effect 수집과 분리한다.
 - Snackbar와 애니메이션은 CollectEffect의 STARTED CoroutineScope에서 launch한다. 동기 Navigation 처리는 직접 수행한다.
 - ScreenContent는 전체 본문을 Loading/Success/Error로 분기한다. Success의 refresh만 진행/실패를 표시하며 동일 조회 오류를 Snackbar로 중복 발행하지 않는다.
+
+- 단계 2 병합: #165. Common 18개 + Auth 13개 테스트, app 빌드·Lint, Common/UI Lint와 기기 smoke 통과.
+- 단계 3: SignUp의 State/Event/Action/Effect/Reducer/Validator/Mapper 분리. 첫 오류 검증 순서·정규화·전송 형식 보존, 입력 변경/중복 제출/취소/실패 회귀 추가.
+  Profile은 기존 기능을 확장하지 않고 생성자 경로 초기화 및 새 기반으로 전환한다. 현재 상태 변경 Action이 없어 Reducer의 Action 타입은 Nothing이다.

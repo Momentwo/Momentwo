@@ -12,19 +12,25 @@ internal val fixtureProfile = Profile("Fixture", "fixture@example.com", "fixture
 
 internal class FakeLoginRepository : LoginRepository {
     var result = Result.success(LoginData("fixture-access", "fixture-refresh", fixtureProfile))
+    var response: (suspend () -> Result<LoginData>)? = null
     val requests = mutableListOf<Pair<String, String>>()
     override suspend fun requestLogin(email: String, password: String): Result<LoginData> {
         requests += email to password
-        return result
+        return response?.invoke() ?: result
     }
 }
 
 internal class FakePreferenceRepository : PreferenceRepository {
     var accessToken = ""
+    var accessReads = 0
+    var accessResponse: (suspend () -> Result<String>)? = null
     var refreshToken = ""
     override suspend fun storeAccessToken(accessToken: String) { this.accessToken = accessToken }
     override suspend fun storeRefreshToken(refreshToken: String) { this.refreshToken = refreshToken }
-    override suspend fun getAccessToken() = Result.success(accessToken)
+    override suspend fun getAccessToken(): Result<String> {
+        accessReads++
+        return accessResponse?.invoke() ?: Result.success(accessToken)
+    }
     override suspend fun getRefreshToken() = Result.success(refreshToken)
 }
 

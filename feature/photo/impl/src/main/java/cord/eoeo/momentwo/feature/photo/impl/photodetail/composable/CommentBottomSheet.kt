@@ -42,6 +42,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.key
+import cord.eoeo.momentwo.feature.photo.impl.photodetail.PhotoCommentDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -68,6 +70,12 @@ import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import cord.eoeo.momentwo.core.ui.CircleAsyncImage
 import cord.eoeo.momentwo.core.ui.TextFieldDialog
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.ui.EmptyContent
+import cord.eoeo.momentwo.core.ui.PagingAppendContent
+import cord.eoeo.momentwo.core.ui.rememberPagingScreenState
+import cord.eoeo.momentwo.core.data.toUiError
+import cord.eoeo.momentwo.core.common.ScreenState
 import cord.eoeo.momentwo.core.model.CommentItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -80,6 +88,15 @@ internal fun CommentBottomSheet(
     onWriteComment: (String) -> Unit,
     onEditComment: (Int, String) -> Unit,
     onDeleteComment: (Int) -> Unit,
+    editDialog: () -> PhotoCommentDialog,
+    editSession: Long,
+    onOpenEditDialog: (Int, String) -> Unit,
+    onDismissEditDialog: () -> Unit,
+    onEditDraftChanged: () -> Unit,
+    draft: () -> String = { "" },
+    onDraftChanged: (String) -> Unit = {},
+    sourceError: cord.eoeo.momentwo.core.common.UiError? = null,
+    onRetrySource: () -> Unit = {},
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val lazyColumnNestedScrollConnection = rememberNestedScrollInteropConnection()
@@ -88,10 +105,8 @@ internal fun CommentBottomSheet(
     var comment by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
-    var isDialogOpened by rememberSaveable { mutableStateOf(false) }
-    var selectedCommentId by rememberSaveable { mutableIntStateOf(-1) }
-    var selectedComment by rememberSaveable { mutableStateOf("") }
 
+    LaunchedEffect(draft()) { if (comment.text != draft()) comment = TextFieldValue(draft()) }
     CommentBottomSheetScreen(
         imageLoader = imageLoader,
         bottomSheetState = { bottomSheetState },
@@ -99,26 +114,21 @@ internal fun CommentBottomSheet(
         lazyListState = lazyListState,
         lazyColumnNestedScrollConnection = { lazyColumnNestedScrollConnection },
         isImeVisible = { isImeVisible },
-        isDialogOpened = { isDialogOpened },
-        selectedComment = { selectedComment },
+        isDialogOpened = { editDialog() is PhotoCommentDialog.Edit },
+        selectedComment = { (editDialog() as? PhotoCommentDialog.Edit)?.initialText.orEmpty() },
         comment = { comment },
         onDismiss = onDismiss,
-        onCommentChange = { comment = it },
+        sourceError = sourceError, onRetrySource = onRetrySource,
+        onCommentChange = { comment = it; onDraftChanged(it.text) },
         onWriteComment = {
             onWriteComment(comment.text)
-            comment = TextFieldValue("")
-            focusManager.clearFocus(force = true)
         },
-        onEditComment = {
-            onEditComment(selectedCommentId, it)
-            isDialogOpened = false
-        },
-        onDeleteComment = { onDeleteComment(selectedCommentId) },
-        onExpandMenu = { selectedId, selectedText ->
-            selectedCommentId = selectedId
-            selectedComment = selectedText
-        },
-        onChangeIsDialogOpened = { isDialogOpened = it },
+        onEditComment = { text -> (editDialog() as? PhotoCommentDialog.Edit)?.let { onEditComment(it.id, text) } },
+        onDeleteComment = onDeleteComment,
+        onOpenEditDialog = onOpenEditDialog,
+        onChangeIsDialogOpened = { if (!it) onDismissEditDialog() },
+        editSession = editSession,
+        onEditDraftChanged = onEditDraftChanged,
     )
 }
 
@@ -138,9 +148,13 @@ internal fun CommentBottomSheetScreen(
     onCommentChange: (TextFieldValue) -> Unit,
     onWriteComment: () -> Unit,
     onEditComment: (String) -> Unit,
-    onDeleteComment: () -> Unit,
-    onExpandMenu: (Int, String) -> Unit,
+    onDeleteComment: (Int) -> Unit,
+    onOpenEditDialog: (Int, String) -> Unit,
     onChangeIsDialogOpened: (Boolean) -> Unit,
+    sourceError: cord.eoeo.momentwo.core.common.UiError? = null,
+    onRetrySource: () -> Unit = {},
+    editSession: Long,
+    onEditDraftChanged: () -> Unit,
 ) {
     LaunchedEffect(lazyListState().canScrollBackward) {
         if (lazyListState().canScrollBackward.not()) {
@@ -148,13 +162,14 @@ internal fun CommentBottomSheetScreen(
         }
     }
 
-    if (isDialogOpened()) {
+    if (isDialogOpened()) key(editSession) {
         TextFieldDialog(
             titleText = { "댓글 수정" },
             description = { "댓글 내용을 수정하세요" },
             onDismiss = { onChangeIsDialogOpened(false) },
             onConfirm = onEditComment,
             initialText = { selectedComment() },
+            onValueChanged = { onEditDraftChanged() },
         )
     }
 
@@ -193,11 +208,14 @@ internal fun CommentBottomSheetScreen(
                 .fillMaxHeight(if (isImeVisible()) 1f else 0.6f)
                 .navigationBarsPadding(),
         ) {
+            val pagingState = rememberPagingScreenState(commentPagingData(), Throwable::toUiError)
+            val listState = if (sourceError != null) ScreenState.Error(sourceError) else pagingState
+            ScreenContent(listState, { if (sourceError != null) onRetrySource() else commentPagingData().retry() }, Modifier.weight(1f)) {
+                if (commentPagingData().itemCount == 0) EmptyContent() else
             LazyColumn(
                 state = lazyListState(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
                     .nestedScroll(lazyColumnNestedScrollConnection()),
             ) {
                 items(
@@ -208,15 +226,15 @@ internal fun CommentBottomSheetScreen(
                         CommentListItem(
                             imageLoader = imageLoader,
                             commentItem = { commentItem },
-                            onChangeIsDialogOpened = onChangeIsDialogOpened,
-                            onDeleteComment = onDeleteComment,
-                            onLongClick = {
-                                onExpandMenu(commentItem.id, commentItem.comment)
-                            },
+                            onChangeIsDialogOpened = { open -> if (open) onOpenEditDialog(commentItem.id, commentItem.comment) else onChangeIsDialogOpened(false) },
+                            onDeleteComment = { onDeleteComment(commentItem.id) },
+                            onLongClick = {},
                             modifier = Modifier.animateItem()
                         )
                     }
                 }
+                item { PagingAppendContent(commentPagingData().loadState.append, Throwable::toUiError, { commentPagingData().retry() }) }
+            }
             }
 
             TextField(

@@ -54,6 +54,12 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coroutines.core)
 
+    androidTestImplementation(project(":core:common"))
+    androidTestImplementation(project(":core:ui"))
+    androidTestImplementation(project(":core:data"))
+    androidTestImplementation(project(":core:database"))
+    androidTestImplementation(libs.room)
+    androidTestImplementation(libs.room.ktx)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ui.test.junit4)

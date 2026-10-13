@@ -53,14 +53,15 @@ object PhotoModule {
         photoDao: PhotoDao,
         photoRemoteKeyDao: PhotoRemoteKeyDao,
         @IoDispatcher dispatcher: CoroutineDispatcher,
-    ): PhotoDataSource.Local = PhotoLocalDataSource(photoDao, photoRemoteKeyDao, dispatcher)
+        database: MomentwoDatabase,
+    ): PhotoDataSource.Local = PhotoLocalDataSource(photoDao, photoRemoteKeyDao, dispatcher, database)
 
     @Provides
     @Singleton
     fun providePhotoRemoteMediator(
         @QualifierModule.RemoteDataSource photoRemoteDataSource: PhotoDataSource.Remote,
         @QualifierModule.LocalDataSource photoLocalDataSource: PhotoDataSource.Local,
-    ): PhotoRemoteMediator = PhotoRemoteMediator(photoRemoteDataSource, photoLocalDataSource)
+    ): PhotoRemoteMediator.Factory = PhotoRemoteMediator.Factory(photoRemoteDataSource, photoLocalDataSource)
 
     @Provides
     @Singleton
@@ -68,7 +69,7 @@ object PhotoModule {
         @QualifierModule.RemoteDataSource photoRemoteDataSource: PhotoDataSource.Remote,
         @QualifierModule.LocalDataSource photoLocalDataSource: PhotoDataSource.Local,
         presignedRemoteDataSource: PresignedDataSource,
-        photoRemoteMediator: PhotoRemoteMediator,
+        photoRemoteMediator: PhotoRemoteMediator.Factory,
         @ApplicationContext applicationContext: Context,
         @IoDispatcher dispatcher: CoroutineDispatcher,
     ): PhotoRepository = PhotoRepositoryImpl(

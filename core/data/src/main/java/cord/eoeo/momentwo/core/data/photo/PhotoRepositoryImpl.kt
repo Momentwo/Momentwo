@@ -18,6 +18,8 @@ import cord.eoeo.momentwo.core.data.model.PresignedRequest
 import cord.eoeo.momentwo.core.data.model.UploadPhoto
 import cord.eoeo.momentwo.core.data.model.UriRequestBody
 import cord.eoeo.momentwo.core.data.presigned.PresignedDataSource
+import cord.eoeo.momentwo.core.common.runSuspendCatching
+import cord.eoeo.momentwo.core.data.CommittedWriteException
 import cord.eoeo.momentwo.core.data.photo.PhotoRepository
 import cord.eoeo.momentwo.core.common.dispatcher.IoDispatcher
 import cord.eoeo.momentwo.core.model.PhotoItem
@@ -30,7 +32,7 @@ class PhotoRepositoryImpl(
     private val photoRemoteDataSource: PhotoDataSource.Remote,
     private val photoLocalDataSource: PhotoDataSource.Local,
     private val presignedRemoteDataSource: PresignedDataSource,
-    private val photoRemoteMediator: PhotoRemoteMediator,
+    private val photoRemoteMediator: PhotoRemoteMediator.Factory,
     private val applicationContext: Context,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : PhotoRepository {
@@ -43,11 +45,11 @@ class PhotoRepositoryImpl(
         albumId: Int,
         subAlbumId: Int,
     ): Flow<PagingData<PhotoItem>> {
-        photoRemoteMediator.setParams(pageSize, albumId, subAlbumId)
+        val mediator = photoRemoteMediator.create(pageSize, albumId, subAlbumId)
 
         return Pager(
             config = PagingConfig(pageSize = pageSize),
-            remoteMediator = photoRemoteMediator,
+            remoteMediator = mediator,
             pagingSourceFactory = { photoLocalDataSource.getPhotoPagingSource(albumId, subAlbumId) },
         ).flow.map { photoPagingData ->
             photoPagingData.map { photoEntity ->
@@ -96,12 +98,10 @@ class PhotoRepositoryImpl(
         subAlbumId: Int,
         photoIds: List<Int>,
     ): Result<Unit> {
-        val deletePhotosResult =
-            photoRemoteDataSource.deletePhotos(albumId, subAlbumId, photoIds.joinToString(","))
-        deletePhotosResult.onSuccess {
-            photoLocalDataSource.deletePhotos(photoIds)
+        return runSuspendCatching {
+            photoRemoteDataSource.deletePhotos(albumId, subAlbumId, photoIds.joinToString(",")).getOrThrow()
+            runSuspendCatching { photoLocalDataSource.deletePhotos(photoIds) }.exceptionOrNull()?.let { throw CommittedWriteException(it) }
         }
-        return deletePhotosResult
     }
 
     override suspend fun updateIsLiked(

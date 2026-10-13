@@ -1,6 +1,18 @@
 package cord.eoeo.momentwo
 
 import android.view.WindowManager
+import androidx.compose.material3.Text
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import cord.eoeo.momentwo.core.common.ScreenState
+import cord.eoeo.momentwo.core.common.RefreshState
+import cord.eoeo.momentwo.core.common.UiError
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import cord.eoeo.momentwo.core.ui.SystemBarsEffect
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import java.util.concurrent.CopyOnWriteArrayList
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
@@ -187,7 +199,7 @@ class AppNavigationSmokeTest {
     }
 
     @Test
-    fun photoArgumentsImmersiveToggleAndBackStackArePreserved() {
+    fun photoArgumentsInitialStateAndBackStackArePreserved() {
         val list = PhotoListDestination(123, 456, "Migration album", "Migration subalbum")
         val detail = PhotoDetailDestination(123, 789, "", false)
         compose.runOnIdle { navController.navigate(list) }
@@ -196,13 +208,9 @@ class AppNavigationSmokeTest {
         compose.runOnIdle { navController.navigate(detail) }
         compose.waitForIdle()
         compose.runOnIdle { assertEquals(detail, navController.currentBackStackEntry!!.toRoute<PhotoDetailDestination>()) }
-        compose.onNodeWithContentDescription("사진 설명").assertExists()
-        compose.onNodeWithContentDescription("사진").performClick()
-        compose.waitForIdle()
+        // Required API data is unavailable: no placeholder photo/actions may be shown.
         compose.onNodeWithContentDescription("사진 설명").assertDoesNotExist()
-        compose.onNodeWithContentDescription("사진").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithContentDescription("사진 설명").assertExists()
+        compose.onNodeWithContentDescription("사진").assertDoesNotExist()
         compose.runOnIdle { navController.popBackStack() }
         compose.waitForIdle()
         compose.runOnIdle {
@@ -211,6 +219,74 @@ class AppNavigationSmokeTest {
         }
         compose.waitForIdle()
         compose.onNodeWithText("Momentwo").assertExists()
+    }
+
+    @Test
+    fun screenContentHidesIncompleteDataAndRetainsRefreshContent() {
+        val screen = mutableStateOf<ScreenState<String>>(ScreenState.Loading)
+        compose.runOnUiThread {
+            compose.activity.setContent { MomentwoTheme { ScreenContent(screen.value, {}) { Text(it) } } }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Fixture content").assertDoesNotExist()
+        compose.runOnIdle { screen.value = ScreenState.Success("Fixture content") }
+        compose.onNodeWithText("Fixture content").assertExists()
+        compose.runOnIdle { screen.value = ScreenState.Success("Fixture content", RefreshState.Loading) }
+        compose.onNodeWithText("Fixture content").assertExists()
+        compose.runOnIdle { screen.value = ScreenState.Success("Fixture content", RefreshState.Error(UiError.Network)) }
+        compose.onNodeWithText("Fixture content").assertExists()
+        compose.onNodeWithText("다시 시도").assertExists()
+        compose.runOnIdle { screen.value = ScreenState.Error(UiError.Unauthorized) }
+        compose.onNodeWithText("Fixture content").assertDoesNotExist()
+        compose.onNodeWithText("다시 시도").assertDoesNotExist()
+    }
+
+    @Test
+    fun bufferedEffectsResumeInOrderWithoutRecompositionDuplicates() {
+        val channel = Channel<Int>(Channel.BUFFERED)
+        val flow = channel.receiveAsFlow()
+        val delivered = CopyOnWriteArrayList<Int>()
+        val generation = mutableStateOf(0)
+        compose.runOnUiThread {
+            compose.activity.setContent {
+                Text("generation ${generation.value}")
+                CollectEffect(flow) { delivered.add(it + generation.value * 10) }
+            }
+        }
+        compose.waitForIdle()
+        channel.trySend(1).getOrThrow()
+        compose.waitUntil { delivered.toList() == listOf(1) }
+        compose.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        channel.trySend(2).getOrThrow()
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertEquals(listOf(1), delivered.toList())
+        compose.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        compose.waitUntil { delivered.toList() == listOf(1, 2) }
+        compose.runOnIdle { generation.value = 1 }
+        channel.trySend(3).getOrThrow()
+        compose.waitUntil { delivered.toList() == listOf(1, 2, 13) }
+        channel.close()
+    }
+
+    @Test
+    fun systemBarsRestoreOnPauseAndDisposalAndReapplyOnResume() {
+        val visible = mutableStateOf(false)
+        val enabled = mutableStateOf(true)
+        val controller = WindowCompat.getInsetsController(compose.activity.window, compose.activity.window.decorView)
+        compose.runOnUiThread {
+            compose.activity.setContent { if (enabled.value) SystemBarsEffect(controller, visible.value) }
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE, controller.systemBarsBehavior) }
+        compose.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        compose.activityRule.scenario.onActivity { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior) }
+        compose.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE, controller.systemBarsBehavior) }
+        compose.runOnIdle { visible.value = true }
+        compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior); visible.value = false }
+        compose.runOnIdle { enabled.value = false }
+        compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior) }
     }
 
 }

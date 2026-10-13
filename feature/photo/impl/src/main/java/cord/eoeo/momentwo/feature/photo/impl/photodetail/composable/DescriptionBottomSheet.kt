@@ -63,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
+import cord.eoeo.momentwo.core.ui.message
 import cord.eoeo.momentwo.core.ui.CircleAsyncImage
 import cord.eoeo.momentwo.core.model.DescriptionItem
 
@@ -77,6 +78,11 @@ internal fun DescriptionBottomSheet(
     onWriteDescription: (String, String) -> Unit,
     onEditDescription: (String, String) -> Unit,
     onDeleteDescription: () -> Unit,
+    session: Long = 0,
+    onDraftChanged: () -> Unit = {},
+    refresh: cord.eoeo.momentwo.core.common.RefreshState = cord.eoeo.momentwo.core.common.RefreshState.Idle,
+    writeCommitted: Boolean = false,
+    onRetry: () -> Unit = {},
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scrollState = rememberScrollState()
@@ -93,6 +99,9 @@ internal fun DescriptionBottomSheet(
     }
     var contentsMaxLine by rememberSaveable { mutableIntStateOf(4) }
 
+    LaunchedEffect(session) {
+        if (isWriteDescMode()) { title = TextFieldValue(currentTitle); contents = TextFieldValue(currentContents) }
+    }
     DescriptionBottomSheetScreen(
         imageLoader = imageLoader,
         bottomSheetState = { bottomSheetState },
@@ -101,14 +110,14 @@ internal fun DescriptionBottomSheet(
         isImeVisible = { isImeVisible },
         isWriteDescMode = isWriteDescMode,
         isLongContents = { descLines.size > 5 },
-        title = { title },
-        contents = { contents },
+        title = { if (isWriteDescMode()) title else TextFieldValue(currentTitle) },
+        contents = { if (isWriteDescMode()) contents else TextFieldValue(currentContents) },
         contentsMaxLine = { contentsMaxLine },
         nickname = { descriptionItem().nickname },
         date = { descriptionItem().date },
         profileImage = { descriptionItem().userProfileImage },
-        onTitleChange = { title = it },
-        onContentsChange = { contents = it },
+        onTitleChange = { title = it; onDraftChanged() },
+        onContentsChange = { contents = it; onDraftChanged() },
         onClickContents = { contentsMaxLine = Int.MAX_VALUE },
         onDismiss = onDismiss,
         onClickWrite = {
@@ -122,6 +131,7 @@ internal fun DescriptionBottomSheet(
         onWriteDescription = { onWriteDescription(title.text, contents.text) },
         onEditDescription = { onEditDescription(title.text, contents.text) },
         onDeleteDescription = onDeleteDescription,
+        refresh = refresh, writeCommitted = writeCommitted, onRetry = onRetry,
     )
 }
 
@@ -150,6 +160,9 @@ internal fun DescriptionBottomSheetScreen(
     onWriteDescription: () -> Unit,
     onEditDescription: () -> Unit,
     onDeleteDescription: () -> Unit,
+    refresh: cord.eoeo.momentwo.core.common.RefreshState = cord.eoeo.momentwo.core.common.RefreshState.Idle,
+    writeCommitted: Boolean = false,
+    onRetry: () -> Unit = {},
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -225,6 +238,14 @@ internal fun DescriptionBottomSheetScreen(
             .statusBarsPadding()
             .imePadding(),
     ) {
+        when (val state = refresh) {
+            cord.eoeo.momentwo.core.common.RefreshState.Idle -> Unit
+            cord.eoeo.momentwo.core.common.RefreshState.Loading -> androidx.compose.material3.LinearProgressIndicator(Modifier.fillMaxWidth())
+            is cord.eoeo.momentwo.core.common.RefreshState.Error -> {
+                Text(if (writeCommitted) "설명은 저장되었습니다. 최신 정보를 불러오지 못했습니다" else state.error.message())
+                if (state.error.canRetry) androidx.compose.material3.TextButton(onClick = onRetry) { Text("다시 시도") }
+            }
+        }
         Column(
             modifier = Modifier
                 .animateContentSize()

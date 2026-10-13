@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -47,14 +46,17 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import cord.eoeo.momentwo.core.common.SIDE_EFFECTS_KEY
+import cord.eoeo.momentwo.core.common.ScreenState
+import cord.eoeo.momentwo.core.common.RefreshState
+import cord.eoeo.momentwo.core.ui.CollectEffect
+import cord.eoeo.momentwo.core.ui.ScreenContent
+import cord.eoeo.momentwo.core.ui.SystemBarsEffect
+import kotlinx.coroutines.launch
 import cord.eoeo.momentwo.core.model.CommentItem
 import cord.eoeo.momentwo.feature.photo.impl.photodetail.composable.CommentBottomSheet
 import cord.eoeo.momentwo.feature.photo.impl.photodetail.composable.DescriptionBottomSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 
 // 몰입형 전체화면 사진 뷰어 — 바(AnimatedVisibility)가 오버레이되며 사진은 edge-to-edge full-bleed 유지
 @Suppress("UnusedMaterial3ScaffoldPaddingParameter")
@@ -63,9 +65,9 @@ internal fun PhotoDetailScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     insetsController: WindowInsetsControllerCompat,
-    uiState: () -> PhotoDetailContract.State,
-    effectFlow: () -> Flow<PhotoDetailContract.Effect>,
-    onEvent: (event: PhotoDetailContract.Event) -> Unit,
+    uiState: () -> PhotoDetailState,
+    effectFlow: () -> Flow<PhotoDetailEffect>,
+    onEvent: (event: PhotoDetailEvent) -> Unit,
     commentPagingData: () -> LazyPagingItems<CommentItem>,
     lazyListState: () -> LazyListState,
     animatedBackgroundColor: () -> Color,
@@ -73,124 +75,105 @@ internal fun PhotoDetailScreen(
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(SIDE_EFFECTS_KEY) {
-        onEvent(PhotoDetailContract.Event.OnGetLikeCount)
-        onEvent(PhotoDetailContract.Event.OnGetDescription)
-
-        effectFlow()
-            .onEach { effect ->
-                when (effect) {
-                    is PhotoDetailContract.Effect.RefreshCommentPagingData -> {
-                        commentPagingData().refresh()
-                    }
-
-                    is PhotoDetailContract.Effect.ScrollCommentToBottom -> {
-                        lazyListState().animateScrollToItem(lazyListState().layoutInfo.totalItemsCount)
-                    }
-
-                    is PhotoDetailContract.Effect.ScrollCommentToTop -> {
-                        lazyListState().scrollToItem(0)
-                    }
-
-                    is PhotoDetailContract.Effect.ToggleSystemBars -> {
-                        if (effect.isVisible) {
-                            insetsController.apply {
-                                show(WindowInsetsCompat.Type.statusBars())
-                                show(WindowInsetsCompat.Type.navigationBars())
-                                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
-                            }
-                        } else {
-                            insetsController.apply {
-                                hide(WindowInsetsCompat.Type.statusBars())
-                                hide(WindowInsetsCompat.Type.navigationBars())
-                                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                            }
-                        }
-                    }
-
-                    is PhotoDetailContract.Effect.PopBackStack -> {
-                        popBackStack()
-                    }
-
-                    is PhotoDetailContract.Effect.ShowSnackbar -> {
-                        snackbarHostState().showSnackbar(
-                            message = effect.message,
-                        )
-                    }
-                }
-            }.collect()
+    SystemBarsEffect(insetsController, uiState().barsVisible)
+    CollectEffect(effectFlow()) { effect ->
+        when (effect) {
+            PhotoDetailEffect.RefreshCommentPagingData -> commentPagingData().refresh()
+            PhotoDetailEffect.ScrollCommentToBottom -> launch {
+                val last = lazyListState().layoutInfo.totalItemsCount - 1
+                if (last >= 0) lazyListState().animateScrollToItem(last)
+            }
+            PhotoDetailEffect.ScrollCommentToTop -> launch { if (lazyListState().layoutInfo.totalItemsCount > 0) lazyListState().scrollToItem(0) }
+            PhotoDetailEffect.PopBackStack -> popBackStack()
+            is PhotoDetailEffect.ShowSnackbar -> launch { snackbarHostState().showSnackbar(effect.message) }
+        }
     }
+    val ready = uiState().screen as? ScreenState.Success
 
-    if (uiState().isDescriptionVisible) {
+    if (uiState().isDescriptionVisible && ready != null) {
         DescriptionBottomSheet(
             imageLoader = imageLoader,
-            descriptionItem = { uiState().descriptionItem },
+            descriptionItem = { ready.content.description },
+            session = uiState().descriptionSession,
+            onDraftChanged = { onEvent(PhotoDetailEvent.OnDescriptionDraftChanged) },
+            refresh = (uiState().screen as? ScreenState.Success)?.refresh ?: RefreshState.Idle,
+            writeCommitted = uiState().confirmedDescriptionRevision != null,
+            onRetry = { onEvent(PhotoDetailEvent.OnGetDescription) },
             isWriteDescMode = { uiState().isWriteDescMode },
             onDismiss = {
-                onEvent(PhotoDetailContract.Event.OnChangeIsDescriptionVisible(false))
-                onEvent(PhotoDetailContract.Event.OnChangeIsWriteDescMode(false))
+                onEvent(PhotoDetailEvent.OnChangeIsDescriptionVisible(false))
+                onEvent(PhotoDetailEvent.OnChangeIsWriteDescMode(false))
             },
-            onChangeIsWriteDescMode = { onEvent(PhotoDetailContract.Event.OnChangeIsWriteDescMode(it)) },
+            onChangeIsWriteDescMode = { onEvent(PhotoDetailEvent.OnChangeIsWriteDescMode(it)) },
             onWriteDescription = { title, contents ->
-                onEvent(PhotoDetailContract.Event.OnWriteDescription(title, contents))
-                onEvent(PhotoDetailContract.Event.OnChangeIsWriteDescMode(false))
+                onEvent(PhotoDetailEvent.OnWriteDescription(title, contents))
             },
             onEditDescription = { title, contents ->
-                onEvent(PhotoDetailContract.Event.OnEditDescription(title, contents))
-                onEvent(PhotoDetailContract.Event.OnChangeIsWriteDescMode(false))
+                onEvent(PhotoDetailEvent.OnEditDescription(title, contents))
             },
-            onDeleteDescription = { onEvent(PhotoDetailContract.Event.OnDeleteDescription) },
+            onDeleteDescription = { onEvent(PhotoDetailEvent.OnDeleteDescription) },
         )
     }
 
-    if (uiState().isCommentVisible) {
+    if (uiState().isCommentVisible && ready != null) {
         CommentBottomSheet(
             imageLoader = imageLoader,
             commentPagingData = commentPagingData,
+            draft = { uiState().commentDraft },
+            onDraftChanged = { onEvent(PhotoDetailEvent.OnCommentDraftChanged(it)) },
+            editDialog = { uiState().commentDialog },
+            editSession = uiState().commentDialogSession,
+            onOpenEditDialog = { id, text -> onEvent(PhotoDetailEvent.OnOpenCommentDialog(id, text)) },
+            onDismissEditDialog = { onEvent(PhotoDetailEvent.OnDismissCommentDialog) },
+            onEditDraftChanged = { onEvent(PhotoDetailEvent.OnCommentEditDraftChanged) },
+            sourceError = uiState().commentsError,
+            onRetrySource = { onEvent(PhotoDetailEvent.OnChangeIsCommentVisible(true)) },
             lazyListState = lazyListState,
             onDismiss = {
-                onEvent(PhotoDetailContract.Event.OnChangeIsCommentVisible(false))
-                onEvent(PhotoDetailContract.Event.OnScrollCommentToTop)
+                onEvent(PhotoDetailEvent.OnChangeIsCommentVisible(false))
+                onEvent(PhotoDetailEvent.OnScrollCommentToTop)
             },
-            onWriteComment = { comment -> onEvent(PhotoDetailContract.Event.OnWriteComment(comment)) },
+            onWriteComment = { comment -> onEvent(PhotoDetailEvent.OnWriteComment(comment)) },
             onEditComment = { commentId, comment ->
-                onEvent(PhotoDetailContract.Event.OnEditComment(commentId, comment))
+                onEvent(PhotoDetailEvent.OnEditComment(commentId, comment))
             },
-            onDeleteComment = { commentId -> onEvent(PhotoDetailContract.Event.OnDeleteComment(commentId)) },
+            onDeleteComment = { commentId -> onEvent(PhotoDetailEvent.OnDeleteComment(commentId)) },
         )
     }
 
     Scaffold(
         topBar = {
             AnimatedVisibility(
-                visible = uiState().isMenuVisible,
+                visible = uiState().barsVisible,
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
                 PhotoDetailTopAppBar(
-                    onBack = { onEvent(PhotoDetailContract.Event.OnBack) }
+                    onBack = { onEvent(PhotoDetailEvent.OnBack) }
                 )
             }
         },
         bottomBar = {
             AnimatedVisibility(
-                visible = uiState().isMenuVisible,
+                visible = uiState().isMenuVisible && ready != null,
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
                 PhotoDetailBottomBar(
-                    likeCount = { uiState().likeCount },
-                    isLiked = { uiState().isLiked },
-                    onClickDescription = { onEvent(PhotoDetailContract.Event.OnChangeIsDescriptionVisible(true)) },
-                    onClickLike = { onEvent(PhotoDetailContract.Event.OnToggleIsLiked) },
-                    onClickComment = { onEvent(PhotoDetailContract.Event.OnChangeIsCommentVisible(true)) },
-                    onClickDownload = { onEvent(PhotoDetailContract.Event.OnDownloadPhoto) },
+                    likeCount = { ready?.content?.likeCount ?: 0 },
+                    isLiked = { ready?.content?.isLiked ?: false },
+                    onClickDescription = { onEvent(PhotoDetailEvent.OnChangeIsDescriptionVisible(true)) },
+                    onClickLike = { onEvent(PhotoDetailEvent.OnToggleIsLiked) },
+                    onClickComment = { onEvent(PhotoDetailEvent.OnChangeIsCommentVisible(true)) },
+                    onClickDownload = { onEvent(PhotoDetailEvent.OnDownloadPhoto) },
                 )
             }
         },
-        snackbarHost = { SnackbarHost(SnackbarHostState()) },
+        snackbarHost = { SnackbarHost(snackbarHostState()) },
         modifier = Modifier.fillMaxSize(),
     ) { paddingValues ->
+        val displayState = if (uiState().isDescriptionVisible && ready != null) ready.copy(refresh = RefreshState.Idle) else uiState().screen
+        ScreenContent(displayState, { onEvent(PhotoDetailEvent.OnRetry) }) {
         AsyncImage(
             model = uiState().photoUrl,
             contentDescription = "사진",
@@ -202,9 +185,10 @@ internal fun PhotoDetailScreen(
                 .clickable(
                     indication = null,
                     interactionSource = null,
-                    onClick = { onEvent(PhotoDetailContract.Event.OnToggleIsMenuVisible) }
+                    onClick = { onEvent(PhotoDetailEvent.OnToggleIsMenuVisible) }
                 ),
         )
+        }
     }
 }
 

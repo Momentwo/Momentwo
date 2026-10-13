@@ -6,6 +6,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.lifecycle.compose.LifecycleStartEffect
+import cord.eoeo.momentwo.core.common.ScreenState
+import cord.eoeo.momentwo.core.ui.rememberPagingScreenState
+import cord.eoeo.momentwo.core.data.toUiError
+import kotlinx.coroutines.flow.emptyFlow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,13 +34,21 @@ internal fun PhotoListRoute(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: PhotoListViewModel = hiltViewModel(),
 ) {
-    val uiState: PhotoListContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState: PhotoListState by viewModel.uiState.collectAsStateWithLifecycle()
     val refreshState: PullToRefreshState = rememberPullToRefreshState()
-    val photoPagingData: LazyPagingItems<PhotoItem> = uiState.photoPagingData.collectAsLazyPagingItems()
+    LifecycleStartEffect(viewModel) { viewModel.initialize(); onStopOrDispose { } }
+    val source = (uiState.source as? ScreenState.Success)?.content ?: remember { emptyFlow() }
+    val photoPagingData = source.collectAsLazyPagingItems()
+    val pagingState = rememberPagingScreenState(photoPagingData, Throwable::toUiError)
+    val screenState = when (val ready = uiState.source) {
+        ScreenState.Loading -> ScreenState.Loading
+        is ScreenState.Error -> ScreenState.Error(ready.error)
+        is ScreenState.Success -> pagingState
+    }
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { imageUri ->
-            viewModel.setEvent(
-                PhotoListContract.Event.OnUploadImage(imageUri)
+            viewModel.onEvent(
+                PhotoListEvent.OnUploadImage(imageUri)
             )
         }
     }
@@ -45,12 +58,14 @@ internal fun PhotoListRoute(
         imageLoader = imageLoader,
         uiState = { uiState },
         effectFlow = { viewModel.effect },
-        onEvent = { event -> viewModel.setEvent(event) },
+        onEvent = { event -> viewModel.onEvent(event) },
         refreshState = { refreshState },
         photoPagingData = { photoPagingData },
+        pagingState = { screenState },
+        retrySource = { viewModel.initialize() },
         launchGallery = { galleryLauncher.launch("image/*") },
         snackbarHostState = { snackbarHostState },
         popBackStack = popBackStack,
-        navigateToPhotoDetail = navigateToPhotoDetail
+        navigateToPhotoDetail = { albumId, photoId, url, liked -> viewModel.onEvent(PhotoListEvent.OnPhotoVisited); navigateToPhotoDetail(albumId, photoId, url, liked) }
     )
 }

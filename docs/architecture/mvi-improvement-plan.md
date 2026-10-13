@@ -74,3 +74,10 @@ StandardTestDispatcher와 제어 가능한 Fake로 취소, 역순 응답, 중복
 - 단계 6: Album 전체 본문 상태와 생성/상세 방문 시 무효화·복귀 재조회. CreateAlbum 임시/확정 선택 원본 분리, 타이틀 SavedStateHandle 보존과 제출 스냅샷/중복 차단.
   생성 중 새 입력이 생긴 경우 성공 안내만 표시하고 새 초안을 닫지 않는다. 친구 재조회는 유효한 선택을 유지하고 사라진 친구만 정리한다.
   Album/CreateAlbum 회귀 9개 및 app/Album 빌드·Lint 통과.
+
+- 단계 6 병합: #169. Album/CreateAlbum 9개 테스트 및 빌드·Lint, 기기 앨범/생성 경로 smoke 통과.
+- 단계 7: PhotoList/PhotoDetail의 분리된 계약과 역할별 Reducer, 필수 설명·좋아요 수의 원자적 Success 전환 및 입력/선택/다이얼로그 버전 보존.
+  좋아요는 해당 필드만 롤백하며 서버 ACK 이후 로컬 캐시 실패와 설명 재조회 실패를 구분한다. 댓글 대상은 ID로 처리하고 제출 중 새 초안을 보존한다.
+  Photo Mediator를 Pager별 immutable 인자로 생성하며 마지막 페이지·실제 좋아요 값을 저장한다. 사진/커서 저장은 앨범/서브앨범 범위의 Room 트랜잭션으로 수행하며 스키마는 유지한다.
+  Photo 15개 및 Photo Mediator 6개 회귀, 영향 모듈 빌드·Lint 통과. 시스템 바는 지속 State와 lifecycle로 적용/복원한다.
+  SM_N976N API 31 별도 앱 기기 6개 통과: 사진 초기 상태/경로, ScreenContent, Effect 복귀/순서, 시스템 바 pause/resume/dispose, 실제 Room 저장 범위/취소 롤백.

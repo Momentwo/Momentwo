@@ -4,9 +4,11 @@ plugins {
 
 android {
     namespace = "cord.eoeo.momentwo.feature.photo.impl"
+    testOptions.unitTests.isReturnDefaultValues = true
 }
 
 dependencies {
+    testImplementation(project(":core:testing"))
     implementation(project(":feature:photo:api"))
     implementation(project(":core:common"))
     implementation(project(":core:model"))

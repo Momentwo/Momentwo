@@ -6,6 +6,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,11 +32,12 @@ internal fun PhotoDetailRoute(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: PhotoDetailViewModel = hiltViewModel(),
 ) {
-    val uiState: PhotoDetailContract.State by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState: PhotoDetailState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) { viewModel.initialize() }
     val commentPagingData: LazyPagingItems<CommentItem> = uiState.commentPagingData.collectAsLazyPagingItems()
     val lazyListState = rememberLazyListState()
     val animatedBackgroundColor: Color by animateColorAsState(
-        targetValue = if (uiState.isMenuVisible) MaterialTheme.colorScheme.background else backgroundDark,
+        targetValue = if (uiState.barsVisible) MaterialTheme.colorScheme.background else backgroundDark,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "backgroundColor"
     )
@@ -46,7 +48,7 @@ internal fun PhotoDetailRoute(
         insetsController = insetsController,
         uiState = { uiState },
         effectFlow = { viewModel.effect },
-        onEvent = { event -> viewModel.setEvent(event) },
+        onEvent = { event -> viewModel.onEvent(event) },
         commentPagingData = { commentPagingData },
         lazyListState = { lazyListState },
         animatedBackgroundColor = { animatedBackgroundColor },

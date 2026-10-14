@@ -1,6 +1,6 @@
 # Offline-First 저장·복사·복구 가이드
 
-기본 진입은 내 로컬 앨범이다. 가입·인증·콘텐츠 API 없이 앨범→서브앨범→사진→설명·개인 메모를 관리한다. [승인 계획과 검증 기록](offline-first-plan.md), [MVI 규칙](mvi-guide.md)을 함께 따른다.
+기본 진입은 기기 앨범이다. 가입·인증·콘텐츠 API 없이 앨범→서브앨범→사진→설명·개인 메모를 관리한다. [승인 계획과 검증 기록](offline-first-plan.md), [기기·계정 UI 공통화](library-ui-parity.md), [MVI 규칙](mvi-guide.md)을 함께 따른다.
 
 ## 저장 공간과 완료의 의미
 

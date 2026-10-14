@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -83,8 +84,8 @@ internal fun CreateAlbumScreen(
         { onEvent(CreateAlbumEvent.OnClickInviteFriend) }, { onEvent(CreateAlbumEvent.OnRequestCreateAlbum(title())) }, snackbarHostState()) {
         LazyVerticalGrid(columns = GridCells.Adaptive(80.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
             items(uiState().selectedFriendList, key = { it.nickname }) { friend ->
-                UserItemBox(userItem = { UserItem(0, friend.nickname, friend.userProfileImage) },
-                    onClickClear = { onEvent(CreateAlbumEvent.OnClearFriendItem(it)) }, modifier = Modifier.animateItem().fillMaxWidth())
+                cord.eoeo.momentwo.core.ui.FriendItemBox(nickname = friend.nickname,
+                    onClear = { onEvent(CreateAlbumEvent.OnClearFriendItem(friend.nickname)) }, modifier = Modifier.animateItem().fillMaxWidth())
             }
         }
     }
@@ -94,7 +95,7 @@ internal fun CreateAlbumScreen(
 internal fun CreateAlbumContent(
     title: String, onTitleChange: (String) -> Unit, pending: Boolean,
     back: () -> Unit, invite: () -> Unit, submit: () -> Unit,
-    messages: SnackbarHostState, invitedContent: @Composable () -> Unit,
+    messages: SnackbarHostState, inputEnabled: Boolean = true, invitedContent: @Composable () -> Unit,
 ) {
     Scaffold(
         topBar = { CreateAlbumTopAppBar(onClickNavigation = { back() }) },
@@ -105,12 +106,14 @@ internal fun CreateAlbumContent(
             modifier =
                 Modifier
                     .padding(paddingValues)
+                    .imePadding()
                     .padding(top = 8.dp)
                     .padding(horizontal = 24.dp),
         ) {
             TitleText(text = { "앨범명" })
             CaptionText(text = { "앨범을 나타낼 수 있는 이름을 지어주세요" })
             OutlinedTextField(
+                enabled = inputEnabled,
                 value = title,
                 onValueChange = onTitleChange,
                 modifier = Modifier.fillMaxWidth(),

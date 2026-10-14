@@ -30,7 +30,7 @@
 
 계정 작업은 기기에 저장한 뒤 이어갑니다. 충돌은 서버 값과 내 변경을 비교해 선택하며, 서버 반영 여부가 불명확하면 자동 재전송하지 않습니다. 기존 API가 생성 ID를 반환하지 않는 경우 실제 서버 항목을 사용자가 확인해 연결합니다. 백엔드 복구 후 실제 전송 검증은 [#150](https://github.com/Momentwo/Momentwo/issues/150)에서 진행합니다.
 
-[저장·복사·복구 가이드](docs/architecture/offline-first-guide.md) · [구현·검증 기록](docs/architecture/offline-first-plan.md)
+[저장·복사·복구 가이드](docs/architecture/offline-first-guide.md) · [구현·검증 기록](docs/architecture/offline-first-plan.md) · [기기·계정 UI 공통화](docs/architecture/library-ui-parity.md)
 
 ## 🔗 Links
 
@@ -375,6 +375,10 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 라이브러리와 plugin 버전 선언은 [gradle/libs.versions.toml](gradle/libs.versions.toml), 공통 빌드 설정은 [build-logic/convention](build-logic/convention)에서 관리합니다.
 
 ---
+
+기기·계정·기존 회원 경로는 같은 앨범 카드·상세 탭·사진 그리드·전체 화면 뷰어와 BottomSheet를 공유합니다. 저장소와 권한은 각 Route/ViewModel이 유지하고, Feature를 넘는 서브앨범 미리보기 카드는 `core:ui`가 제공합니다. 생성은 별도 화면에서 완료하며, 선택 삭제는 부모 UUID를 검증하는 단일 transaction으로 처리합니다.
+
+기기 사진의 하단 메뉴는 **설명·즐겨찾기·개인 메모·갤러리 내보내기**, 계정 사진은 **설명·공유 좋아요·공유 댓글·내보내기**입니다. 계정 사진의 개인 기록과 즐겨찾기는 더보기 메뉴에서 관리합니다. 로그인 안내를 다녀와도 기기 자료와 초안은 유지됩니다.
 
 ## 개발 환경과 검증
 

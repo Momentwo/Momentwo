@@ -45,7 +45,9 @@ internal fun MomentwoNavGraph(
         modifier = Modifier,
     ) {
         localLibraryScreen(imageLoader, create = { navController.navigate(LibraryCreateAlbumDestination()) }, account = { navController.navigate(AccountAlbumsDestination) }, navigateToLogin = { navController.navigate(AccountLibraryDestination) }, navigateToAlbum = { navController.navigate(LocalAlbumDetailDestination(it)) })
-        libraryCreateAlbumScreen(navActions.popBackStack, { navController.navigate(AccountLibraryDestination) })
+        libraryCreateAlbumScreen(navActions.popBackStack, { navController.navigate(AccountLibraryDestination) }, { account ->
+            navController.navigate(if(account)AccountAlbumsDestination else LocalLibraryDestination) { popUpTo<LibraryCreateAlbumDestination> { inclusive=true }; launchSingleTop=true }
+        })
         accountAlbumsScreen(imageLoader, { navController.popBackStack<LocalLibraryDestination>(false) }, { navController.navigate(AccountLibraryDestination) }, { navController.navigate(LibraryCreateAlbumDestination(true)) }, { navController.navigate(LocalAlbumDetailDestination(it)) })
         localAlbumDetailScreen(imageLoader, navActions.popBackStack, navigateToLogin = { navController.navigate(AccountLibraryDestination) }, openPhotos = { navController.navigate(LocalPhotoListDestination(it)) }, openAccountPhotos = navActions.navigateToPhotoList, openSharedAlbum = {id,title,subtitle,cover -> navController.navigate(AlbumDetailDestination(id,title,subtitle,cover)) })
         localPhotoScreens(imageLoader,insetsController,navActions.popBackStack,openPhoto = { navController.navigate(LocalPhotoDetailDestination(it)) })

@@ -19,6 +19,11 @@ class LocalPhotoViewModelTest {
     private val repo = PhotoLocalFake(); private val drafts = EmptyLibraryDrafts(); private val store = ViewModelStore()
     private fun vm() = LocalPhotoViewModel(repo,drafts,"photo").also {store.put("photo",it);it.initialize()}
     @After fun clear() = store.clear()
+    @Test fun knownParentTitlesRemainWhileFirstPageIsUnavailableButDisappearOnOwnershipLoss()=runTest(main.testDispatcher) {
+        val vm=LocalPhotoListViewModel(repo,"child");store.put("list",vm);vm.initialize();runCurrent()
+        assertEquals(ScreenState.Loading,vm.uiState.value.screen);assertEquals(LocalPhotoListHeader("old","child"),vm.uiState.value.header)
+        repo.album.value=null;runCurrent();assertEquals(ScreenState.Error(UiError.NotFound),vm.uiState.value.screen);assertNull(vm.uiState.value.header)
+    }
     @Test fun captionCanBeClearedWithoutOverwritingFavoriteOrMemo() = runTest(main.testDispatcher) {
         repo.description = {repo.photo.value=repo.photo.value!!.copy(description=it)}
         val vm=vm();runCurrent();vm.onEvent(LocalPhotoEvent.Favorite);runCurrent()
@@ -60,7 +65,7 @@ private class PhotoLocalFake : LocalLibraryRepository {
     var edits = 0
     override fun album(id: String): Flow<LocalAlbum?> = album
     override fun subAlbums(albumId: String): Flow<List<LocalSubAlbum>> = subs
-    override fun subAlbum(id: String): Flow<LocalSubAlbum?> = flowOf(null)
+    override fun subAlbum(id: String): Flow<LocalSubAlbum?> = flowOf(LocalSubAlbum("child","album","child",null,0,photosLoaded=false))
     override fun photos(subAlbumId: String): Flow<List<LocalPhoto>> = flowOf(emptyList())
     val photo = MutableStateFlow<LocalPhoto?>(LocalPhoto("photo","child","file:///photo.png","photo.png",null,"old",true,false,false,null,0))
     val notes = MutableStateFlow<List<LocalMemo>>(emptyList())

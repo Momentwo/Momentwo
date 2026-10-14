@@ -30,7 +30,7 @@ internal fun LocalPhotoListRoute(loader: ImageLoader, back: () -> Unit, open: (S
     val manage=writable && (album?.libraryId=="device" || album?.role in setOf("ROLE_ALBUM_ADMIN","ROLE_ALBUM_SUB_ADMIN") || (album?.locallyCreated==true && album.remoteId==null))
     if(state.rename)LibraryEditDialog("서브 앨범 제목 변경",state.draft.text,pending="rename" in state.pending,onText={vm.onEvent(LocalPhotoListEvent.Text(it))},onSave={vm.onEvent(LocalPhotoListEvent.SaveName)},onDismiss={vm.onEvent(LocalPhotoListEvent.Dismiss)})
     if(state.confirmDelete)AlertDialog(onDismissRequest={vm.onEvent(LocalPhotoListEvent.Dismiss)},title={Text("선택 사진 삭제")},text={Text("선택한 사진과 기록을 삭제할까요? 가져온 원본 파일은 유지됩니다.")},confirmButton={TextButton(onClick={vm.onEvent(LocalPhotoListEvent.ConfirmDelete)},enabled="delete" !in state.pending){Text("삭제")}},dismissButton={TextButton(onClick={vm.onEvent(LocalPhotoListEvent.Dismiss)}){Text("취소")}})
-    Scaffold(topBar={PhotoListTopAppBar({album?.title.orEmpty()},{content?.subAlbum?.title.orEmpty()},{state.menu},{state.editing},
+    Scaffold(topBar={PhotoListTopAppBar({album?.title ?: state.header?.albumTitle.orEmpty()},{content?.subAlbum?.title ?: state.header?.subAlbumTitle.orEmpty()},{state.menu},{state.editing},
         {vm.onEvent(LocalPhotoListEvent.Back)},{picker.launch("image/*")},{vm.onEvent(LocalPhotoListEvent.Menu(true))},{vm.onEvent(LocalPhotoListEvent.Menu(false))},
         {vm.onEvent(LocalPhotoListEvent.Rename)},{vm.onEvent(LocalPhotoListEvent.Edit(true))},{vm.onEvent(LocalPhotoListEvent.Edit(false))},{vm.onEvent(LocalPhotoListEvent.Delete)},
         canAdd=writable && !state.importing,canRename=manage,canDelete=writable)},snackbarHost={SnackbarHost(messages)}) { padding ->

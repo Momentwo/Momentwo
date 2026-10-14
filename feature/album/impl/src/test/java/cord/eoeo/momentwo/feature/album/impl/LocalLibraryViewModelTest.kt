@@ -19,7 +19,7 @@ class LocalLibraryViewModelTest {
     private val repository = LocalLibraryFake()
     private val drafts = EmptyLibraryDrafts()
     private val store = ViewModelStore()
-    private fun vm() = LocalLibraryViewModel(repository, drafts).also { store.put("device", it) }
+    private fun vm() = LocalLibraryViewModel(repository).also { store.put("device", it) }
     @After fun clear() = store.clear()
     @Test fun deviceEmptySuccessDoesNotNeedLoginAndInitializationIsIdempotent() = runTest(main.testDispatcher) {
         val vm = vm(); vm.initialize(); runCurrent(); vm.initialize(); runCurrent()
@@ -43,47 +43,54 @@ class LocalLibraryViewModelTest {
         repository.rows.value = listOf(LocalAlbum("local", "device", "late", "", "", null, 0))
         runCurrent(); assertEquals(before, vm.uiState.value)
     }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class LibraryCreateDeviceViewModelTest {
+    @get:Rule val main=MainDispatcherRule(StandardTestDispatcher())
+    private val repository=LocalLibraryFake();private val drafts=EmptyLibraryDrafts();private val store=ViewModelStore()
+    private fun vm()=LibraryCreateViewModel(repository,drafts).also{store.put("create",it)}
+    @After fun clear()=store.clear()
     @Test fun submissionSnapshotsInputSkipsDuplicatesAndKeepsNewDraft() = runTest(main.testDispatcher) {
         val response = CompletableDeferred<Unit>()
         repository.create = { _, id -> response.await(); id }
         val vm = vm(); vm.initialize(); runCurrent()
-        vm.onEvent(LocalLibraryEvent.OpenCreate); vm.onEvent(LocalLibraryEvent.TextChanged("submitted")); runCurrent()
-        vm.onEvent(LocalLibraryEvent.Save); runCurrent()
-        vm.onEvent(LocalLibraryEvent.TextChanged("new draft")); vm.onEvent(LocalLibraryEvent.Save); runCurrent()
+        vm.onEvent(LibraryCreateEvent.Text("submitted")); runCurrent()
+        vm.onEvent(LibraryCreateEvent.Submit); runCurrent()
+        vm.onEvent(LibraryCreateEvent.Text("new draft")); vm.onEvent(LibraryCreateEvent.Submit); runCurrent()
         response.complete(Unit); runCurrent()
         assertEquals(listOf("submitted"), repository.created)
         assertEquals("new draft", vm.uiState.value.draft.text)
-        assertTrue(vm.uiState.value.creating)
+        assertTrue(vm.uiState.value.ready)
         assertFalse(vm.uiState.value.pending)
-        assertTrue(vm.effect.first() is LocalLibraryEffect.Message)
+        assertTrue(vm.effect.first() is LibraryCreateEffect.Message)
         assertEquals("new draft", drafts.value!!.text)
     }
     @Test fun restoredDraftIsOnlyClearedWhenItsOwnSubmissionCompletes() = runTest(main.testDispatcher) {
         drafts.value = LibraryDraft("restored", "", "receipt")
         val vm = vm(); vm.initialize(); runCurrent()
-        assertTrue(vm.uiState.value.creating)
-        vm.onEvent(LocalLibraryEvent.Save); runCurrent()
-        assertFalse(vm.uiState.value.creating)
+        assertTrue(vm.uiState.value.ready)
+        vm.onEvent(LibraryCreateEvent.Submit); runCurrent()
+        assertEquals("",vm.uiState.value.draft.text)
         assertNull(drafts.value)
-        assertEquals(LocalLibraryEffect.Album("receipt"), vm.effect.first())
+        assertEquals(LibraryCreateEffect.Created(false), vm.effect.first())
     }
     @Test fun cancellingViewModelDoesNotPublishCreateResultOrFailureEffect() = runTest(main.testDispatcher) {
         repository.create = { _, _ -> awaitCancellation() }
-        val effects = mutableListOf<LocalLibraryEffect>()
+        val effects = mutableListOf<LibraryCreateEffect>()
         val vm = vm(); backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.effect.collect { effects += it } }
-        vm.initialize(); runCurrent(); vm.onEvent(LocalLibraryEvent.OpenCreate); vm.onEvent(LocalLibraryEvent.TextChanged("pending")); runCurrent()
-        vm.onEvent(LocalLibraryEvent.Save); runCurrent(); val before = vm.uiState.value
+        vm.initialize(); runCurrent(); vm.onEvent(LibraryCreateEvent.Text("pending")); runCurrent()
+        vm.onEvent(LibraryCreateEvent.Submit); runCurrent(); val before = vm.uiState.value
         store.clear(); runCurrent()
         assertEquals(before, vm.uiState.value)
         assertTrue(effects.isEmpty())
     }
-    @Test fun optionalDraftFailureDoesNotHideStoredAlbums() = runTest(main.testDispatcher) {
-        drafts.failLoad = true
-        val vm = vm(); vm.initialize(); runCurrent()
-        assertEquals(ScreenState.Success(emptyList<LocalAlbum>()), vm.uiState.value.screen)
-        assertTrue(vm.effect.first() is LocalLibraryEffect.Message)
+    @Test fun failedDraftRestoreCanRetryWithoutReplacingTheSavedDraft()=runTest(main.testDispatcher) {
+        drafts.failLoad=true;drafts.value=LibraryDraft("saved","","receipt")
+        val vm=vm();vm.initialize();runCurrent();assertTrue(vm.uiState.value.restoreFailed);assertFalse(vm.uiState.value.ready)
+        drafts.failLoad=false;vm.onEvent(LibraryCreateEvent.Retry);runCurrent()
+        assertTrue(vm.uiState.value.ready);assertEquals("saved",vm.uiState.value.draft.text)
     }
-
 }
 private class LocalLibraryFake : LocalLibraryRepository {
     var create: suspend (String, String) -> String = { _, id -> id }

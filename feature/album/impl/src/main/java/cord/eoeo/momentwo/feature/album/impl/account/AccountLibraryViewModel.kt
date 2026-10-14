@@ -22,6 +22,10 @@ internal class AccountLibraryViewModel @Inject constructor(private val accounts:
             combine(local.albums(LibraryScope.Device),if(identity==null)flowOf(emptyList())else local.albums(LibraryScope.Account(identity.accountId))){device,albums->AccountLibraryContent(identity,albums,device.size,storage.first,storage.second)}
         }.catch{if(it is CancellationException||it is Error)throw it;Log.e("AccountLibrary","Read failed",it);dispatch(AccountLibraryAction.Failure(UiError.Unknown))}.collect{dispatch(AccountLibraryAction.Snapshot(it))}
     }}
+    fun openAlbums() {
+        initialize()
+        viewModelScope.launch { if(accounts.identities().first()?.canSync==true)refresh() }
+    }
     override fun handleEvent(event:AccountLibraryEvent){when(event){
         AccountLibraryEvent.Retry->{initialize();if((uiState.value.screen as? ScreenState.Success)?.content?.identity?.canSync==true) refresh()}
         AccountLibraryEvent.Login->sendEffect(AccountLibraryEffect.Login)

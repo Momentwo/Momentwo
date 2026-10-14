@@ -1,0 +1,15 @@
+package cord.eoeo.momentwo.feature.photo.impl.local
+import cord.eoeo.momentwo.core.common.*
+internal object LocalPhotoReducer : Reducer<LocalPhotoState, LocalPhotoAction> {
+    override fun reduce(state: LocalPhotoState, action: LocalPhotoAction) = when (action) {
+        is LocalPhotoAction.Snapshot -> state.copy(screen = ScreenState.Success(action.content))
+        is LocalPhotoAction.Failed -> state.copy(screen = if (action.error == UiError.NotFound) ScreenState.Error(action.error) else state.screen.failRefresh(action.error))
+        is LocalPhotoAction.Open -> state.copy(dialog = action.dialog, draft = action.draft, interaction = state.interaction + 1)
+        is LocalPhotoAction.Restored -> if (state.interaction == 0L) state.copy(dialog = action.dialog, draft = action.draft) else state
+        LocalPhotoAction.Dismiss -> state.copy(dialog = LocalPhotoDialog.None, interaction = state.interaction + 1)
+        is LocalPhotoAction.Edited -> state.copy(draft = action.draft, interaction = state.interaction + 1)
+        is LocalPhotoAction.Saved -> if (state.draft.token == action.token && state.interaction == action.interaction) state.copy(dialog = LocalPhotoDialog.None) else state
+        LocalPhotoAction.ToggleImmersive -> state.copy(immersive = !state.immersive)
+        is LocalPhotoAction.Pending -> state.copy(pending = if (action.value) state.pending + action.key else state.pending - action.key)
+    }
+}

@@ -16,6 +16,9 @@ import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.impl.authScreens
 import cord.eoeo.momentwo.feature.friend.impl.friendScreen
 import cord.eoeo.momentwo.feature.photo.impl.photoScreens
+import cord.eoeo.momentwo.feature.photo.impl.local.localPhotoScreens
+import cord.eoeo.momentwo.feature.photo.api.LocalPhotoListDestination
+import cord.eoeo.momentwo.feature.photo.api.LocalPhotoDetailDestination
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -32,7 +35,8 @@ internal fun MomentwoNavGraph(
         modifier = Modifier,
     ) {
         localLibraryScreen(navigateToLogin = { navController.navigate(LoginDestination) }, navigateToAlbum = { navController.navigate(LocalAlbumDetailDestination(it)) })
-        localAlbumDetailScreen(imageLoader, navActions.popBackStack, navigateToLogin = { navController.navigate(LoginDestination) })
+        localAlbumDetailScreen(imageLoader, navActions.popBackStack, navigateToLogin = { navController.navigate(LoginDestination) }, openPhotos = { navController.navigate(LocalPhotoListDestination(it)) })
+        localPhotoScreens(imageLoader,insetsController,navActions.popBackStack,openPhoto = { navController.navigate(LocalPhotoDetailDestination(it)) })
         friendScreen(
             coroutineScope = coroutineScope,
             imageLoader = imageLoader,

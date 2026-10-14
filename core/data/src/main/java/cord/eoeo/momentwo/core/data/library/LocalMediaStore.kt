@@ -68,7 +68,7 @@ class LocalMediaStore @Inject constructor(@ApplicationContext private val contex
             directory.listFiles()?.forEach { if (it.name.startsWith(".import-") || it.name !in references) it.delete() }
         }
     }
-    suspend fun export(name: String): Unit = withContext(Dispatchers.IO) {
+    suspend fun export(name: String): Uri = withContext(Dispatchers.IO) {
         val source = file(name)
         if (!source.isFile) throw IOException("기기에 사진 파일이 없습니다")
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -89,6 +89,7 @@ class LocalMediaStore @Inject constructor(@ApplicationContext private val contex
             currentCoroutineContext().ensureActive()
             context.contentResolver.update(target, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null)
             published = true
+            target
         } finally { if (!published) withContext(NonCancellable) { context.contentResolver.delete(target, null, null) } }
     }
 }

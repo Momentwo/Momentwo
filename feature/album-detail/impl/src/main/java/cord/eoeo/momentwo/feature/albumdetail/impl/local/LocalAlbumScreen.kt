@@ -2,6 +2,7 @@ package cord.eoeo.momentwo.feature.albumdetail.impl.local
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,12 +21,12 @@ import cord.eoeo.momentwo.core.ui.*
 import cord.eoeo.momentwo.feature.albumdetail.api.LocalAlbumDetailDestination
 import kotlinx.coroutines.launch
 
-fun NavGraphBuilder.localAlbumDetailScreen(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit) {
-    composable<LocalAlbumDetailDestination> { LocalAlbumRoute(imageLoader, popBackStack, navigateToLogin) }
+fun NavGraphBuilder.localAlbumDetailScreen(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit, openPhotos: (String) -> Unit) {
+    composable<LocalAlbumDetailDestination> { LocalAlbumRoute(imageLoader, popBackStack, navigateToLogin, openPhotos) }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LocalAlbumRoute(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit, vm: LocalAlbumViewModel = hiltViewModel()) {
+private fun LocalAlbumRoute(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit, openPhotos: (String) -> Unit, vm: LocalAlbumViewModel = hiltViewModel()) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     val messages = remember { SnackbarHostState() }
     LaunchedEffect(vm) { vm.initialize() }
@@ -52,7 +53,7 @@ private fun LocalAlbumRoute(imageLoader: ImageLoader, popBackStack: () -> Unit, 
                     TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.CreateSub)) }) { Text("서브앨범 추가") }
                 }
                 items(ready.subAlbums, key = { it.localId }) { sub ->
-                    ListItem(headlineContent = { Text(sub.title) }, trailingContent = { Row {
+                    ListItem(modifier = Modifier.clickable { openPhotos(sub.localId) }, headlineContent = { Text(sub.title) }, trailingContent = { Row {
                         TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.RenameSub(sub.localId))) }) { Text("이름 변경") }
                         TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.DeleteSub(sub.localId))) }) { Text("삭제") }
                     } })

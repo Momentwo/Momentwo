@@ -23,8 +23,9 @@ internal class LocalLibraryViewModel @Inject constructor(private val repository:
         if (observation?.isActive == true) return
         observation = viewModelScope.launch {
             runSuspendCatching {
-                repository.initialize(); repository.cleanUnusedMedia()
+                repository.initialize()
             }.onFailure { Log.e("LocalLibrary", "Initialization failed", it); dispatch(LocalLibraryAction.Failed); return@launch }
+            runSuspendCatching { repository.cleanUnusedMedia() }.onFailure { Log.e("LocalLibrary", "Cleanup deferred", it) }
             runSuspendCatching { drafts.load(draftKey) }.onSuccess { it?.let { draft -> dispatch(LocalLibraryAction.Restored(draft)) } }
                 .onFailure { Log.e("LocalLibrary", "Draft restore failed", it); emitEffect(LocalLibraryEffect.Message("초안을 불러오지 못했습니다")) }
             repository.albums(LibraryScope.Device).catch {

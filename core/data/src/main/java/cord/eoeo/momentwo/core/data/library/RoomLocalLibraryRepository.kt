@@ -54,6 +54,31 @@ class RoomLocalLibraryRepository @Inject constructor(private val db: MomentwoDat
         else media.withImported(source) { name -> db.withTransaction { val old = deviceAlbum(id); dao.updateAlbum(old.copy(coverMediaName = name, revision = old.revision + 1)) } }
         cleanupAfterCommit()
     }
+    private suspend fun deviceSub(id: String): LocalSubAlbumEntity = requireNotNull(dao.subAlbum(id)).also { deviceAlbum(it.albumId) }
+    private suspend fun devicePhoto(id: String): LocalPhotoEntity = requireNotNull(dao.photo(id)).also { deviceSub(it.subAlbumId) }
+    override suspend fun importPhoto(subAlbumId: String, source: android.net.Uri, localId: String): String {
+        deviceSub(subAlbumId)
+        // The same intent may be resumed after SQLite commits; it must not copy another file.
+        dao.photo(localId)?.let { check(it.subAlbumId == subAlbumId); return localId }
+        return media.withImported(source) { name -> db.withTransaction {
+            deviceSub(subAlbumId)
+            val existing = dao.photo(localId); check(existing == null || existing.subAlbumId == subAlbumId)
+            dao.insertPhoto(LocalPhotoEntity(localId, subAlbumId, name, createdAt = System.currentTimeMillis()))
+            localId
+        } }
+    }
+    override suspend fun setDescription(id: String, text: String) { db.withTransaction { val old = devicePhoto(id); dao.updatePhoto(old.copy(description = text, descriptionKnown = true, revision = old.revision + 1)) } }
+    override suspend fun setFavorite(id: String, value: Boolean) { db.withTransaction { val old = devicePhoto(id); dao.updatePhoto(old.copy(favorite = value, revision = old.revision + 1)) } }
+    override suspend fun saveMemo(photoId: String, text: String, memoId: String): String = db.withTransaction {
+        devicePhoto(photoId); require(text.isNotBlank())
+        val old = dao.memo(memoId)
+        if (old == null) dao.insertMemo(LocalMemoEntity(memoId, photoId, text, System.currentTimeMillis()))
+        else { check(old.photoId == photoId); dao.updateMemo(old.copy(text = text)) }
+        memoId
+    }
+    override suspend fun deleteMemo(id: String) { db.withTransaction { val old = requireNotNull(dao.memo(id)); devicePhoto(old.photoId); dao.deleteMemo(id) } }
+    override suspend fun deletePhoto(id: String) { db.withTransaction { devicePhoto(id); dao.deletePhoto(id) }; cleanupAfterCommit() }
+    override suspend fun exportPhoto(id: String) { val name = requireNotNull(devicePhoto(id).mediaName) { "사진 파일을 내려받은 뒤 내보낼 수 있습니다" }; media.export(name) }
     private suspend fun cleanupAfterCommit() { cord.eoeo.momentwo.core.common.runSuspendCatching { media.cleanUnused() }.onFailure { android.util.Log.e("LocalLibrary", "Saved; cleanup deferred", it) } }
     override suspend fun cleanUnusedMedia() { media.cleanUnused() }
     override suspend fun deleteAlbum(id: String) { db.withTransaction { deviceAlbum(id); dao.deleteAlbum(id) }; cleanupAfterCommit() }

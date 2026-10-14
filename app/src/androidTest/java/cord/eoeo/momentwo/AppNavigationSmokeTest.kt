@@ -108,7 +108,8 @@ class AppNavigationSmokeTest {
 
     @Test
     fun loginSignUpAndBackUseFeatureGraph() {
-        compose.onNodeWithText("계정 연결").performClick()
+        compose.onNodeWithContentDescription("메뉴").performClick()
+        compose.onNodeWithText("계정·저장 공간").performClick()
         compose.onNodeWithText("로그인").performClick()
         compose.onNodeWithText("회원가입").performClick()
         compose.waitForIdle()
@@ -133,7 +134,7 @@ class AppNavigationSmokeTest {
         }
         compose.runOnIdle { navController.popBackStack() }
         compose.waitForIdle()
-        compose.onNodeWithText("내 로컬 앨범").assertExists()
+        compose.onNodeWithText("Album").assertExists()
     }
 
     @Test
@@ -149,7 +150,7 @@ class AppNavigationSmokeTest {
         compose.onNodeWithText("받은 요청").assertExists()
         compose.runOnIdle { navController.popBackStack() }
         compose.waitForIdle()
-        compose.onNodeWithText("내 로컬 앨범").assertExists()
+        compose.onNodeWithText("Album").assertExists()
     }
     @Test
     fun subAlbumSlotAndDetailTabsAreReachableWithoutBackend() {
@@ -168,7 +169,7 @@ class AppNavigationSmokeTest {
         compose.waitForIdle()
         compose.runOnIdle { navController.popBackStack() }
         compose.waitForIdle()
-        compose.onNodeWithText("내 로컬 앨범").assertExists()
+        compose.onNodeWithText("Album").assertExists()
     }
 
     @Test
@@ -226,7 +227,7 @@ class AppNavigationSmokeTest {
             navController.popBackStack()
         }
         compose.waitForIdle()
-        compose.onNodeWithText("내 로컬 앨범").assertExists()
+        compose.onNodeWithText("Album").assertExists()
     }
 
     @Test
@@ -250,7 +251,7 @@ class AppNavigationSmokeTest {
             navController.popBackStack()
         }
         compose.waitForIdle()
-        compose.onNodeWithText("내 로컬 앨범").assertExists()
+        compose.onNodeWithText("Album").assertExists()
     }
 
     @Test

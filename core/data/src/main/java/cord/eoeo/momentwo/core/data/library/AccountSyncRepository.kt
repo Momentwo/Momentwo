@@ -84,7 +84,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
         val parent=parentId?.let{id->jobs.lastOrNull{it.targetId==id && it.kind in setOf(SyncKind.CREATE_ALBUM.name,SyncKind.CREATE_SUB.name,SyncKind.UPLOAD_PHOTO.name) && it.status!=SyncStatus.DONE.name}}
         return enqueue(owner.accountId,targetId,parentId,kind,label,value,mediaName=mediaName,base=base,dependency=prior?.id ?: parent?.id,revision=revision)
     }
-    suspend fun createAccountAlbum(title:String,intentId:String,expected:AccountIdentity?=null):String {
+    suspend fun createAccountAlbum(title:String,intentId:String,expected:AccountIdentity?=null,inviteNames:List<String> = emptyList()):String {
         require(title.isNotBlank());val owner=if(expected==null)currentOwner()else requireOwner(expected);val libraryId=LibraryScope.Account(owner.accountId).id
         db.withTransaction {
             dao.insertLibrary(LibraryEntity(libraryId,owner.accountId,owner.accountId))
@@ -92,7 +92,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
             if(prior!=null){check(prior.libraryId==libraryId);return@withTransaction}
             dao.insertAlbum(LocalAlbumEntity(intentId,libraryId,title.trim(),createdAt=System.currentTimeMillis(),locallyCreated=true))
             work.putLink(SyncLinkEntity(intentId,owner.accountId,"ALBUM",null,null))
-            enqueue(owner.accountId,intentId,null,SyncKind.CREATE_ALBUM,title,title.trim())
+            enqueue(owner.accountId,intentId,null,SyncKind.CREATE_ALBUM,title,title.trim(),extra=AlbumInvitations.encode(inviteNames))
         }
         scheduler.enqueue();return intentId
     }

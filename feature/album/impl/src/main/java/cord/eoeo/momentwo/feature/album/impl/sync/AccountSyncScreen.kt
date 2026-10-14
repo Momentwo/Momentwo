@@ -17,9 +17,9 @@ import cord.eoeo.momentwo.core.model.*
 import cord.eoeo.momentwo.core.ui.*
 import cord.eoeo.momentwo.feature.album.api.AccountSyncDestination
 import kotlinx.coroutines.launch
-fun NavGraphBuilder.accountSyncScreen(loader:ImageLoader,back:()->Unit,open:(String)->Unit){composable<AccountSyncDestination>{AccountSyncRoute(loader,back,open)}}
+fun NavGraphBuilder.accountSyncScreen(loader:ImageLoader,back:()->Unit,open:(String)->Unit,create:()->Unit){composable<AccountSyncDestination>{AccountSyncRoute(loader,back,open,create)}}
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable private fun AccountSyncRoute(loader:ImageLoader,back:()->Unit,open:(String)->Unit,vm:AccountSyncViewModel=hiltViewModel()){
+@Composable private fun AccountSyncRoute(loader:ImageLoader,back:()->Unit,open:(String)->Unit,create:()->Unit,vm:AccountSyncViewModel=hiltViewModel()){
     val state by vm.uiState.collectAsStateWithLifecycle();val messages=remember{SnackbarHostState()};LaunchedEffect(vm){vm.initialize()};CollectEffect(vm.effect){when(val e=it){AccountSyncEffect.Back->back();is AccountSyncEffect.Album->open(e.id);is AccountSyncEffect.Message->launch{messages.showSnackbar(e.text)}}}
     val content=(state.screen as? ScreenState.Success)?.content
     fun button(text:String,event:AccountSyncEvent):@Composable ()->Unit={TextButton(onClick={vm.onEvent(event)},enabled=state.pending.isEmpty()){Text(text)}}
@@ -33,7 +33,7 @@ fun NavGraphBuilder.accountSyncScreen(loader:ImageLoader,back:()->Unit,open:(Str
         is SyncDialog.Cancel->AlertDialog(onDismissRequest={vm.onEvent(AccountSyncEvent.Dismiss)},title={Text("대기 작업 중단")},text={Text("${dialog.job.displayName}\n복사 작업은 기기 복사본과 남은 전송을 중단합니다. 원본은 유지하며 이미 서버에 반영된 자료를 자동 삭제하지 않습니다. 반영 여부가 불명확하면 먼저 서버 항목을 확인해주세요.")},confirmButton=button("중단",AccountSyncEvent.Cancel),dismissButton=button("돌아가기",AccountSyncEvent.Dismiss))
     }
     Scaffold(topBar={TopAppBar(title={Text("계정 복사·동기화")},navigationIcon={TextButton(onClick={vm.onEvent(AccountSyncEvent.Back)}){Text("뒤로")}})},snackbarHost={SnackbarHost(messages)}){padding->ScreenContent(state.screen,{vm.onEvent(AccountSyncEvent.Retry)},Modifier.padding(padding)){ready->LazyColumn(Modifier.fillMaxSize().padding(16.dp)){
-        item{Text("대상 계정 · ${ready.identity.accountId}");Text("로그인만으로 기기 자료를 업로드하지 않습니다");TextButton(onClick={vm.onEvent(AccountSyncEvent.OpenCreate)}){Text("계정 앨범 만들기")};Text("복사할 기기 앨범 선택")}
+        item{Text("대상 계정 · ${ready.identity.accountId}");Text("로그인만으로 기기 자료를 업로드하지 않습니다");TextButton(onClick=create){Text("계정 앨범 만들기")};Text("복사할 기기 앨범 선택")}
         items(ready.albums,key={it.localId}){album->Row{Checkbox(checked=album.localId in state.selected,onCheckedChange={vm.onEvent(AccountSyncEvent.Toggle(album.localId))});Text(album.title,Modifier.padding(top=12.dp))}}
         item{TextButton(onClick={vm.onEvent(AccountSyncEvent.OpenCopy)},enabled=state.selected.isNotEmpty() && "copy" !in state.pending){Text("선택 앨범 복사")};TextButton(onClick={vm.onEvent(AccountSyncEvent.Retry)}){Text("대기 작업 이어가기")};Text("저장된 계정 작업")}
         items(ready.jobs,key={it.id}){job->Column(Modifier.padding(vertical=8.dp)){Text(job.displayName);Text(statusLabel(job.status));if(job.status in setOf(SyncStatus.AWAITING_ID,SyncStatus.UNKNOWN) && job.kind in creations)TextButton(onClick={vm.onEvent(AccountSyncEvent.Link(job))}){Text("서버 항목 확인")};if(job.status in setOf(SyncStatus.UNKNOWN,SyncStatus.CONFLICT,SyncStatus.PERMISSION_DENIED,SyncStatus.NOT_FOUND) && job.kind !in creations)TextButton(onClick={vm.onEvent(AccountSyncEvent.Inspect(job))}){Text("서버 값 확인")};if(job.status in setOf(SyncStatus.QUEUED,SyncStatus.PREPARING,SyncStatus.AUTH_REQUIRED,SyncStatus.PERMISSION_DENIED,SyncStatus.NOT_FOUND,SyncStatus.CONFLICT))TextButton(onClick={vm.onEvent(AccountSyncEvent.OpenCancel(job))}){Text("작업 중단")}}}

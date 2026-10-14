@@ -12,6 +12,10 @@ import cord.eoeo.momentwo.feature.album.impl.account.AccountAccessGuard
 import cord.eoeo.momentwo.feature.album.api.AccountLibraryDestination
 import cord.eoeo.momentwo.feature.album.api.AccountSyncDestination
 import cord.eoeo.momentwo.feature.album.impl.sync.accountSyncScreen
+import cord.eoeo.momentwo.feature.album.impl.local.libraryCreateAlbumScreen
+import cord.eoeo.momentwo.feature.album.impl.account.accountAlbumsScreen
+import cord.eoeo.momentwo.feature.album.api.LibraryCreateAlbumDestination
+import cord.eoeo.momentwo.feature.album.api.AccountAlbumsDestination
 import cord.eoeo.momentwo.feature.album.impl.local.localLibraryScreen
 import cord.eoeo.momentwo.feature.albumdetail.api.LocalAlbumDetailDestination
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
@@ -40,11 +44,13 @@ internal fun MomentwoNavGraph(
         startDestination = LocalLibraryDestination,
         modifier = Modifier,
     ) {
-        localLibraryScreen(navigateToLogin = { navController.navigate(AccountLibraryDestination) }, navigateToAlbum = { navController.navigate(LocalAlbumDetailDestination(it)) })
+        localLibraryScreen(imageLoader, create = { navController.navigate(LibraryCreateAlbumDestination()) }, account = { navController.navigate(AccountAlbumsDestination) }, navigateToLogin = { navController.navigate(AccountLibraryDestination) }, navigateToAlbum = { navController.navigate(LocalAlbumDetailDestination(it)) })
+        libraryCreateAlbumScreen(navActions.popBackStack, { navController.navigate(AccountLibraryDestination) })
+        accountAlbumsScreen(imageLoader, { navController.popBackStack<LocalLibraryDestination>(false) }, { navController.navigate(AccountLibraryDestination) }, { navController.navigate(LibraryCreateAlbumDestination(true)) }, { navController.navigate(LocalAlbumDetailDestination(it)) })
         localAlbumDetailScreen(imageLoader, navActions.popBackStack, navigateToLogin = { navController.navigate(AccountLibraryDestination) }, openPhotos = { navController.navigate(LocalPhotoListDestination(it)) }, openAccountPhotos = navActions.navigateToPhotoList, openSharedAlbum = {id,title,subtitle,cover -> navController.navigate(AlbumDetailDestination(id,title,subtitle,cover)) })
         localPhotoScreens(imageLoader,insetsController,navActions.popBackStack,openPhoto = { navController.navigate(LocalPhotoDetailDestination(it)) })
-        accountLibraryScreen(navActions.popBackStack, { navController.navigate(LoginDestination) }, navActions.navigateToFriend, { navController.navigate(LocalAlbumDetailDestination(it)) }, {navController.navigate(AccountSyncDestination)})
-        accountSyncScreen(imageLoader,navActions.popBackStack,{navController.navigate(LocalAlbumDetailDestination(it))})
+        accountLibraryScreen(navActions.popBackStack, { navController.navigate(LoginDestination) }, navActions.navigateToFriend, { navController.navigate(LocalAlbumDetailDestination(it)) }, {navController.navigate(AccountSyncDestination)}, {navController.navigate(AccountAlbumsDestination)})
+        accountSyncScreen(imageLoader,navActions.popBackStack,{navController.navigate(LocalAlbumDetailDestination(it))}, {navController.navigate(LibraryCreateAlbumDestination(true))})
         friendScreen(
             accountGuard = { content -> AccountAccessGuard({ navController.navigate(AccountLibraryDestination) { launchSingleTop = true; popUpTo<LocalLibraryDestination>() } },content) },
             coroutineScope = coroutineScope,
@@ -62,6 +68,9 @@ internal fun MomentwoNavGraph(
         )
 
         albumScreens(
+            device = { navController.popBackStack<LocalLibraryDestination>(false) },
+            account = { navController.navigate(AccountAlbumsDestination) },
+            settings = { navController.navigate(AccountLibraryDestination) },
             accountGuard = { content -> AccountAccessGuard({ navController.navigate(AccountLibraryDestination) { launchSingleTop = true; popUpTo<LocalLibraryDestination>() } },content) },
             coroutineScope = coroutineScope,
             imageLoader = imageLoader,

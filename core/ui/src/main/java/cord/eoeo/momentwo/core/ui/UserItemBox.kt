@@ -29,13 +29,18 @@ fun UserItemBox(
     onClickClear: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    FriendItemBox(userItem().nickname, { onClickClear(userItem().nickname) }, modifier)
+}
+
+@Composable
+fun FriendItemBox(nickname: String, onClear: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .aspectRatio(1f)
             .padding(8.dp),
     ) {
         IconButton(
-            onClick = { onClickClear(userItem().nickname) },
+            onClick = onClear,
             modifier = Modifier
                 .size(18.dp)
                 .align(Alignment.TopEnd),
@@ -58,7 +63,7 @@ fun UserItemBox(
                     .weight(1f),
             )
             Text(
-                text = userItem().nickname,
+                text = nickname,
                 fontSize = 13.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

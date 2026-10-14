@@ -54,6 +54,9 @@ internal fun AlbumScreen(
     navigateToProfile: () -> Unit,
     navigateToFriend: () -> Unit,
     navigateToAlbumDetail: (AlbumItem) -> Unit,
+    device: () -> Unit = {},
+    account: () -> Unit = {},
+    settings: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     CollectEffect(effectFlow()) { effect ->
@@ -67,27 +70,11 @@ internal fun AlbumScreen(
         onEvent(AlbumEvent.OnCloseDrawer)
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState(),
-        drawerContent = {
-            AlbumDrawerContent(
-                navigateToProfile = navigateToProfile,
-                navigateToFriend = navigateToFriend,
-                navigateToSetting = { /*TODO: Navigate to Setting*/ },
-            )
-        },
-    ) {
-        Scaffold(
-            topBar = {
-                AlbumTopAppBar(
-                    onClickDrawer = onClickDrawer,
-                    onClickSearch = { /*TODO: Navigate to Search*/ },
-                )
-            },
-            floatingActionButton = { CreateAlbumFAB(onClick = navigateToCreateAlbum) },
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState()) },
-            modifier = Modifier.fillMaxSize(),
-        ) { paddingValues ->
+    cord.eoeo.momentwo.feature.album.impl.presentation.AlbumScaffold(
+        messages = snackbarHostState(), create = navigateToCreateAlbum,
+        drawerContent = { close -> cord.eoeo.momentwo.feature.album.impl.presentation.LibraryDrawer(device, account, settings, close, true) },
+        drawer = drawerState(),
+    ) { paddingValues ->
             ScreenContent(uiState().screen, { onEvent(AlbumEvent.OnGetAlbumList) }, Modifier.padding(paddingValues)) { content ->
                 if (content.albums.isEmpty()) EmptyContent() else
             LazyVerticalGrid(
@@ -109,7 +96,6 @@ internal fun AlbumScreen(
                 }
             }
             }
-        }
     }
 }
 
@@ -119,7 +105,6 @@ internal fun AlbumDrawerContent(
     navigateToFriend: () -> Unit,
     navigateToSetting: () -> Unit,
 ) {
-    ModalDrawerSheet {
         NavigationDrawerItem(
             label = { Text(text = "Profile", maxLines = 1) },
             icon = { Icon(Icons.Default.AccountCircle, "") },
@@ -144,7 +129,6 @@ internal fun AlbumDrawerContent(
             onClick = navigateToSetting,
             modifier = Modifier.padding(16.dp, 8.dp),
         )
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -157,12 +141,12 @@ internal fun AlbumTopAppBar(
         title = { Text(text = "Album") },
         navigationIcon = {
             IconButton(onClick = onClickDrawer) {
-                Icon(Icons.Default.Menu, "")
+                Icon(Icons.Default.Menu, "메뉴")
             }
         },
         actions = {
             IconButton(onClick = onClickSearch) {
-                Icon(Icons.Default.Search, "")
+                Icon(Icons.Default.Search, "검색")
             }
         },
     )
@@ -171,6 +155,6 @@ internal fun AlbumTopAppBar(
 @Composable
 internal fun CreateAlbumFAB(onClick: () -> Unit) {
     FloatingActionButton(onClick = onClick) {
-        Icon(Icons.Default.Add, "")
+        Icon(Icons.Default.Add, "앨범 추가")
     }
 }

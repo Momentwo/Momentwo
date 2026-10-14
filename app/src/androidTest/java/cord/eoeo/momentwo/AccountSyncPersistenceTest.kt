@@ -41,6 +41,15 @@ class AccountSyncPersistenceTest {
             query("SELECT COUNT(*) FROM local_memo").use{it.moveToFirst();assertEquals(1,it.getInt(0))};close()
         }
     }
+    @Test fun accountCreationPersistsInvitationsAndRejectsChangedAccount()=fixture { db,_,sync,prefs ->
+        val expected=prefs.getSession().getOrThrow()!!.identity
+        sync.createAccountAlbum("Invited","invite-album",expected,listOf("친구", "a,b"))
+        val job=db.syncDao().jobs("A").single()
+        assertEquals(listOf("친구", "a,b"),AlbumInvitations.decode(job.extra))
+        prefs.storeSession("B","b","r")
+        val result=cord.eoeo.momentwo.core.common.runSuspendCatching { sync.createAccountAlbum("Wrong","wrong-album",expected,listOf("친구")) }
+        assertTrue(result.isFailure);assertNull(db.libraryDao().album("wrong-album"))
+    }
     @Test fun offlineMutationsCoalesceAndCancellationPreservesIndependentFavorite()=fixture { db,repo,sync,prefs ->
         val library="account:A";db.libraryDao().insertLibrary(LibraryEntity(library,"A","A"))
         db.libraryDao().insertAlbum(LocalAlbumEntity("album",library,"Remote",remoteId=1,role=MemberAuth.ADMIN.roleString,createdAt=0))

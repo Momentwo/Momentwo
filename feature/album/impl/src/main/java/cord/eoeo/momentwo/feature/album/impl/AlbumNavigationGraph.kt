@@ -19,10 +19,13 @@ fun NavGraphBuilder.albumScreens(
     navigateToProfile: () -> Unit,
     navigateToFriend: () -> Unit,
     navigateToAlbumDetail: (AlbumItem) -> Unit,
+    device: () -> Unit = {},
+    account: () -> Unit = {},
+    settings: () -> Unit = {},
     accountGuard: @Composable (@Composable () -> Unit) -> Unit = { content -> content() },
 ) {
     composable<AlbumDestination> {
-        accountGuard { AlbumRoute(coroutineScope, imageLoader, navigateToCreateAlbum, navigateToProfile, navigateToFriend, navigateToAlbumDetail) }
+        accountGuard { AlbumRoute(coroutineScope, imageLoader, navigateToCreateAlbum, navigateToProfile, navigateToFriend, navigateToAlbumDetail, device, account, settings) }
     }
     composable<CreateAlbumDestination> {
         accountGuard { CreateAlbumRoute(coroutineScope, popBackStack) }

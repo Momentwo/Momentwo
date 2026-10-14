@@ -16,9 +16,14 @@ class GuestAccountConnectionSmokeTest {
     @Test fun cancellingOptionalLoginReturnsToDeviceLibraryWithoutApiOrUpload(){
         compose.runOnUiThread{compose.activity.setShowWhenLocked(true);compose.activity.setTurnScreenOn(true);compose.activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
         fun wait(text:String){compose.waitUntil(10_000){compose.onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired=false).isNotEmpty()}}
-        wait("내 로컬 앨범");val counter=EntryPointAccessors.fromApplication(compose.activity,ApiDiagnostics::class.java).apiRequests();val before=counter.count
+        wait("Album");val counter=EntryPointAccessors.fromApplication(compose.activity,ApiDiagnostics::class.java).apiRequests();val before=counter.count
+        compose.onNodeWithContentDescription("앨범 추가").performClick();wait("Create Album")
+        compose.onNode(hasSetTextAction()).performTextReplacement("보존할 초안")
+        compose.onNodeWithText("추가").performClick();wait("친구와 앨범 공유")
         compose.onNodeWithText("계정 연결").performClick();wait("계정·저장 공간");compose.onNodeWithText("계정 없이 사용 중").assertExists()
         compose.onNodeWithText("로그인").performClick();wait("Momentwo");compose.runOnUiThread{compose.activity.onBackPressedDispatcher.onBackPressed()}
-        wait("계정·저장 공간");compose.onNodeWithText("뒤로").performClick();wait("내 로컬 앨범");assertEquals(before,counter.count)
+        wait("계정·저장 공간");compose.onNodeWithText("뒤로").performClick();wait("Create Album")
+        compose.onNode(hasSetTextAction()).assertTextEquals("보존할 초안")
+        compose.onNodeWithContentDescription("뒤로").performClick();wait("Album");assertEquals(before,counter.count)
     }
 }

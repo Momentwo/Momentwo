@@ -102,7 +102,7 @@ internal class AccountSyncTransport(private val session:StoredSession,private va
     override suspend fun execute(job:SyncJobEntity):WriteReceipt {
         clients.check(session);val ids=address(job)
         when(SyncKind.valueOf(job.kind)){
-            SyncKind.CREATE_ALBUM->{albums.postCreateAlbum(CreateAlbumInfo(job.text,emptyList()));return WriteReceipt.NeedsId}
+            SyncKind.CREATE_ALBUM->{albums.postCreateAlbum(CreateAlbumInfo(job.text,cord.eoeo.momentwo.core.data.library.AlbumInvitations.decode(job.extra)));return WriteReceipt.NeedsId}
             SyncKind.CREATE_SUB->{subs.postCreateSubAlbum(CreateSubAlbumInfo(requireNotNull(ids.album),job.text));return WriteReceipt.NeedsId}
             SyncKind.UPLOAD_PHOTO->{val album=requireNotNull(ids.album);photos.postPhotoUpload(UploadPhoto(album,requireNotNull(ids.sub),stagedObject(job,album,false)));return WriteReceipt.NeedsId}
             SyncKind.SET_COVER->{val album=requireNotNull(ids.album);if(job.mediaName==null)albums.deleteAlbumImage(album)else albums.putAlbumImage(AlbumImage(album,stagedObject(job,album,true)))}

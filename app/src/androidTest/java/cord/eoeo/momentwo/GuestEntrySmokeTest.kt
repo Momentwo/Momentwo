@@ -30,8 +30,8 @@ class GuestEntrySmokeTest {
                 it.setShowWhenLocked(true); it.setTurnScreenOn(true)
                 it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
-            compose.waitUntil(10_000) { compose.onAllNodes(androidx.compose.ui.test.hasText("내 로컬 앨범")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
-            compose.onNodeWithText("내 로컬 앨범").assertExists()
+            compose.waitUntil(10_000) { compose.onAllNodes(androidx.compose.ui.test.hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+            compose.onNodeWithText("Album").assertExists()
             compose.onNodeWithText("Momentwo").assertDoesNotExist()
             scenario.moveToState(Lifecycle.State.CREATED); scenario.moveToState(Lifecycle.State.RESUMED)
             compose.waitForIdle()

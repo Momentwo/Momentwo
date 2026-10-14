@@ -65,6 +65,17 @@ class AccountSyncPersistenceTest {
         repo.deleteSubAlbums(a,setOf(first,second))
         assertNull(repo.subAlbum(first).first());assertNull(repo.subAlbum(second).first());assertNotNull(repo.subAlbum(outside).first())
     }
+    @Test fun bulkPhotoDeletionIsAtomicAndPreservesOtherParentsAndSources()=fixture { db,repo,_,_ ->
+        val a=repo.createAlbum("A");val one=repo.createSubAlbum(a,"One");val two=repo.createSubAlbum(a,"Two")
+        val source=File(InstrumentationRegistry.getInstrumentation().targetContext.cacheDir,"bulk-${UUID.randomUUID()}.png")
+        try {
+            android.graphics.Bitmap.createBitmap(8,8,android.graphics.Bitmap.Config.ARGB_8888).also{b->source.outputStream().use{b.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)};b.recycle()}
+            val p=repo.importPhoto(one,android.net.Uri.fromFile(source));val q=repo.importPhoto(one,android.net.Uri.fromFile(source));val other=repo.importPhoto(two,android.net.Uri.fromFile(source))
+            assertTrue(cord.eoeo.momentwo.core.common.runSuspendCatching { repo.deletePhotos(one,linkedSetOf(p,other)) }.isFailure)
+            assertEquals(2,repo.photos(one).first().size);assertTrue(source.exists())
+            repo.deletePhotos(one,setOf(p,q));assertTrue(repo.photos(one).first().isEmpty());assertNotNull(repo.photo(other).first());assertTrue(source.exists())
+        } finally {source.delete()}
+    }
     @Test fun separateAlbumFieldsPreserveLatestIndependentEdits()=fixture { _,repo,_,_ ->
         val id=repo.createAlbum("Original")
         repo.editAlbumSubtitle(id,"latest subtitle");repo.editAlbumTitle(id,"latest title")

@@ -9,4 +9,5 @@ internal sealed interface LocalPhotoDialog {
     data class Comment(val id:String?) : LocalPhotoDialog
     data object Delete : LocalPhotoDialog
 }
-internal data class LocalPhotoState(val id: String, val screen: ScreenState<LocalPhotoContent> = ScreenState.Loading, val dialog: LocalPhotoDialog = LocalPhotoDialog.None, val draft: LibraryDraft = LibraryDraft("", "", ""), val interaction: Long = 0, val pending: Set<String> = emptySet(), val immersive: Boolean = false,val commentsOpen:Boolean=false) : UiState
+internal enum class LocalPhotoSheet { None, Description, Memos, Comments }
+internal data class LocalPhotoState(val id: String, val screen: ScreenState<LocalPhotoContent> = ScreenState.Loading, val dialog: LocalPhotoDialog = LocalPhotoDialog.None, val draft: LibraryDraft = LibraryDraft("", "", ""), val interaction: Long = 0, val pending: Set<String> = emptySet(), val immersive: Boolean = false, val sheet: LocalPhotoSheet = LocalPhotoSheet.None,val commentsOpen:Boolean=false) : UiState

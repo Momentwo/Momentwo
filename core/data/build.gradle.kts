@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
 
+    implementation(libs.datastore)
     implementation(libs.room)
     implementation(libs.room.ktx)
     implementation(libs.retrofit)

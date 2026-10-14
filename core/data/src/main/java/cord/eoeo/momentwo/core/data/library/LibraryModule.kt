@@ -8,5 +8,6 @@ import javax.inject.Singleton
 
 @Module @InstallIn(SingletonComponent::class)
 abstract class LibraryModule {
+    @Binds @Singleton abstract fun drafts(impl: PreferenceLibraryDrafts): LibraryDrafts
     @Binds @Singleton abstract fun repository(impl: RoomLocalLibraryRepository): LocalLibraryRepository
 }

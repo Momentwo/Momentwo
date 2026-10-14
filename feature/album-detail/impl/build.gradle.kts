@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(libs.activity.compose)
     implementation(libs.icons.extended)
+    implementation(libs.coil.compose)
     implementation(libs.coil)
     implementation(libs.lifecycle.viewmodel.savedstate)
 }

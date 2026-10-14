@@ -47,3 +47,7 @@
 - 단계 1 구현: library/local_album/local_subalbum/local_photo/local_memo 테이블과 v1→v2 migration. 미귀속 photo/friend 캐시만 초기화하며 Profile identity는 유지한다. 기본 그래프는 로컬 라이브러리이며 계정 연결이 기존 Auth로 이동한다. 초기 CRUD 화면은 다음 단계에서 확장한다.
 
 - 단계 1 검증: 단위 테스트 126개(기존 123+신규 3), app/영향 모듈 빌드·Lint 통과. SM_N976N API 31 별도 패키지 신규 설치 상태 기기 5개 통과: 첫 진입 API 시도 0, migration, DB 재열기/cascade, 라이브러리 변경 차단, 계정 연결/Auth 이동.
+
+- 단계 1 PR #172 병합 완료. 단계 2는 로컬 앨범/서브앨범 생성·수정·삭제, 소제목과 영속 대표 사진, DataStore 편집 초안 복원을 추가한다. 생성 의도 UUID를 저장해 프로세스 재진입의 중복 생성을 막는다. DB에 연결된 파일은 취소 후에도 유지하며 파일 정리는 메타데이터 저장 결과와 구분한다.
+
+- 단계 2 검증: Album 16개·AlbumDetail 22개 단위 테스트, app 빌드 및 영향 모듈 Lint 통과. SM_N976N API 31 별도 앱 신규 데이터에서 기기 8개 통과(migration, DB reopen, 생성 의도 중복, 대표 사진 보존/실패/커밋 후 취소, 실제 로컬 CRUD 및 첫 진입 API 0). 테스트가 중복 삭제 버튼을 선택하던 문제를 다이얼로그 범위 선택으로 수정했다.

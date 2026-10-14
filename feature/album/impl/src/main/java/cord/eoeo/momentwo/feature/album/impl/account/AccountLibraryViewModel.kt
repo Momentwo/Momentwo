@@ -26,6 +26,7 @@ internal class AccountLibraryViewModel @Inject constructor(private val accounts:
         AccountLibraryEvent.Retry->{initialize();if((uiState.value.screen as? ScreenState.Success)?.content?.identity?.canSync==true) refresh()}
         AccountLibraryEvent.Login->sendEffect(AccountLibraryEffect.Login)
         AccountLibraryEvent.Back->sendEffect(AccountLibraryEffect.Back)
+        AccountLibraryEvent.Sync->sendEffect(AccountLibraryEffect.Sync)
         AccountLibraryEvent.Friend->if((uiState.value.screen as? ScreenState.Success)?.content?.identity!=null)sendEffect(AccountLibraryEffect.Friend)else sendEffect(AccountLibraryEffect.Login)
         is AccountLibraryEvent.Open->sendEffect(AccountLibraryEffect.Open(event.id))
         AccountLibraryEvent.Logout->requests.launchRequest(Logout,RequestPolicy.IgnoreWhileRunning,{runSuspendCatching{accounts.logout()}},onStarted={dispatch(AccountLibraryAction.Pending("logout",true))},onSuccess={},onFailure={Log.e("AccountLibrary","Logout failed",it);emitEffect(AccountLibraryEffect.Message("계정 연결을 해제하지 못했습니다"))},onFinished={dispatch(AccountLibraryAction.Pending("logout",false))})

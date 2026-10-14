@@ -10,6 +10,8 @@ import cord.eoeo.momentwo.feature.album.impl.albumScreens
 import cord.eoeo.momentwo.feature.album.impl.account.accountLibraryScreen
 import cord.eoeo.momentwo.feature.album.impl.account.AccountAccessGuard
 import cord.eoeo.momentwo.feature.album.api.AccountLibraryDestination
+import cord.eoeo.momentwo.feature.album.api.AccountSyncDestination
+import cord.eoeo.momentwo.feature.album.impl.sync.accountSyncScreen
 import cord.eoeo.momentwo.feature.album.impl.local.localLibraryScreen
 import cord.eoeo.momentwo.feature.albumdetail.api.LocalAlbumDetailDestination
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
@@ -41,7 +43,8 @@ internal fun MomentwoNavGraph(
         localLibraryScreen(navigateToLogin = { navController.navigate(AccountLibraryDestination) }, navigateToAlbum = { navController.navigate(LocalAlbumDetailDestination(it)) })
         localAlbumDetailScreen(imageLoader, navActions.popBackStack, navigateToLogin = { navController.navigate(AccountLibraryDestination) }, openPhotos = { navController.navigate(LocalPhotoListDestination(it)) }, openAccountPhotos = navActions.navigateToPhotoList, openSharedAlbum = {id,title,subtitle,cover -> navController.navigate(AlbumDetailDestination(id,title,subtitle,cover)) })
         localPhotoScreens(imageLoader,insetsController,navActions.popBackStack,openPhoto = { navController.navigate(LocalPhotoDetailDestination(it)) })
-        accountLibraryScreen(navActions.popBackStack, { navController.navigate(LoginDestination) }, navActions.navigateToFriend, { navController.navigate(LocalAlbumDetailDestination(it)) })
+        accountLibraryScreen(navActions.popBackStack, { navController.navigate(LoginDestination) }, navActions.navigateToFriend, { navController.navigate(LocalAlbumDetailDestination(it)) }, {navController.navigate(AccountSyncDestination)})
+        accountSyncScreen(imageLoader,navActions.popBackStack,{navController.navigate(LocalAlbumDetailDestination(it))})
         friendScreen(
             accountGuard = { content -> AccountAccessGuard({ navController.navigate(AccountLibraryDestination) { launchSingleTop = true; popUpTo<LocalLibraryDestination>() } },content) },
             coroutineScope = coroutineScope,

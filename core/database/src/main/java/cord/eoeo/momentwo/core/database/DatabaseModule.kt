@@ -21,6 +21,6 @@ object DatabaseModule {
         applicationContext,
         MomentwoDatabase::class.java,
         "momentwo-database"
-    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
         .build()
 }

@@ -68,8 +68,8 @@ class LocalMediaStore @Inject constructor(@ApplicationContext private val contex
             directory.listFiles()?.forEach { if (it.name.startsWith(".import-") || it.name !in references) it.delete() }
         }
     }
-    suspend fun export(name: String): Uri = withContext(Dispatchers.IO) {
-        val source = file(name)
+    suspend fun export(name: String): Uri = exportFile(file(name), name)
+    internal suspend fun exportFile(source: File, name: String): Uri = withContext(Dispatchers.IO) {
         if (!source.isFile) throw IOException("기기에 사진 파일이 없습니다")
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(source.path, bounds)

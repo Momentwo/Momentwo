@@ -10,5 +10,7 @@ internal sealed interface LocalPhotoAction {
     data class Edited(val draft: LibraryDraft) : LocalPhotoAction
     data class Saved(val token: String, val interaction: Long) : LocalPhotoAction
     data class Pending(val key: String, val value: Boolean) : LocalPhotoAction
+    data object OpenComments:LocalPhotoAction
+    data class CommentFailed(val error:UiError):LocalPhotoAction
     data object ToggleImmersive : LocalPhotoAction
 }

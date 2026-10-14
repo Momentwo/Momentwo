@@ -7,16 +7,19 @@ import kotlinx.coroutines.flow.Flow
 interface LibraryDao {
     @Query("SELECT * FROM library WHERE id = :id") suspend fun library(id: String): LibraryEntity?
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertLibrary(entity: LibraryEntity)
-    @Query("SELECT * FROM local_album WHERE libraryId = :libraryId ORDER BY createdAt DESC, localId") fun albums(libraryId: String): Flow<List<LocalAlbumEntity>>
-    @Query("SELECT * FROM local_album WHERE localId = :id") fun observeAlbum(id: String): Flow<LocalAlbumEntity?>
+    @Query("SELECT * FROM local_album WHERE libraryId = :libraryId AND deleted=0 ORDER BY createdAt DESC, localId") fun albums(libraryId: String): Flow<List<LocalAlbumEntity>>
+    @Query("SELECT * FROM local_album WHERE localId = :id AND deleted=0") fun observeAlbum(id: String): Flow<LocalAlbumEntity?>
     @Query("SELECT * FROM local_album WHERE libraryId = :libraryId AND remoteId = :remoteId LIMIT 1") suspend fun remoteAlbum(libraryId: String, remoteId: Int): LocalAlbumEntity?
     @Query("SELECT * FROM local_album WHERE localId = :id") suspend fun album(id: String): LocalAlbumEntity?
-    @Query("SELECT * FROM local_subalbum WHERE albumId = :albumId ORDER BY createdAt, localId") fun subAlbums(albumId: String): Flow<List<LocalSubAlbumEntity>>
-    @Query("SELECT * FROM local_subalbum WHERE localId = :id") fun observeSubAlbum(id: String): Flow<LocalSubAlbumEntity?>
+    @Query("SELECT * FROM local_subalbum WHERE albumId = :albumId AND deleted=0 ORDER BY createdAt, localId") fun subAlbums(albumId: String): Flow<List<LocalSubAlbumEntity>>
+    @Query("SELECT * FROM local_subalbum WHERE albumId=:albumId ORDER BY createdAt,localId") suspend fun allSubs(albumId:String):List<LocalSubAlbumEntity>
+    @Query("SELECT * FROM local_subalbum WHERE localId = :id AND deleted=0") fun observeSubAlbum(id: String): Flow<LocalSubAlbumEntity?>
     @Query("SELECT * FROM local_subalbum WHERE albumId = :albumId AND remoteId = :remoteId LIMIT 1") suspend fun remoteSub(albumId: String,remoteId: Int): LocalSubAlbumEntity?
     @Query("SELECT * FROM local_subalbum WHERE localId = :id") suspend fun subAlbum(id: String): LocalSubAlbumEntity?
-    @Query("SELECT * FROM local_photo WHERE subAlbumId = :subAlbumId ORDER BY createdAt, localId") fun photos(subAlbumId: String): Flow<List<LocalPhotoEntity>>
-    @Query("SELECT * FROM local_photo WHERE localId = :id") fun observePhoto(id: String): Flow<LocalPhotoEntity?>
+    @Query("SELECT * FROM local_photo WHERE subAlbumId = :subAlbumId AND deleted=0 ORDER BY createdAt, localId") fun photos(subAlbumId: String): Flow<List<LocalPhotoEntity>>
+    @Query("SELECT * FROM local_photo WHERE subAlbumId=:subAlbumId ORDER BY createdAt,localId") suspend fun allPhotos(subAlbumId:String):List<LocalPhotoEntity>
+    @Query("SELECT * FROM local_photo WHERE localId = :id AND deleted=0") fun observePhoto(id: String): Flow<LocalPhotoEntity?>
+    @Query("SELECT * FROM local_photo WHERE subAlbumId=:subAlbumId AND remoteId=:remoteId LIMIT 1") suspend fun remotePhoto(subAlbumId:String,remoteId:Int):LocalPhotoEntity?
     @Query("SELECT * FROM local_photo WHERE localId = :id") suspend fun photo(id: String): LocalPhotoEntity?
     @Query("SELECT * FROM local_memo WHERE photoId = :photoId ORDER BY createdAt, localId") fun memos(photoId: String): Flow<List<LocalMemoEntity>>
     @Query("SELECT * FROM local_memo WHERE localId = :id") suspend fun memo(id: String): LocalMemoEntity?
@@ -32,5 +35,5 @@ interface LibraryDao {
     @Query("DELETE FROM local_subalbum WHERE localId = :id") suspend fun deleteSubAlbum(id: String)
     @Query("DELETE FROM local_photo WHERE localId = :id") suspend fun deletePhoto(id: String)
     @Query("DELETE FROM local_memo WHERE localId = :id") suspend fun deleteMemo(id: String)
-    @Query("SELECT mediaName FROM local_photo WHERE mediaName IS NOT NULL UNION SELECT coverMediaName FROM local_album WHERE coverMediaName IS NOT NULL") suspend fun mediaReferences(): List<String>
+    @Query("SELECT mediaName FROM local_photo WHERE mediaName IS NOT NULL UNION SELECT coverMediaName FROM local_album WHERE coverMediaName IS NOT NULL UNION SELECT mediaName FROM sync_media_pin") suspend fun mediaReferences(): List<String>
 }

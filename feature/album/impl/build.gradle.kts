@@ -18,4 +18,5 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.icons.extended)
     implementation(libs.coil)
+    implementation(libs.coil.compose)
 }

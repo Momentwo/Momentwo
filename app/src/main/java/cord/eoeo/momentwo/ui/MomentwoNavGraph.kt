@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import coil.ImageLoader
 import cord.eoeo.momentwo.feature.album.impl.albumScreens
+import cord.eoeo.momentwo.feature.album.impl.local.localLibraryScreen
+import cord.eoeo.momentwo.feature.album.api.LocalLibraryDestination
 import cord.eoeo.momentwo.feature.albumdetail.impl.albumDetailScreen
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.impl.authScreens
@@ -24,9 +26,10 @@ internal fun MomentwoNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = LoginDestination,
+        startDestination = LocalLibraryDestination,
         modifier = Modifier,
     ) {
+        localLibraryScreen(navigateToLogin = { navController.navigate(LoginDestination) })
         friendScreen(
             coroutineScope = coroutineScope,
             imageLoader = imageLoader,

@@ -7,6 +7,8 @@ plugins {
 android {
     namespace = "cord.eoeo.momentwo"
 
+    sourceSets["androidTest"].assets.srcDir("$rootDir/core/database/schemas")
+
     defaultConfig {
         applicationId = "cord.eoeo.momentwo"
         versionCode = 1
@@ -60,6 +62,8 @@ dependencies {
     androidTestImplementation(project(":core:database"))
     androidTestImplementation(libs.room)
     androidTestImplementation(libs.room.ktx)
+    androidTestImplementation(libs.room.testing)
+    androidTestImplementation(project(":core:network"))
     androidTestImplementation(libs.paging)
     androidTestImplementation(libs.paging.compose)
     androidTestImplementation(libs.androidx.test.ext.junit)

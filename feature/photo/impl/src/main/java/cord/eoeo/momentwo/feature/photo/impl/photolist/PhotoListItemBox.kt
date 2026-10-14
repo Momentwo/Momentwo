@@ -38,6 +38,12 @@ internal fun PhotoListItemBox(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    PhotoGridTile(imageLoader, photoItem().photoUrl, photoItem().isLiked, isEditMode, isSelected, onChangeSelected, onClick, modifier)
+}
+
+@Composable
+internal fun PhotoGridTile(imageLoader: ImageLoader, image: Any?, marked: Boolean, isEditMode: () -> Boolean, isSelected: () -> Boolean,
+    onChangeSelected: (Boolean) -> Unit, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -52,7 +58,7 @@ internal fun PhotoListItemBox(
             },
     ) {
         AsyncImage(
-            model = photoItem().photoUrl,
+            model = image,
             contentDescription = "사진",
             imageLoader = imageLoader,
             contentScale = ContentScale.Crop,
@@ -61,7 +67,7 @@ internal fun PhotoListItemBox(
                 .clip(RoundedCornerShape(4.dp)),
         )
 
-        if (photoItem().isLiked) {
+        if (marked) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)

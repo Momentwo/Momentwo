@@ -1,6 +1,9 @@
 package cord.eoeo.momentwo.feature.photo.impl.local
 import cord.eoeo.momentwo.core.common.UiEvent
 internal sealed interface LocalPhotoEvent : UiEvent {
+    data class Sheet(val sheet: LocalPhotoSheet) : LocalPhotoEvent
+    data class Body(val text: String) : LocalPhotoEvent
+    data object DeleteDescription : LocalPhotoEvent
     data object Retry : LocalPhotoEvent
     data object Back : LocalPhotoEvent
     data object ToggleImmersive : LocalPhotoEvent

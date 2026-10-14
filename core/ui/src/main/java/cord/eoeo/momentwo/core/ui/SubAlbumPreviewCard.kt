@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.core.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,7 +50,8 @@ fun SubAlbumPreviewCard(
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .clickable { if(isEditMode())onSelectedChange(!isSelected())else onClick() },
         ) {
             ElevatedCard(
                 onClick = {

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -173,44 +174,10 @@ internal fun CommentBottomSheetScreen(
         )
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = bottomSheetState(),
-        dragHandle = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                BottomSheetDefaults.DragHandle()
-
-                Text(
-                    text = "댓글",
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        },
-        properties = ModalBottomSheetProperties(
-            shouldDismissOnBackPress = false,
-        ),
-        contentWindowInsets = { WindowInsets.ime },
-        modifier = Modifier
-            .statusBarsPadding()
-            .imePadding(),
-    ) {
-        Column(
-            modifier = Modifier
-                .animateContentSize()
-                .fillMaxWidth()
-                .fillMaxHeight(if (isImeVisible()) 1f else 0.6f)
-                .navigationBarsPadding(),
-        ) {
+    cord.eoeo.momentwo.feature.photo.impl.presentation.RecordsSheet("댓글",comment(),onCommentChange,onWriteComment,onDismiss,sheet=bottomSheetState()) {
             val pagingState = rememberPagingScreenState(commentPagingData(), Throwable::toUiError)
             val listState = if (sourceError != null) ScreenState.Error(sourceError) else pagingState
-            ScreenContent(listState, { if (sourceError != null) onRetrySource() else commentPagingData().retry() }, Modifier.weight(1f)) {
+            ScreenContent(listState, { if (sourceError != null) onRetrySource() else commentPagingData().retry() }, Modifier.fillMaxSize()) {
                 if (commentPagingData().itemCount == 0) EmptyContent() else
             LazyColumn(
                 state = lazyListState(),
@@ -236,45 +203,6 @@ internal fun CommentBottomSheetScreen(
                 item { PagingAppendContent(commentPagingData().loadState.append, Throwable::toUiError, { commentPagingData().retry() }) }
             }
             }
-
-            TextField(
-                value = comment(),
-                placeholder = { Text("댓글 입력") },
-                onValueChange = onCommentChange,
-                trailingIcon = {
-                    if (comment().text.isNotEmpty()) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        ) {
-                            IconButton(
-                                onClick = onWriteComment,
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowUpward,
-                                    contentDescription = "댓글 작성",
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                )
-                            }
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.colors(
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(
-                        min = TextFieldDefaults.MinHeight,
-                        max = TextFieldDefaults.MinHeight * 2,
-                    )
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-            )
-        }
     }
 }
 
@@ -324,65 +252,6 @@ internal fun CommentListItemScreen(
     onDeleteComment: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .combinedClickable(
-                onClick = { /* TODO: 키보드 내리기, TextField 포커스 해제 */ },
-                onLongClick = onLongClick,
-            )
-            .padding(vertical = 12.dp, horizontal = 16.dp),
-    ) {
-        CircleAsyncImage(
-            model = commentItem().userProfileImage,
-            contentDescription = "사진",
-            imageLoader = imageLoader,
-            modifier = Modifier
-                .padding(vertical = 6.dp)
-                .height(38.dp),
-        )
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp),
-        ) {
-            Row {
-                Text(
-                    text = commentItem().nickname,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(end = 8.dp),
-                )
-
-                Text(
-                    text = commentItem().date,
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(end = 8.dp),
-                )
-            }
-
-            Text(
-                text = commentItem().comment,
-                modifier = Modifier.padding(vertical = 2.dp),
-            )
-        }
-
-        DropdownMenu(
-            expanded = isMenuExpanded(),
-            onDismissRequest = onDismissMenu,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            DropdownMenuItem(
-                leadingIcon = { Icon(Icons.Default.Edit, "댓글 수정") },
-                text = { Text("댓글 수정하기") },
-                onClick = { onChangeIsDialogOpened(true) },
-            )
-            DropdownMenuItem(
-                leadingIcon = { Icon(Icons.Default.Clear, "댓글 삭제") },
-                text = { Text("댓글 삭제하기") },
-                onClick = onDeleteComment,
-            )
-        }
-    }
+    cord.eoeo.momentwo.feature.photo.impl.presentation.RecordRow(imageLoader,commentItem().nickname,commentItem().date,commentItem().userProfileImage,commentItem().comment,
+        "댓글",true,{onChangeIsDialogOpened(true)},onDeleteComment,modifier)
 }

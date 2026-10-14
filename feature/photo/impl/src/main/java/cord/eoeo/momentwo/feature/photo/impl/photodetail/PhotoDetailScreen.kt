@@ -141,54 +141,12 @@ internal fun PhotoDetailScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            AnimatedVisibility(
-                visible = uiState().barsVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                PhotoDetailTopAppBar(
-                    onBack = { onEvent(PhotoDetailEvent.OnBack) }
-                )
-            }
-        },
-        bottomBar = {
-            AnimatedVisibility(
-                visible = uiState().isMenuVisible && ready != null,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                PhotoDetailBottomBar(
-                    likeCount = { ready?.content?.likeCount ?: 0 },
-                    isLiked = { ready?.content?.isLiked ?: false },
-                    onClickDescription = { onEvent(PhotoDetailEvent.OnChangeIsDescriptionVisible(true)) },
-                    onClickLike = { onEvent(PhotoDetailEvent.OnToggleIsLiked) },
-                    onClickComment = { onEvent(PhotoDetailEvent.OnChangeIsCommentVisible(true)) },
-                    onClickDownload = { onEvent(PhotoDetailEvent.OnDownloadPhoto) },
-                )
-            }
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState()) },
-        modifier = Modifier.fillMaxSize(),
-    ) { paddingValues ->
-        val displayState = if (uiState().isDescriptionVisible && ready != null) ready.copy(refresh = RefreshState.Idle) else uiState().screen
-        ScreenContent(displayState, { onEvent(PhotoDetailEvent.OnRetry) }) {
-        AsyncImage(
-            model = uiState().photoUrl,
-            contentDescription = "사진",
-            imageLoader = imageLoader,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxSize()
-                .drawBehind { drawRect(animatedBackgroundColor()) }
-                .clickable(
-                    indication = null,
-                    interactionSource = null,
-                    onClick = { onEvent(PhotoDetailEvent.OnToggleIsMenuVisible) }
-                ),
-        )
-        }
+    val displayState = if (uiState().isDescriptionVisible && ready != null) ready.copy(refresh = RefreshState.Idle) else uiState().screen
+    cord.eoeo.momentwo.feature.photo.impl.presentation.PhotoViewer(imageLoader,uiState().photoUrl,displayState,animatedBackgroundColor(),uiState().barsVisible,uiState().isMenuVisible,snackbarHostState(),
+        {onEvent(PhotoDetailEvent.OnBack)},{onEvent(PhotoDetailEvent.OnToggleIsMenuVisible)},{onEvent(PhotoDetailEvent.OnRetry)}) {
+        PhotoDetailBottomBar({ready?.content?.likeCount},{ready?.content?.isLiked ?: false},
+            {onEvent(PhotoDetailEvent.OnChangeIsDescriptionVisible(true))},{onEvent(PhotoDetailEvent.OnToggleIsLiked)},
+            {onEvent(PhotoDetailEvent.OnChangeIsCommentVisible(true))},{onEvent(PhotoDetailEvent.OnDownloadPhoto)})
     }
 }
 
@@ -196,26 +154,30 @@ internal fun PhotoDetailScreen(
 @Composable
 internal fun PhotoDetailTopAppBar(
     onBack: () -> Unit,
+    actions: @Composable () -> Unit = {},
 ) {
     TopAppBar(
         title = { /* TODO: 사진 날짜 or 찍은 곳 */ },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Default.ArrowBack, "")
+                Icon(Icons.AutoMirrored.Default.ArrowBack, "뒤로")
             }
         },
+        actions = { actions() },
         colors = TopAppBarDefaults.topAppBarColors().copy(containerColor = Color.Transparent),
     )
 }
 
 @Composable
 internal fun PhotoDetailBottomBar(
-    likeCount: () -> Int,
+    likeCount: () -> Int?,
     isLiked: () -> Boolean,
     onClickDescription: () -> Unit,
     onClickLike: () -> Unit,
     onClickComment: () -> Unit,
     onClickDownload: () -> Unit,
+    likeLabel: String = "좋아요", recordLabel: String = "사진 댓글", exportLabel: String = "사진 다운로드",
+    canDescribe: Boolean = true, canLike: Boolean = true, canRecord: Boolean = true, canExport: Boolean = true,
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
@@ -235,7 +197,7 @@ internal fun PhotoDetailBottomBar(
                 .clickable(
                     indication = null,
                     interactionSource = null,
-                    onClick = onClickDescription,
+                    enabled = canDescribe, onClick = onClickDescription,
                 ),
         ) {
             Icon(Icons.AutoMirrored.Outlined.Article, "사진 설명")
@@ -250,17 +212,17 @@ internal fun PhotoDetailBottomBar(
                 .clickable(
                     indication = null,
                     interactionSource = null,
-                    onClick = onClickLike,
+                    enabled = canLike, onClick = onClickLike,
                 ),
         ) {
-            Icon(if (isLiked()) Icons.Default.Favorite else Icons.Default.FavoriteBorder, "좋아요")
-            Text(
-                text = likeCount().toString(),
+            Icon(if (isLiked()) Icons.Default.Favorite else Icons.Default.FavoriteBorder, likeLabel)
+            likeCount()?.let { count -> Text(
+                text = count.toString(),
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth(),
-            )
+            ) } ?: androidx.compose.foundation.layout.Spacer(Modifier.height(16.dp))
         }
 
         Column(
@@ -272,10 +234,10 @@ internal fun PhotoDetailBottomBar(
                 .clickable(
                     indication = null,
                     interactionSource = null,
-                    onClick = onClickComment,
+                    enabled = canRecord, onClick = onClickComment,
                 ),
         ) {
-            Icon(Icons.Outlined.ModeComment, "사진 댓글")
+            Icon(Icons.Outlined.ModeComment, recordLabel)
         }
 
         Column(
@@ -287,10 +249,10 @@ internal fun PhotoDetailBottomBar(
                 .clickable(
                     indication = null,
                     interactionSource = null,
-                    onClick = onClickDownload,
+                    enabled = canExport, onClick = onClickDownload,
                 ),
         ) {
-            Icon(Icons.Default.Download, "사진 다운로드")
+            Icon(Icons.Default.Download, exportLabel)
         }
     }
 }

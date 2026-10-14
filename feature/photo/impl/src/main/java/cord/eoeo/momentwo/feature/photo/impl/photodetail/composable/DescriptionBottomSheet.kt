@@ -163,6 +163,7 @@ internal fun DescriptionBottomSheetScreen(
     refresh: cord.eoeo.momentwo.core.common.RefreshState = cord.eoeo.momentwo.core.common.RefreshState.Idle,
     writeCommitted: Boolean = false,
     onRetry: () -> Unit = {},
+    hasDescription: () -> Boolean = { nickname().isNotEmpty() }, canEdit: Boolean = true, pending: Boolean = false,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -194,8 +195,8 @@ internal fun DescriptionBottomSheetScreen(
                         .fillMaxWidth()
                         .padding(top = 24.dp),
                 ) {
-                    if (nickname().isEmpty() && isWriteDescMode().not()) {
-                        IconButton(onClick = onClickWrite) {
+                    if (!hasDescription() && !isWriteDescMode() && canEdit) {
+                        IconButton(onClick = onClickWrite, enabled = !pending) {
                             Icon(Icons.Default.Edit, "설명 작성")
                         }
                     }
@@ -214,8 +215,9 @@ internal fun DescriptionBottomSheetScreen(
                             }
 
                             IconButton(
+                                enabled = !pending,
                                 onClick = {
-                                    if (nickname().isEmpty()) {
+                                    if (!hasDescription()) {
                                         onWriteDescription()
                                     } else {
                                         onEditDescription()
@@ -265,6 +267,7 @@ internal fun DescriptionBottomSheetScreen(
             } else {
                 DescriptionScreen(
                     imageLoader = imageLoader,
+                    hasDescription = hasDescription, canEdit = canEdit, pending = pending,
                     scrollState = scrollState,
                     nestedScrollConnection = nestedScrollConnection,
                     title = { title().text },
@@ -302,6 +305,7 @@ internal fun DescriptionScreen(
     onClickContents: () -> Unit,
     onClickWrite: () -> Unit,
     onDeleteDescription: () -> Unit,
+    hasDescription: () -> Boolean = { nickname().isNotEmpty() }, canEdit: Boolean = true, pending: Boolean = false,
 ) {
     LaunchedEffect(scrollState().canScrollBackward) {
         if (scrollState().canScrollBackward.not()) {
@@ -316,7 +320,7 @@ internal fun DescriptionScreen(
             .nestedScroll(nestedScrollConnection())
             .padding(top = 16.dp, start = 16.dp, end = 16.dp),
     ) {
-        if (nickname().isNotEmpty()) {
+        if (hasDescription()) {
             Text(
                 text = title(),
                 fontSize = 20.sp,
@@ -326,18 +330,18 @@ internal fun DescriptionScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
+            if(nickname().isNotEmpty() || date().isNotEmpty()) Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp, horizontal = 8.dp)
             ) {
-                Row(
+                if(nickname().isNotEmpty()) Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .weight(0.55f)
                         .height(intrinsicSize = IntrinsicSize.Max),
                 ) {
-                    CircleAsyncImage(
+                    if(profileImage().isNotEmpty()) CircleAsyncImage(
                         model = profileImage(),
                         contentDescription = "사진",
                         imageLoader = imageLoader,
@@ -363,7 +367,7 @@ internal fun DescriptionScreen(
                     }
                 }
 
-                Column(
+                if(date().isNotEmpty()) Column(
                     modifier = Modifier.weight(0.45f),
                 ) {
                     Text(
@@ -420,8 +424,8 @@ internal fun DescriptionScreen(
                         }
                     }
 
-                    Row {
-                        IconButton(onClick = onClickWrite) {
+                    if(canEdit) Row {
+                        IconButton(onClick = onClickWrite, enabled = !pending) {
                             Icon(Icons.Default.Edit, "설명 수정")
                         }
 

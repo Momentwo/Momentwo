@@ -2,6 +2,7 @@ package cord.eoeo.momentwo.feature.photo.impl.local
 import cord.eoeo.momentwo.core.common.UiError
 import cord.eoeo.momentwo.core.model.LibraryDraft
 internal sealed interface LocalPhotoAction {
+    data class Sheet(val sheet: LocalPhotoSheet) : LocalPhotoAction
     data class Snapshot(val content: LocalPhotoContent) : LocalPhotoAction
     data class Failed(val error: UiError) : LocalPhotoAction
     data class Open(val dialog: LocalPhotoDialog, val draft: LibraryDraft) : LocalPhotoAction

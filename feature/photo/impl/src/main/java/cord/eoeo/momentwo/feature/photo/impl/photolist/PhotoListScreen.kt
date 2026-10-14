@@ -173,6 +173,7 @@ internal fun PhotoListTopAppBar(
     onClickEditPhoto: () -> Unit,
     onClickCancel: () -> Unit,
     onClickDelete: () -> Unit,
+    canAdd: Boolean = true, canRename: Boolean = true, canDelete: Boolean = true,
 ) {
     TopAppBar(
         title = {
@@ -188,16 +189,16 @@ internal fun PhotoListTopAppBar(
         },
         navigationIcon = {
             IconButton(onClick = onClickBack) {
-                Icon(Icons.AutoMirrored.Default.ArrowBack, "")
+                Icon(Icons.AutoMirrored.Default.ArrowBack, "뒤로")
             }
         },
         actions = {
             if (isEditMode().not()) {
-                IconButton(onClick = onClickAdd) {
-                    Icon(Icons.Default.Add, "")
+                IconButton(onClick = onClickAdd, enabled = canAdd) {
+                    Icon(Icons.Default.Add, "사진 추가")
                 }
                 IconButton(onClick = onClickMenu) {
-                    Icon(Icons.Default.MoreVert, "")
+                    Icon(Icons.Default.MoreVert, "더보기")
                 }
 
                 DropdownMenu(
@@ -207,11 +208,13 @@ internal fun PhotoListTopAppBar(
                     DropdownMenuItem(
                         text = { Text("서브 앨범 제목 수정") },
                         onClick = onClickEditTitle,
+                        enabled = canRename,
                         leadingIcon = { Icon(Icons.Default.Edit, "서브 앨범 제목 수정") },
                     )
                     DropdownMenuItem(
                         text = { Text("사진 삭제") },
                         onClick = onClickEditPhoto,
+                        enabled = canDelete,
                         leadingIcon = { Icon(Icons.Default.HideImage, "사진 목록 편집") },
                     )
                 }
@@ -222,7 +225,7 @@ internal fun PhotoListTopAppBar(
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
-                TextButton(onClick = onClickDelete) {
+                TextButton(onClick = onClickDelete, enabled = canDelete) {
                     Text(
                         text = "삭제",
                         color = MaterialTheme.colorScheme.error,

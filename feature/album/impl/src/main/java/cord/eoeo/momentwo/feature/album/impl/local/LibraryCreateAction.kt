@@ -1,6 +1,8 @@
 package cord.eoeo.momentwo.feature.album.impl.local
 import cord.eoeo.momentwo.core.model.*
 internal sealed interface LibraryCreateAction {
+    data object RestoreFailed : LibraryCreateAction
+    data class Owner(val identity: AccountIdentity?) : LibraryCreateAction
     data class Restore(val draft: LibraryDraft, val identity: AccountIdentity?, val names: List<String>) : LibraryCreateAction
     data class Edit(val draft: LibraryDraft, val names: List<String>) : LibraryCreateAction
     data class Pending(val value: Boolean) : LibraryCreateAction

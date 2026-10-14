@@ -2,7 +2,9 @@ package cord.eoeo.momentwo.feature.album.impl.local
 import cord.eoeo.momentwo.core.common.*
 internal object LibraryCreateReducer : Reducer<LibraryCreateState, LibraryCreateAction> {
     override fun reduce(state: LibraryCreateState, action: LibraryCreateAction) = when (action) {
-        is LibraryCreateAction.Restore -> if (!state.ready) state.copy(ready = true, draft = action.draft, identity = action.identity, selected = action.names) else state
+        LibraryCreateAction.RestoreFailed -> state.copy(restoreFailed=true)
+        is LibraryCreateAction.Owner -> if(action.identity?.accountId==state.identity?.accountId)state.copy(identity=action.identity,ownerAvailable=action.identity!=null)else state.copy(ownerAvailable=false,inviteOpen=false,friends=ScreenState.Loading,temporary=emptyList())
+        is LibraryCreateAction.Restore -> if (!state.ready) state.copy(ready = true, restoreFailed=false, draft = action.draft, identity = action.identity, selected = action.names) else state
         is LibraryCreateAction.Edit -> state.copy(draft = action.draft, selected = action.names, revision = state.revision + 1)
         is LibraryCreateAction.Pending -> state.copy(pending = action.value)
         is LibraryCreateAction.Invite -> state.copy(inviteOpen = action.open, temporary = state.selected)

@@ -1,6 +1,7 @@
 package cord.eoeo.momentwo.feature.photo.impl.local
 import cord.eoeo.momentwo.core.common.UiError
 internal sealed interface LocalPhotoListAction {
+    data class Header(val header: LocalPhotoListHeader) : LocalPhotoListAction
     data object Refreshing : LocalPhotoListAction
     data object Refreshed : LocalPhotoListAction
     data class Menu(val open: Boolean) : LocalPhotoListAction

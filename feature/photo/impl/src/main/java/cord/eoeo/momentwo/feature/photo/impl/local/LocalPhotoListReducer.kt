@@ -2,6 +2,7 @@ package cord.eoeo.momentwo.feature.photo.impl.local
 import cord.eoeo.momentwo.core.common.*
 internal object LocalPhotoListReducer : Reducer<LocalPhotoListState, LocalPhotoListAction> {
     override fun reduce(state: LocalPhotoListState, action: LocalPhotoListAction) = when(action) {
+        is LocalPhotoListAction.Header -> state.copy(header=action.header)
         LocalPhotoListAction.Refreshing -> state.copy(screen=state.screen.startRefresh())
         LocalPhotoListAction.Refreshed -> state.copy(screen=state.screen.cancelRefresh())
         is LocalPhotoListAction.Menu -> state.copy(menu=action.open)
@@ -14,7 +15,7 @@ internal object LocalPhotoListReducer : Reducer<LocalPhotoListState, LocalPhotoL
         is LocalPhotoListAction.Saved -> if(state.draft.token==action.token)state.copy(rename=false)else state
         is LocalPhotoListAction.Pending -> state.copy(pending=if(action.value)state.pending+action.key else state.pending-action.key)
         is LocalPhotoListAction.Snapshot -> state.copy(screen = ScreenState.Success(action.content))
-        is LocalPhotoListAction.Failed -> if(action.error==UiError.NotFound)state.copy(screen=ScreenState.Error(action.error),editing=false,rename=false,confirmDelete=false,menu=false,selected=emptySet(),draft=cord.eoeo.momentwo.core.model.LibraryDraft("","",""),revision=state.revision+1)else state.copy(screen=state.screen.failRefresh(action.error))
+        is LocalPhotoListAction.Failed -> if(action.error==UiError.NotFound)state.copy(screen=ScreenState.Error(action.error),header=null,editing=false,rename=false,confirmDelete=false,menu=false,selected=emptySet(),draft=cord.eoeo.momentwo.core.model.LibraryDraft("","",""),revision=state.revision+1)else state.copy(screen=state.screen.failRefresh(action.error))
         is LocalPhotoListAction.Importing -> state.copy(importing = action.value)
     }
 }

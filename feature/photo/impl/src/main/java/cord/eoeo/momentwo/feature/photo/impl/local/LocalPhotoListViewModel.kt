@@ -34,7 +34,7 @@ internal class LocalPhotoListViewModel(private val repository: LocalLibraryRepos
             combine(repository.subAlbum(uiState.value.id), repository.photos(uiState.value.id)) { sub, photos -> sub to photos }
             .flatMapLatest { (sub,photos) -> if(sub==null)flowOf(null)else repository.album(sub.albumId).map { album -> if(album==null)null else LocalPhotoListContent(sub,photos,album) } }
             .catch { if(it is CancellationException || it is Error) throw it; Log.e("LocalPhotos", "Observation failed", it); dispatch(LocalPhotoListAction.Failed(UiError.Unknown)) }
-            .collect { if(it == null) dispatch(LocalPhotoListAction.Failed(UiError.NotFound)) else if(it.subAlbum.photosLoaded || it.photos.isNotEmpty()) dispatch(LocalPhotoListAction.Snapshot(it)) }
+            .collect { if(it == null) dispatch(LocalPhotoListAction.Failed(UiError.NotFound)) else { dispatch(LocalPhotoListAction.Header(LocalPhotoListHeader(it.album?.title.orEmpty(),it.subAlbum.title)));if(it.subAlbum.photosLoaded || it.photos.isNotEmpty())dispatch(LocalPhotoListAction.Snapshot(it)) } }
         }
     }
     private fun refreshAccount(){val remote=accounts ?: return;requests.launchRequest(ReadAccount,RequestPolicy.LatestWins,{runSuspendCatching{remote.refreshPhotos(uiState.value.id)}},onStarted={dispatch(LocalPhotoListAction.Refreshing)},onSuccess={dispatch(LocalPhotoListAction.Refreshed)},onFailure={Log.e("LocalPhotos","Account refresh failed",it);dispatch(LocalPhotoListAction.Failed(it.toUiError()))})}

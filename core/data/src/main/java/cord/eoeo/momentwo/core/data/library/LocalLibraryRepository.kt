@@ -12,10 +12,12 @@ interface LocalLibraryRepository {
     fun photos(subAlbumId: String): Flow<List<LocalPhoto>>
     fun photo(id: String): Flow<LocalPhoto?>
     fun memos(photoId: String): Flow<List<LocalMemo>>
-    suspend fun createAlbum(title: String): String
-    suspend fun createSubAlbum(albumId: String, title: String): String
+    suspend fun createAlbum(title: String, localId: String = java.util.UUID.randomUUID().toString()): String
+    suspend fun createSubAlbum(albumId: String, title: String, localId: String = java.util.UUID.randomUUID().toString()): String
     suspend fun editAlbum(id: String, title: String, subtitle: String)
     suspend fun editSubAlbum(id: String, title: String)
+    suspend fun setCover(id: String, source: android.net.Uri?)
+    suspend fun cleanUnusedMedia()
     suspend fun deleteAlbum(id: String)
     suspend fun deleteSubAlbum(id: String)
 }

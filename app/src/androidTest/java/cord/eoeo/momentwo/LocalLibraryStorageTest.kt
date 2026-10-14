@@ -66,4 +66,21 @@ class LocalLibraryStorageTest {
             assertEquals("Original", db.libraryDao().album("foreign")!!.title)
         } finally { db.close() }
     }
+    @Test fun replayedCreateIntentIsIdempotentAndEditsPreserveOtherFields() = runBlocking {
+        val db = Room.inMemoryDatabaseBuilder(context, MomentwoDatabase::class.java).build()
+        try {
+            val repository = RoomLocalLibraryRepository(db, context)
+            val id = repository.createAlbum("Original", "intent")
+            assertEquals(id, repository.createAlbum("Original", "intent"))
+            assertEquals(1, repository.albums(LibraryScope.Device).first().size)
+            repository.editAlbum(id, "Changed", "Subtitle")
+            val sub = repository.createSubAlbum(id, "Child", "sub-intent")
+            repository.createSubAlbum(id, "Child", "sub-intent")
+            repository.editSubAlbum(sub, "Renamed")
+            assertEquals(1, repository.subAlbums(id).first().size)
+            assertEquals("Renamed", repository.subAlbums(id).first().single().title)
+            assertEquals("Subtitle", repository.album(id).first()!!.subtitle)
+        } finally { db.close() }
+    }
+
 }

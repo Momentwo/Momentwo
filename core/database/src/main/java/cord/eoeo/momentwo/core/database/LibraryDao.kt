@@ -18,8 +18,8 @@ interface LibraryDao {
     @Query("SELECT * FROM local_photo WHERE localId = :id") suspend fun photo(id: String): LocalPhotoEntity?
     @Query("SELECT * FROM local_memo WHERE photoId = :photoId ORDER BY createdAt, localId") fun memos(photoId: String): Flow<List<LocalMemoEntity>>
     @Query("SELECT * FROM local_memo WHERE localId = :id") suspend fun memo(id: String): LocalMemoEntity?
-    @Insert suspend fun insertAlbum(entity: LocalAlbumEntity)
-    @Insert suspend fun insertSubAlbum(entity: LocalSubAlbumEntity)
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertAlbum(entity: LocalAlbumEntity)
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertSubAlbum(entity: LocalSubAlbumEntity)
     @Insert suspend fun insertPhoto(entity: LocalPhotoEntity)
     @Insert suspend fun insertMemo(entity: LocalMemoEntity)
     @Update suspend fun updateAlbum(entity: LocalAlbumEntity)

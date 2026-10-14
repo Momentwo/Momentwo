@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import coil.ImageLoader
 import cord.eoeo.momentwo.feature.album.impl.albumScreens
 import cord.eoeo.momentwo.feature.album.impl.local.localLibraryScreen
+import cord.eoeo.momentwo.feature.albumdetail.api.LocalAlbumDetailDestination
+import cord.eoeo.momentwo.feature.albumdetail.impl.local.localAlbumDetailScreen
 import cord.eoeo.momentwo.feature.album.api.LocalLibraryDestination
 import cord.eoeo.momentwo.feature.albumdetail.impl.albumDetailScreen
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
@@ -29,7 +31,8 @@ internal fun MomentwoNavGraph(
         startDestination = LocalLibraryDestination,
         modifier = Modifier,
     ) {
-        localLibraryScreen(navigateToLogin = { navController.navigate(LoginDestination) })
+        localLibraryScreen(navigateToLogin = { navController.navigate(LoginDestination) }, navigateToAlbum = { navController.navigate(LocalAlbumDetailDestination(it)) })
+        localAlbumDetailScreen(imageLoader, navActions.popBackStack, navigateToLogin = { navController.navigate(LoginDestination) })
         friendScreen(
             coroutineScope = coroutineScope,
             imageLoader = imageLoader,

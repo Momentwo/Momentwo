@@ -34,7 +34,7 @@ internal class LocalAlbumViewModel(private val repository: LocalLibraryRepositor
                 .catch { if (it is CancellationException || it is Error) throw it; Log.e("LocalAlbum", "Observation failed", it); dispatch(LocalAlbumAction.Failed(UiError.Unknown)) }
                 .collect { (album,subs) ->
                     val content = album?.let { LocalAlbumContent(it,subs) }
-                    if (content == null) dispatch(LocalAlbumAction.Failed(UiError.NotFound)) else if(content.album.libraryId == "device" || content.album.locallyCreated || (content.album.subsLoaded && content.album.role != null)) {
+                    if (content == null) {dispatch(LocalAlbumAction.Failed(UiError.NotFound))} else if(content.album.libraryId == "device" || content.album.locallyCreated || (content.album.subsLoaded && content.album.role != null)) {
                         dispatch(LocalAlbumAction.Snapshot(content))
                         if (!restored && saved != null) {
                             val dialog = when {
@@ -106,9 +106,11 @@ internal class LocalAlbumViewModel(private val repository: LocalLibraryRepositor
         requests.launchRequest(DraftWrite, RequestPolicy.LatestWins, { runSuspendCatching { drafts.save(draftKey, draft) } }, onSuccess = {}, onFailure = { Log.e("LocalAlbum", "Draft failed", it); emitEffect(LocalAlbumEffect.Message("초안을 저장하지 못했습니다")) })
     }
     private fun write(key: String, request: suspend () -> Unit, success: suspend () -> Unit) {
+        val library=(uiState.value.screen as? ScreenState.Success)?.content?.album?.libraryId
+        suspend fun stillOwned()=library=="device" || (library!=null && library==accounts?.identities()?.first()?.accountId?.let{"account:$it"})
         requests.launchRequest(Write(key), RequestPolicy.IgnoreWhileRunning, { runSuspendCatching { request() } },
-            onStarted = { if (key == "create-sub" || key == "edit-album" || key.startsWith("rename:")) requests.cancel(DraftWrite); dispatch(LocalAlbumAction.Pending(key, true)) }, onSuccess = { success() },
-            onFailure = { Log.e("LocalAlbum", "Local write failed", it); emitEffect(LocalAlbumEffect.Message("기기에 저장하지 못했습니다")) },
+            onStarted = { if (key == "create-sub" || key == "edit-album" || key.startsWith("rename:")) requests.cancel(DraftWrite); dispatch(LocalAlbumAction.Pending(key, true)) }, onSuccess = { if(stillOwned())success() },
+            onFailure = { Log.e("LocalAlbum", "Local write failed", it); if(stillOwned())emitEffect(LocalAlbumEffect.Message("기기에 저장하지 못했습니다")) },
             onFinished = { dispatch(LocalAlbumAction.Pending(key, false)) })
     }
 }

@@ -58,6 +58,12 @@ class AccountCopyStorageTest {
             val source=repo.createAlbum("Source");val identity=preferences.getSession().getOrThrow()!!.identity
             try{sync.copyAlbums(setOf(source,"missing"),identity,"failed");fail("Expected missing original")}catch(_:IllegalArgumentException){}
             assertNull(db.syncDao().batch("failed"));assertTrue(db.syncDao().jobs("A").isEmpty());assertTrue(repo.albums(LibraryScope.Account("A")).first().isEmpty())
+            val child=repo.createSubAlbum(source,"Child")
+            val missingPhoto=UUID.randomUUID().toString()
+            db.libraryDao().insertPhoto(LocalPhotoEntity(missingPhoto,child,"${UUID.randomUUID()}.png",createdAt=0))
+            try{sync.copyAlbums(setOf(source),identity,"missing-file");fail("Expected unavailable owned file")}catch(_:IllegalStateException){}
+            assertNull(db.syncDao().batch("missing-file"));assertTrue(db.syncDao().jobs("A").isEmpty());assertTrue(repo.albums(LibraryScope.Account("A")).first().isEmpty())
+            assertNotNull(db.libraryDao().photo(missingPhoto));assertNotNull(repo.subAlbum(child).first())
             preferences.storeSession("B","b","r");try{sync.copyAlbums(setOf(source),identity,"wrong-account");fail("Expected changed recipient")}catch(_:IllegalStateException){}
             assertNotNull(repo.album(source).first());assertNull(db.syncDao().batch("wrong-account"));assertTrue(db.syncDao().jobs("B").isEmpty())
         } finally{db.close();root.deleteRecursively()}

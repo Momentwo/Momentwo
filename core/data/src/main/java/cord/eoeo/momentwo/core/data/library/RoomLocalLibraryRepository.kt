@@ -42,7 +42,7 @@ class RoomLocalLibraryRepository @Inject constructor(private val db: MomentwoDat
         dao.insertAlbum(LocalAlbumEntity(localId, LibraryScope.Device.id, title.trim(), createdAt = System.currentTimeMillis()))
         localId
     }
-    private suspend fun writableAlbum(id: String,kind:SyncKind?=null):LocalAlbumEntity = requireNotNull(dao.album(id)){"앨범을 찾을 수 없습니다"}.also {check(!it.deleted);if(it.libraryId!=LibraryScope.Device.id)requireNotNull(sync){"다른 라이브러리의 자료입니다"}.ownerFor(it,kind)}
+    private suspend fun writableAlbum(id: String,kind:SyncKind?=null):LocalAlbumEntity = requireNotNull(dao.album(id)){"앨범을 찾을 수 없습니다"}.also {check(!it.deleted);if(it.libraryId!=LibraryScope.Device.id)checkNotNull(sync){"다른 라이브러리의 자료입니다"}.ownerFor(it,kind)}
     private suspend fun record(album:LocalAlbumEntity,target:String,parent:String?,kind:SyncKind,value:String,base:String?,revision:Long,mediaName:String?=null){if(album.libraryId!=LibraryScope.Device.id){val queue=requireNotNull(sync);val owner=queue.ownerFor(album,kind);queue.mutation(owner,target,parent,kind,album.title,value,base,revision,mediaName)}}
     override suspend fun createSubAlbum(albumId: String, title: String, localId: String): String = db.withTransaction {
         val album=writableAlbum(albumId,SyncKind.CREATE_SUB); require(title.isNotBlank()) { "서브앨범 이름을 입력해주세요" }
@@ -65,7 +65,7 @@ class RoomLocalLibraryRepository @Inject constructor(private val db: MomentwoDat
         record(album,id,old.albumId,SyncKind.EDIT_SUB,next.title,old.title,next.revision)
     }
     override suspend fun setCover(id: String, source: android.net.Uri?) {
-        if (source == null) db.withTransaction { val old=writableAlbum(id,SyncKind.SET_COVER);dao.updateAlbum(old.copy(coverMediaName=null,revision=old.revision+1));record(old,id,null,SyncKind.SET_COVER,"",old.remoteCoverUrl,old.revision+1) }
+        if (source == null) db.withTransaction { val old=writableAlbum(id,SyncKind.SET_COVER);dao.updateAlbum(old.copy(coverMediaName=null,remoteCoverUrl="",revision=old.revision+1));record(old,id,null,SyncKind.SET_COVER,"",old.remoteCoverUrl,old.revision+1) }
         else media.withImported(source) { name -> db.withTransaction { val old=writableAlbum(id,SyncKind.SET_COVER);dao.updateAlbum(old.copy(coverMediaName=name,revision=old.revision+1));record(old,id,null,SyncKind.SET_COVER,"",old.remoteCoverUrl,old.revision+1,name) } }
         cleanupAfterCommit()
     }

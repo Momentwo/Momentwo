@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
     @Query("SELECT * FROM sync_job WHERE accountId=:accountId ORDER BY createdAt,id") fun observeJobs(accountId:String):Flow<List<SyncJobEntity>>
     @Query("SELECT * FROM sync_job WHERE accountId=:accountId ORDER BY createdAt,id") suspend fun jobs(accountId:String):List<SyncJobEntity>
     @Query("SELECT j.* FROM sync_job j JOIN sync_batch b ON j.batchId=b.id WHERE instr(',' || b.replicaIds || ',', ',' || :rootId || ',') > 0") fun copyJobs(rootId:String):Flow<List<SyncJobEntity>>
+    @Query("SELECT COALESCE(MAX(createdAt),0) FROM sync_job") suspend fun latestOrder():Long
     @Query("SELECT * FROM sync_job WHERE id=:id") suspend fun job(id:String):SyncJobEntity?
     @Query("SELECT * FROM sync_batch WHERE id=:id") suspend fun batch(id:String):SyncBatchEntity?
     @Insert suspend fun insertBatch(batch:SyncBatchEntity)

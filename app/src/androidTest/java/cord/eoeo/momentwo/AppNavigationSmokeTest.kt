@@ -68,6 +68,7 @@ class AppNavigationSmokeTest {
 
     @Before
     fun installTestGraph() {
+        kotlinx.coroutines.runBlocking { access().preferences().clearSession() }
         compose.runOnUiThread {
             val activity = compose.activity
             // Display only this test activity when the device auto-locks during the suite.
@@ -91,6 +92,18 @@ class AppNavigationSmokeTest {
                 compose.activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
         }
         compose.waitForIdle()
+    }
+
+    @org.junit.After
+    fun clearFixtureAccount() { kotlinx.coroutines.runBlocking { access().preferences().clearSession() } }
+
+    private fun access() = dagger.hilt.android.EntryPointAccessors.fromApplication(compose.activity.applicationContext,cord.eoeo.momentwo.core.data.library.LibraryTestAccess::class.java)
+    private fun useExpiredFixtureAccount() = kotlinx.coroutines.runBlocking {
+        val preferences=access().preferences()
+        preferences.storeSession("navigation-fixture","fixture-access","fixture-refresh")
+        val identity=preferences.getSession().getOrThrow()!!.identity
+        preferences.expireSession(identity.accountId,identity.epoch)
+        // A verified, expired identity admits cached navigation but cannot send a content request.
     }
 
     @Test
@@ -125,6 +138,7 @@ class AppNavigationSmokeTest {
 
     @Test
     fun friendGraphAndRequestTabAreReachableWithoutBackend() {
+        useExpiredFixtureAccount()
         compose.runOnIdle { navController.navigate(FriendDestination) }
         compose.waitForIdle()
         compose.runOnIdle {
@@ -139,6 +153,7 @@ class AppNavigationSmokeTest {
     }
     @Test
     fun subAlbumSlotAndDetailTabsAreReachableWithoutBackend() {
+        useExpiredFixtureAccount()
         val destination = AlbumDetailDestination(123, "Migration album", "Test", "")
         compose.runOnIdle { navController.navigate(destination) }
         compose.waitForIdle()
@@ -194,6 +209,7 @@ class AppNavigationSmokeTest {
 
     @Test
     fun albumAndCreateAlbumGraphsRestoreTheirBackStack() {
+        useExpiredFixtureAccount()
         compose.runOnIdle { navController.navigate(AlbumDestination) }
         compose.waitForIdle()
         compose.onNodeWithText("Album").assertExists()
@@ -215,6 +231,7 @@ class AppNavigationSmokeTest {
 
     @Test
     fun photoArgumentsInitialStateAndBackStackArePreserved() {
+        useExpiredFixtureAccount()
         val list = PhotoListDestination(123, 456, "Migration album", "Migration subalbum")
         val detail = PhotoDetailDestination(123, 789, "", false)
         compose.runOnIdle { navController.navigate(list) }

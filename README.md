@@ -6,7 +6,7 @@
 ## 📝 프로젝트 소개
 
 ```
-📚 모든 순간을 다양한 사람들과 함께 기록하자
+📚 계정 없이 순간을 기록하고, 원할 때 함께 공유하자
 ```
 
 ### 앨범 하나로 추억들을 함께, 쉽게 정리
@@ -15,6 +15,22 @@
 > - 앨범에 참여한 사람들과 서브 앨범을 활용해 사진을 체계적으로 관리해보세요.
 > - 사진을 올려 그 날의 기억, 감정들을 공유해보세요.
 > - 공유된 사진에 좋아요, 댓글을 남겨 추억을 함께 떠올려보세요.
+
+## 계정 없이 시작하기
+
+앱을 열면 **내 로컬 앨범**으로 시작합니다. 가입·로그인·인터넷 없이 앨범과 서브앨범을 만들고 사진·설명·개인 메모·즐겨찾기를 관리할 수 있습니다. 사진은 앱의 영속 저장소에 복사하며 가져온 원본은 변경하지 않습니다.
+
+| 기본 로컬 사용 | 선택한 계정 기능 |
+|---|---|
+| 앨범·서브앨범·대표 사진·소제목 관리 | 계정 앨범과 친구·초대·멤버 관리 |
+| 영속 사진 보관·열람·삭제·갤러리 내보내기 | 저장된 계정 사진의 오프라인 열람과 변경 동기화 |
+| 설명·개인 메모·즐겨찾기 | 공유 댓글·좋아요 |
+
+**계정 연결 → 기기 앨범 복사·동기화**에서 복사할 앨범과 대상 계정을 확인합니다. 로그인만으로 업로드하지 않습니다. 복사는 시작 시점의 앨범·서브앨범·사진·설명을 대상으로 하며 원래 기기 자료와 개인 메모·즐겨찾기를 유지합니다. 복사 이후 두 자료는 독립적으로 편집합니다.
+
+계정 작업은 기기에 저장한 뒤 이어갑니다. 충돌은 서버 값과 내 변경을 비교해 선택하며, 서버 반영 여부가 불명확하면 자동 재전송하지 않습니다. 기존 API가 생성 ID를 반환하지 않는 경우 실제 서버 항목을 사용자가 확인해 연결합니다. 백엔드 복구 후 실제 전송 검증은 [#150](https://github.com/Momentwo/Momentwo/issues/150)에서 진행합니다.
+
+[저장·복사·복구 가이드](docs/architecture/offline-first-guide.md) · [구현·검증 기록](docs/architecture/offline-first-plan.md)
 
 ## 🔗 Links
 
@@ -34,6 +50,8 @@
 ---
 
 ## 🖼️ App 한눈에 보기
+
+아래 이미지는 기존 계정·공유 화면입니다. 기본 진입과 로컬 기능은 위 사용 흐름을 참고해주세요.
 
 | <img src="https://github.com/user-attachments/assets/40f3e804-7b62-4747-b33d-218b8205249f" width="180" /> | <img src="https://github.com/user-attachments/assets/9ec32bf9-d743-4d1f-8476-034c6b6c8a33" width="180" /> | <img src="https://github.com/user-attachments/assets/a92c40b4-f970-4613-a52c-4d9e8483196e" width="180" /> |
 |:---------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|
@@ -278,14 +296,14 @@ Momentwo/
 | 모듈 | 책임 |
 |---|---|
 | `core:model` | AlbumItem·PhotoItem 등 공용 모델. Android에 의존하지 않는 Kotlin JVM 모듈 |
-| `core:common` | ReducerViewModel·순수 Reducer, ScreenState·요청·취소 기반, Coroutine Dispatcher |
+| `core:common` | ReducerViewModel·순수 Reducer, ScreenState·요청·취소 기반, Coroutine Dispatcher·시작 훅 계약 |
 | `core:designsystem` | Compose Theme, 색상·타이포그래피 등 디자인 토큰 |
 | `core:ui` | AlbumItemCard·UserItemBox·Dialog 등 도메인 공유 Composable |
 | `core:domain` | 여러 화면에서 사용하는 UseCase |
-| `core:data` | Repository 인터페이스·구현, DTO·Service·DataSource·RemoteMediator와 매핑 |
+| `core:data` | Repository 인터페이스·구현, DTO·Service·DataSource·RemoteMediator, 영속 파일·선택 복사·JobScheduler 동기화 |
 | `core:network` | Retrofit·OkHttp·Moshi 설정, 인증 Interceptor/Authenticator, BASE_URL |
-| `core:database` | Room Database, DAO, Entity, RemoteKey |
-| `core:datastore` | Preferences DataStore 기반 토큰·세션 설정 저장 |
+| `core:database` | Room v4, 로컬 원본·계정별 캐시·동기화 작업·연결 정보, 명시적 migration |
+| `core:datastore` | Preferences DataStore 기반 원자적 계정 세션·편집 초안 저장 |
 | `core:navigation` | 공용 Navigation 확장용 모듈. 경로 키는 Feature API로 이동했고 현재 공용 소스는 없음 |
 | `core:testing` | 코루틴 ViewModel 테스트에 사용하는 MainDispatcherRule |
 
@@ -299,8 +317,8 @@ Momentwo/
 | `friend` | 친구 목록·검색·요청, 목록/요청 내부 탭 |
 | `subalbum` | 서브앨범 목록·카드 렌더링, 클릭·선택 콜백 |
 | `album-detail` | 앨범 상세·멤버·설정·대표 이미지, 서브앨범 상태·편집·CRUD, 내부 탭 그래프 |
-| `album` | 앨범 목록·생성, 상세·친구·Profile 이동 콜백 |
-| `photo` | 사진 목록·상세, 댓글·설명 BottomSheet, 몰입 모드 |
+| `album` | 기본 로컬 앨범·계정 연결·선택 복사·동기화, 기존 계정 앨범 목록·생성 |
+| `photo` | 로컬/계정 사진·설명·개인 메모·즐겨찾기·공유 댓글/좋아요·몰입 모드 |
 
 `subalbum`은 독립 ViewModel 없이 화면을 렌더링합니다. 목록·선택·편집 상태와 API 요청은 `album-detail`이 소유하고, app의 `SubAlbumContentAdapter`가 두 impl을 Composable 슬롯으로 연결합니다.
 
@@ -329,7 +347,7 @@ AlbumDetail이 전달한 목록·선택 상태와 콜백을 app의 어댑터가 
 - `Core → Feature`, `Feature → app`, `impl → 다른 Feature impl`, `api → impl/data` 의존은 금지합니다. 현재 모든 Feature API는 serialization 런타임만 사용하며 Core 의존이 없습니다.
 - Repository 인터페이스는 `core:data`, UseCase는 `core:domain`, UI 공용 모델은 `core:model`에 둡니다.
 
-MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다. Feature ViewModel 9개가 UI Event를 Main에서 처리하고 Action으로 최신 State를 갱신합니다. 최초 데이터는 `ScreenState`의 Loading/Success/Error로 구분하며 새로고침 중에는 기존 콘텐츠와 입력·선택을 유지합니다.
+MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다. Feature ViewModel은 UI Event를 Main에서 처리하고 Action으로 최신 State를 갱신합니다. 최초 데이터는 `ScreenState`의 Loading/Success/Error로 구분하며 새로고침 중에는 기존 콘텐츠와 입력·선택을 유지합니다.
 
 화면은 `StateFlow`를 `collectAsStateWithLifecycle()`로 수집하고, `Channel(BUFFERED)` Effect를 STARTED에서 처리합니다. 조회는 최신 요청만 반영하고 동일 쓰기는 중복 차단합니다. 취소는 오류 UI로 변환하지 않습니다. Paging 표시 상태는 LoadState에서 파생하며 SubAlbum 상태는 AlbumDetail이 소유합니다. 세부 규칙과 한계는 [MVI 구현 가이드](docs/architecture/mvi-guide.md)에 정리했습니다.
 
@@ -347,7 +365,8 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 | Dependency Injection | Hilt, KSP | Repository·UseCase·ViewModel 주입과 코드 생성 |
 | Network | Retrofit, OkHttp | HTTP API, 인증 Interceptor/Authenticator |
 | Serialization | Moshi, Kotlinx Serialization | HTTP JSON 변환 / Navigation 경로 직렬화 |
-| Local Storage | Room, Preferences DataStore | 데이터 캐시·Paging / 토큰·세션 설정 |
+| Local Storage | Room, Preferences DataStore, 앱 영속 파일 | 로컬 원본·계정별 캐시·대기 작업 / 세션·편집 초안 / 사진 보관 |
+| Background Sync | Android JobScheduler | 사용자가 저장한 계정 작업의 연결 복구·재시작 후 이어가기 |
 | Paging | Paging 3, RemoteMediator | 페이지 단위 로딩과 Room/원격 데이터 연동 |
 | Image | Coil, Coil Compose | 이미지 로딩·Compose 표시 |
 | Testing | JUnit 4, Coroutines Test, AndroidX Test, Compose UI Test | Reducer·요청·취소 회귀, 경로·lifecycle·Paging·Room 기기 검증 |
@@ -386,7 +405,12 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 
 2026-10-13 #155 MVI 개선에서는 전체 clean 빌드·Lint·단위 테스트 123개와 SM_N976N API 31 별도 앱 기기 회귀 13개를 통과했습니다. 9개 ViewModel의 Reducer 전환과 구 기반 제거를 완료했으며, API 골든 패스는 계속 #150에서 추적합니다.
 
+2026-10-14 #162 전환은 가입 없이 사용하는 로컬 라이브러리, 선택 계정 연결·복사와 영속 동기화를 추가했습니다. 전체 단위 테스트 161개·Debug/Release 빌드·Lint, 실제 비행기 모드와 프로세스 복원을 포함한 기기 테스트 36개를 통과했습니다. 최신 검증 결과와 미확인 항목은 [Offline-First 실행 기록](docs/architecture/offline-first-plan.md)에 정리합니다.
+
 ### 아키텍처 문서
+
+- [Offline-First 저장·복사·복구 가이드](docs/architecture/offline-first-guide.md)
+- [Offline-First 구현·검증 기록](docs/architecture/offline-first-plan.md)
 
 - [MVI 구현 가이드](docs/architecture/mvi-guide.md)
 - [MVI 개선·검증 기록](docs/architecture/mvi-improvement-plan.md)

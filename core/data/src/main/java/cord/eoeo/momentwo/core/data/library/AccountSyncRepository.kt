@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.*
 class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,private val preferences:PreferenceRepository,private val media:LocalMediaStore,private val scheduler:SyncScheduling,private val clients:AccountClientFactory?=null) {
     private val dao get()=db.libraryDao()
     private val work get()=db.syncDao()
-    private var sequence=0L
     suspend fun requireOwner(expected:AccountIdentity):AccountIdentity {
         val current=requireNotNull(preferences.getSession().getOrThrow()).identity
         check(current.accountId==expected.accountId && current.epoch==expected.epoch){"복사 대상 계정이 변경되었습니다"}
@@ -61,7 +60,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
     /** Must be called inside the same transaction as the local mutation. */
     internal suspend fun enqueue(accountId:String,targetId:String,parentId:String?,kind:SyncKind,label:String,text:String,extra:String="",mediaName:String?=null,base:String?=null,baseExtra:String?=null,dependency:String?=null,batchId:String?=null,revision:Long=0):String {
         val id=UUID.randomUUID().toString()
-        work.insertJob(SyncJobEntity(id,accountId,batchId,targetId,parentId,kind.name,SyncStatus.QUEUED.name,label,text,extra,mediaName,base,baseExtra,null,null,dependency,revision,System.currentTimeMillis()+sequence++,null))
+        work.insertJob(SyncJobEntity(id,accountId,batchId,targetId,parentId,kind.name,SyncStatus.QUEUED.name,label,text,extra,mediaName,base,baseExtra,null,null,dependency,revision,maxOf(System.currentTimeMillis(),work.latestOrder()+1),null))
         if(mediaName!=null)work.pin(SyncMediaPinEntity(id,mediaName))
         return id
     }
@@ -80,7 +79,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
         val jobs=work.jobs(owner.accountId)
         val prior=jobs.lastOrNull{it.targetId==targetId && it.status !in setOf(SyncStatus.DONE.name,SyncStatus.CANCELLED.name)}
         if(prior?.status==SyncStatus.QUEUED.name && (prior.kind==kind.name || (prior.kind in setOf(SyncKind.DO_LIKE.name,SyncKind.UNDO_LIKE.name) && kind in setOf(SyncKind.DO_LIKE,SyncKind.UNDO_LIKE))) && prior.batchId==null){
-            work.updateJob(prior.copy(kind=kind.name,text=value,revision=revision,mediaName=mediaName));work.unpin(prior.id);if(mediaName!=null)work.pin(SyncMediaPinEntity(prior.id,mediaName));return prior.id
+            work.updateJob(prior.copy(kind=kind.name,text=value,revision=revision,mediaName=mediaName,transferPhase=if(prior.mediaName==mediaName)prior.transferPhase else 0,objectKey=if(prior.mediaName==mediaName)prior.objectKey else null));work.unpin(prior.id);if(mediaName!=null)work.pin(SyncMediaPinEntity(prior.id,mediaName));return prior.id
         }
         val parent=parentId?.let{id->jobs.lastOrNull{it.targetId==id && it.kind in setOf(SyncKind.CREATE_ALBUM.name,SyncKind.CREATE_SUB.name,SyncKind.UPLOAD_PHOTO.name) && it.status!=SyncStatus.DONE.name}}
         return enqueue(owner.accountId,targetId,parentId,kind,label,value,mediaName=mediaName,base=base,dependency=prior?.id ?: parent?.id,revision=revision)
@@ -191,7 +190,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
             } else {
                 check(job.status !in setOf(SyncStatus.SENDING.name,SyncStatus.UNKNOWN.name,SyncStatus.AWAITING_ID.name)){"먼저 서버 반영 상태를 확인해주세요"}
                 if(SyncKind.valueOf(job.kind) in setOf(SyncKind.CREATE_ALBUM,SyncKind.CREATE_SUB,SyncKind.UPLOAD_PHOTO,SyncKind.CREATE_COMMENT)){check(cancelUnsentTree(job.targetId)){"먼저 서버 반영 상태를 확인해주세요"};when(SyncKind.valueOf(job.kind)){SyncKind.CREATE_ALBUM->dao.deleteAlbum(job.targetId);SyncKind.CREATE_SUB->dao.deleteSubAlbum(job.targetId);SyncKind.UPLOAD_PHOTO->dao.deletePhoto(job.targetId);SyncKind.CREATE_COMMENT->work.deleteComment(job.targetId);else->error("creation")};return@withTransaction}
-                applyRemote(job,job.baseText.orEmpty());work.updateJob(job.copy(status=SyncStatus.DONE.name,claimId=null));work.unpin(job.id)
+                applyRemote(job,if(job.kind in setOf("DELETE_ALBUM","DELETE_SUB","DELETE_PHOTO","DELETE_COMMENT"))"서버에 아직 존재합니다"else job.baseText.orEmpty());work.updateJob(job.copy(status=SyncStatus.DONE.name,claimId=null));work.unpin(job.id)
                 work.jobs(job.accountId).filter{it.dependency==job.id && it.kind==job.kind && it.status==SyncStatus.QUEUED.name}.forEach{work.updateJob(it.copy(baseText=job.baseText))}
             }
         };scheduler.enqueue();cleanupAfterCommit()

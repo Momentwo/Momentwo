@@ -30,7 +30,7 @@ internal class LocalPhotoViewModel(private val repository: LocalLibraryRepositor
             var restored = false
             combine(repository.photo(uiState.value.id),repository.memos(uiState.value.id),sync?.comments(uiState.value.id) ?: flowOf(emptyList())) {photo,memos,comments->photo?.let{LocalPhotoContent(it,memos,if(it.commentsLoaded)ScreenState.Success(comments)else ScreenState.Loading)}}
             .catch { if(it is CancellationException || it is Error) throw it; Log.e("LocalPhoto", "Observation failed", it); dispatch(LocalPhotoAction.Failed(UiError.Unknown)) }
-            .collect { content -> if(content == null) dispatch(LocalPhotoAction.Failed(UiError.NotFound)) else {
+            .collect { content -> if(content == null) {dispatch(LocalPhotoAction.Failed(UiError.NotFound))} else {
                 dispatch(LocalPhotoAction.Snapshot(content))
                 if(!restored && saved != null) {
                     val dialog = when { saved.context == "caption" -> LocalPhotoDialog.Caption; saved.context == "comment:new" -> LocalPhotoDialog.Comment(null); saved.context.startsWith("comment:") && (content.comments as? ScreenState.Success)?.content?.any{it.localId==saved.context.removePrefix("comment:")}==true -> LocalPhotoDialog.Comment(saved.context.removePrefix("comment:")); saved.context == "memo:new" -> LocalPhotoDialog.Memo(null); saved.context.startsWith("memo:") && content.memos.any { it.localId == saved.context.removePrefix("memo:") } -> LocalPhotoDialog.Memo(saved.context.removePrefix("memo:")); else -> LocalPhotoDialog.None }
@@ -76,6 +76,8 @@ internal class LocalPhotoViewModel(private val repository: LocalLibraryRepositor
         }
     }
     private fun write(key: String, request: suspend () -> Unit, success: suspend () -> Unit) {
-        requests.launchRequest(Write(key),RequestPolicy.IgnoreWhileRunning,{runSuspendCatching {request()}},onStarted={if(key=="caption" || key.startsWith("memo:") || key.startsWith("comment:")) requests.cancel(DraftWrite);dispatch(LocalPhotoAction.Pending(key,true))},onSuccess={success()},onFailure={Log.e("LocalPhoto","Local write failed",it);emitEffect(LocalPhotoEffect.Message("기기에 저장하지 못했습니다"))},onFinished={dispatch(LocalPhotoAction.Pending(key,false))})
+        val library=(uiState.value.screen as? ScreenState.Success)?.content?.photo?.libraryId
+        suspend fun stillOwned()=library=="device" || (library!=null && library==accounts?.identities()?.first()?.accountId?.let{"account:$it"})
+        requests.launchRequest(Write(key),RequestPolicy.IgnoreWhileRunning,{runSuspendCatching {request()}},onStarted={if(key=="caption" || key.startsWith("memo:") || key.startsWith("comment:")) requests.cancel(DraftWrite);dispatch(LocalPhotoAction.Pending(key,true))},onSuccess={if(stillOwned())success()},onFailure={Log.e("LocalPhoto","Local write failed",it);if(stillOwned())emitEffect(LocalPhotoEffect.Message("기기에 저장하지 못했습니다"))},onFinished={dispatch(LocalPhotoAction.Pending(key,false))})
     }
 }

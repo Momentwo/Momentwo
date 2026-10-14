@@ -45,7 +45,7 @@ fun InviteDialog(
     onConfirm: () -> Unit,
 ) {
     var searchQuery: String by rememberSaveable { mutableStateOf("") }
-    val searchRegex = Regex(searchQuery, RegexOption.IGNORE_CASE)
+    val searchRegex = Regex(Regex.escape(searchQuery), RegexOption.IGNORE_CASE)
 
     InviteDialogScreen(
         searchQuery = { searchQuery },
@@ -120,9 +120,9 @@ fun InviteDialogScreen(
                             .fillMaxWidth(),
                     ) {
                         items(items = selectedFriendList(), key = { it.nickname }) { friendItem ->
-                            UserItemBox(
-                                userItem = { UserItem(0, friendItem.nickname, "") },
-                                onClickClear = { onCheckedChange(false, friendItem) },
+                            FriendItemBox(
+                                nickname = friendItem.nickname,
+                                onClear = { onCheckedChange(false, friendItem) },
                                 modifier = Modifier
                                     .animateItem()
                                     .fillMaxHeight(),

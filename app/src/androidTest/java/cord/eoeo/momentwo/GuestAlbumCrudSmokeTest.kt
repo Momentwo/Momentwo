@@ -19,14 +19,16 @@ class GuestAlbumCrudSmokeTest {
     @Before fun ready() {
         compose.runOnUiThread { compose.activity.setShowWhenLocked(true); compose.activity.setTurnScreenOn(true); compose.activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
         compose.waitUntil(10_000) { compose.activity.hasWindowFocus() }
-        compose.waitUntil(10_000) { compose.onAllNodes(hasText("내 로컬 앨범")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
     }
     @Test fun albumAndSubAlbumCanBeCreatedEditedReopenedAndDeletedWithoutApi() {
         val counter = EntryPointAccessors.fromApplication(compose.activity.applicationContext, ApiDiagnostics::class.java).apiRequests()
         val before = counter.count
-        compose.onNodeWithText("앨범 추가").performClick()
-        compose.onNodeWithText("이름").performTextInput("Guest fixture")
-        compose.onNodeWithText("저장").performClick()
+        compose.onNodeWithContentDescription("앨범 추가").performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("Guest fixture")
+        compose.onNodeWithText("완료", useUnmergedTree = true).performClick()
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest fixture")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+        compose.onNodeWithText("Guest fixture").performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("서브앨범 추가")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.onNodeWithText("서브앨범 추가").performClick()
         compose.onNodeWithText("이름").performTextInput("Guest child")
@@ -43,7 +45,7 @@ class GuestAlbumCrudSmokeTest {
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest child")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.onNodeWithText("앨범 삭제").performClick()
         compose.onNode(hasText("삭제") and hasAnyAncestor(isDialog())).performClick()
-        compose.waitUntil(10_000) { compose.onAllNodes(hasText("내 로컬 앨범")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.onNodeWithText("Guest fixture").assertDoesNotExist()
         assertEquals(before, counter.count)
     }

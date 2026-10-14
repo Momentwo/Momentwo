@@ -79,9 +79,27 @@ internal fun CreateAlbumScreen(
         }
     }
 
+    CreateAlbumContent(title(), onTitleChange, uiState().isLoading, { onEvent(CreateAlbumEvent.OnBack) },
+        { onEvent(CreateAlbumEvent.OnClickInviteFriend) }, { onEvent(CreateAlbumEvent.OnRequestCreateAlbum(title())) }, snackbarHostState()) {
+        LazyVerticalGrid(columns = GridCells.Adaptive(80.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            items(uiState().selectedFriendList, key = { it.nickname }) { friend ->
+                UserItemBox(userItem = { UserItem(0, friend.nickname, friend.userProfileImage) },
+                    onClickClear = { onEvent(CreateAlbumEvent.OnClearFriendItem(it)) }, modifier = Modifier.animateItem().fillMaxWidth())
+            }
+        }
+    }
+}
+
+@Composable
+internal fun CreateAlbumContent(
+    title: String, onTitleChange: (String) -> Unit, pending: Boolean,
+    back: () -> Unit, invite: () -> Unit, submit: () -> Unit,
+    messages: SnackbarHostState, invitedContent: @Composable () -> Unit,
+) {
     Scaffold(
-        topBar = { CreateAlbumTopAppBar(onClickNavigation = { onEvent(CreateAlbumEvent.OnBack) }) },
+        topBar = { CreateAlbumTopAppBar(onClickNavigation = { back() }) },
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { androidx.compose.material3.SnackbarHost(messages) },
     ) { paddingValues ->
         Column(
             modifier =
@@ -93,7 +111,7 @@ internal fun CreateAlbumScreen(
             TitleText(text = { "앨범명" })
             CaptionText(text = { "앨범을 나타낼 수 있는 이름을 지어주세요" })
             OutlinedTextField(
-                value = title(),
+                value = title,
                 onValueChange = onTitleChange,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -110,7 +128,7 @@ internal fun CreateAlbumScreen(
                     CaptionText(text = { "앨범을 같이 사용할 친구를 초대하세요" })
                 }
                 ElevatedButton(
-                    onClick = { onEvent(CreateAlbumEvent.OnClickInviteFriend) },
+                    onClick = { invite() },
                     modifier =
                         Modifier
                             .align(Alignment.CenterVertically),
@@ -120,29 +138,11 @@ internal fun CreateAlbumScreen(
                     Text(text = "추가")
                 }
             }
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(80.dp),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .weight(1f),
-            ) {
-                items(items = uiState().selectedFriendList, key = { it.nickname }) { friendItem ->
-                    UserItemBox(
-                        userItem = { UserItem(0, friendItem.nickname, friendItem.userProfileImage) },
-                        onClickClear = { onEvent(CreateAlbumEvent.OnClearFriendItem(it)) },
-                        modifier =
-                            Modifier
-                                .animateItem()
-                                .fillMaxWidth(),
-                    )
-                }
-            }
+            Column(Modifier.weight(1f)) { invitedContent() }
 
             ConfirmExtendedFAB(
-                enabled = !uiState().isLoading,
-                onClick = { onEvent(CreateAlbumEvent.OnRequestCreateAlbum(title())) },
+                enabled = !pending,
+                onClick = { submit() },
                 modifier =
                     Modifier
                         .align(Alignment.End)
@@ -164,7 +164,7 @@ internal fun CreateAlbumTopAppBar(onClickNavigation: () -> Unit) {
         },
         navigationIcon = {
             IconButton(onClick = onClickNavigation) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "뒤로")
             }
         },
     )

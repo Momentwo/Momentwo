@@ -9,9 +9,11 @@ interface LibraryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertLibrary(entity: LibraryEntity)
     @Query("SELECT * FROM local_album WHERE libraryId = :libraryId ORDER BY createdAt DESC, localId") fun albums(libraryId: String): Flow<List<LocalAlbumEntity>>
     @Query("SELECT * FROM local_album WHERE localId = :id") fun observeAlbum(id: String): Flow<LocalAlbumEntity?>
+    @Query("SELECT * FROM local_album WHERE libraryId = :libraryId AND remoteId = :remoteId LIMIT 1") suspend fun remoteAlbum(libraryId: String, remoteId: Int): LocalAlbumEntity?
     @Query("SELECT * FROM local_album WHERE localId = :id") suspend fun album(id: String): LocalAlbumEntity?
     @Query("SELECT * FROM local_subalbum WHERE albumId = :albumId ORDER BY createdAt, localId") fun subAlbums(albumId: String): Flow<List<LocalSubAlbumEntity>>
     @Query("SELECT * FROM local_subalbum WHERE localId = :id") fun observeSubAlbum(id: String): Flow<LocalSubAlbumEntity?>
+    @Query("SELECT * FROM local_subalbum WHERE albumId = :albumId AND remoteId = :remoteId LIMIT 1") suspend fun remoteSub(albumId: String,remoteId: Int): LocalSubAlbumEntity?
     @Query("SELECT * FROM local_subalbum WHERE localId = :id") suspend fun subAlbum(id: String): LocalSubAlbumEntity?
     @Query("SELECT * FROM local_photo WHERE subAlbumId = :subAlbumId ORDER BY createdAt, localId") fun photos(subAlbumId: String): Flow<List<LocalPhotoEntity>>
     @Query("SELECT * FROM local_photo WHERE localId = :id") fun observePhoto(id: String): Flow<LocalPhotoEntity?>

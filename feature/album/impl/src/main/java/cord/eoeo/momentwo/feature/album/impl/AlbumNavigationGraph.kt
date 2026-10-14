@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.feature.album.impl
 
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import coil.ImageLoader
@@ -18,11 +19,12 @@ fun NavGraphBuilder.albumScreens(
     navigateToProfile: () -> Unit,
     navigateToFriend: () -> Unit,
     navigateToAlbumDetail: (AlbumItem) -> Unit,
+    accountGuard: @Composable (@Composable () -> Unit) -> Unit = { content -> content() },
 ) {
     composable<AlbumDestination> {
-        AlbumRoute(coroutineScope, imageLoader, navigateToCreateAlbum, navigateToProfile, navigateToFriend, navigateToAlbumDetail)
+        accountGuard { AlbumRoute(coroutineScope, imageLoader, navigateToCreateAlbum, navigateToProfile, navigateToFriend, navigateToAlbumDetail) }
     }
     composable<CreateAlbumDestination> {
-        CreateAlbumRoute(coroutineScope, popBackStack)
+        accountGuard { CreateAlbumRoute(coroutineScope, popBackStack) }
     }
 }

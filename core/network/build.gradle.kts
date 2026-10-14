@@ -22,6 +22,7 @@ fun getLocalProperty(key: String): String = gradleLocalProperties(rootDir, provi
 
 dependencies {
     implementation(project(":core:datastore"))
+    implementation(project(":core:model"))
 
     implementation(libs.coroutines.core)
 }

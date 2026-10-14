@@ -33,9 +33,10 @@ object ProfileModule {
     @Singleton
     @QualifierModule.LocalDataSource
     fun provideProfileLocalDataSource(
+        preferences: cord.eoeo.momentwo.core.datastore.PreferenceRepository,
         profileDao: ProfileDao,
         @IoDispatcher dispatcher: CoroutineDispatcher,
-    ): ProfileDataSource.Local = ProfileLocalDataSource(profileDao, dispatcher)
+    ): ProfileDataSource.Local = ProfileLocalDataSource(profileDao, dispatcher, preferences)
 
     @Provides
     @Singleton

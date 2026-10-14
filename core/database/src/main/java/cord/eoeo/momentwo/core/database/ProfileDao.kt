@@ -11,6 +11,9 @@ interface ProfileDao {
     @Query("SELECT * FROM profile LIMIT 1")
     suspend fun getProfile(): ProfileEntity
 
+    @Query("SELECT * FROM profile WHERE username = :accountId")
+    suspend fun getProfile(accountId: String): ProfileEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(profile: ProfileEntity)
 }

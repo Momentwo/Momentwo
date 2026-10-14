@@ -21,6 +21,13 @@ class RequestLoginUseCaseTest {
     @Test fun cancelledTokenWriteCannotContinueSessionWrites() = runTest {
         val writes = mutableListOf<String>()
         val preferences = object : PreferenceRepository {
+            override fun identities() = kotlinx.coroutines.flow.flowOf<cord.eoeo.momentwo.core.model.AccountIdentity?>(null)
+            override suspend fun getSession() = Result.success<cord.eoeo.momentwo.core.datastore.StoredSession?>(null)
+            override suspend fun storeSession(accountId: String, accessToken: String, refreshToken: String) { storeAccessToken(accessToken) }
+            override suspend fun updateSessionTokens(session: cord.eoeo.momentwo.core.datastore.StoredSession, accessToken: String, refreshToken: String) = false
+    override suspend fun clearSession() = Unit
+            override suspend fun expireSession(accountId: String, epoch: String) = Unit
+
             override suspend fun storeAccessToken(accessToken: String) {
                 writes += "access"
                 currentCoroutineContext().cancel()
@@ -43,13 +50,20 @@ class RequestLoginUseCaseTest {
                 .onSuccess { completed = true }
         }
         job.join()
-        assertEquals(listOf("access"), writes)
+        assertEquals(listOf("profile", "access"), writes)
         assertFalse(completed)
     }
 
     @Test fun profileStorageFailureIsNotLoginSuccess() = runTest {
         val failure = IOException("profile storage failed")
         val preferences = object : PreferenceRepository {
+            override fun identities() = kotlinx.coroutines.flow.flowOf<cord.eoeo.momentwo.core.model.AccountIdentity?>(null)
+            override suspend fun getSession() = Result.success<cord.eoeo.momentwo.core.datastore.StoredSession?>(null)
+            override suspend fun storeSession(accountId: String, accessToken: String, refreshToken: String) { storeAccessToken(accessToken) }
+            override suspend fun updateSessionTokens(session: cord.eoeo.momentwo.core.datastore.StoredSession, accessToken: String, refreshToken: String) = false
+    override suspend fun clearSession() = Unit
+            override suspend fun expireSession(accountId: String, epoch: String) = Unit
+
             override suspend fun storeAccessToken(accessToken: String) = Unit
             override suspend fun storeRefreshToken(refreshToken: String) = Unit
             override suspend fun getAccessToken() = Result.success("")

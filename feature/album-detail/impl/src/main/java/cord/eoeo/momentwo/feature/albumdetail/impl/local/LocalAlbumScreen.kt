@@ -21,12 +21,12 @@ import cord.eoeo.momentwo.core.ui.*
 import cord.eoeo.momentwo.feature.albumdetail.api.LocalAlbumDetailDestination
 import kotlinx.coroutines.launch
 
-fun NavGraphBuilder.localAlbumDetailScreen(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit, openPhotos: (String) -> Unit) {
-    composable<LocalAlbumDetailDestination> { LocalAlbumRoute(imageLoader, popBackStack, navigateToLogin, openPhotos) }
+fun NavGraphBuilder.localAlbumDetailScreen(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit, openPhotos: (String) -> Unit, openAccountPhotos: (Int,Int,String,String) -> Unit = {_,_,_,_->}, openSharedAlbum: (Int,String,String,String) -> Unit = {_,_,_,_->}) {
+    composable<LocalAlbumDetailDestination> { LocalAlbumRoute(imageLoader, popBackStack, navigateToLogin, openPhotos, openAccountPhotos, openSharedAlbum) }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LocalAlbumRoute(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit, openPhotos: (String) -> Unit, vm: LocalAlbumViewModel = hiltViewModel()) {
+private fun LocalAlbumRoute(imageLoader: ImageLoader, popBackStack: () -> Unit, navigateToLogin: () -> Unit, openPhotos: (String) -> Unit, openAccountPhotos: (Int,Int,String,String) -> Unit, openSharedAlbum: (Int,String,String,String) -> Unit, vm: LocalAlbumViewModel = hiltViewModel()) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     val messages = remember { SnackbarHostState() }
     LaunchedEffect(vm) { vm.initialize() }
@@ -47,18 +47,20 @@ private fun LocalAlbumRoute(imageLoader: ImageLoader, popBackStack: () -> Unit, 
                 item {
                     if (ready.album.coverUri.isNotEmpty()) AsyncImage(ready.album.coverUri, "대표 사진", imageLoader, modifier = Modifier.fillMaxWidth().height(160.dp))
                     Text(ready.album.subtitle)
-                    Text("이 기기에 저장됨")
+                    Text(if(ready.album.libraryId == "device") "이 기기에 저장됨" else "계정에 저장된 앨범")
+                    if(ready.album.libraryId == "device") {
                     Row { TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.EditAlbum)) }) { Text("앨범 편집") }; TextButton(onClick = { picker.launch("image/*") }) { Text("대표 사진 변경") } }
                     Row { TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Cover(null)) }) { Text("대표 사진 초기화") }; TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.DeleteAlbum)) }) { Text("앨범 삭제") } }
                     TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.CreateSub)) }) { Text("서브앨범 추가") }
+                    }
                 }
                 items(ready.subAlbums, key = { it.localId }) { sub ->
-                    ListItem(modifier = Modifier.clickable { openPhotos(sub.localId) }, headlineContent = { Text(sub.title) }, trailingContent = { Row {
+                    ListItem(modifier = Modifier.clickable { if(ready.album.libraryId=="device") openPhotos(sub.localId) else { val albumId=ready.album.remoteId;val subId=sub.remoteId;if(albumId!=null && subId!=null) openAccountPhotos(albumId,subId,ready.album.title,sub.title) } }, headlineContent = { Text(sub.title) }, trailingContent = { if(ready.album.libraryId == "device") Row {
                         TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.RenameSub(sub.localId))) }) { Text("이름 변경") }
                         TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.DeleteSub(sub.localId))) }) { Text("삭제") }
                     } })
                 }
-                item { TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Connect) }) { Text("계정 연결 후 공유") } }
+                item { if(ready.album.libraryId != "device") ready.album.remoteId?.let { id -> TextButton(onClick={openSharedAlbum(id,ready.album.title,ready.album.subtitle,ready.album.coverUri)}){Text("멤버·공유 관리")} }; TextButton(onClick = { vm.onEvent(LocalAlbumEvent.Connect) }) { Text("계정 연결 후 공유") } }
             }
         }
     }

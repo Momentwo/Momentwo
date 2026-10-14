@@ -8,12 +8,12 @@ import cord.eoeo.momentwo.core.database.FriendRemoteKeyEntity
 
 @Dao
 interface FriendRemoteKeyDao {
-    @Query("SELECT * FROM friend_key WHERE id = (SELECT MAX(id) FROM friend_key)")
-    suspend fun getLastKey(): FriendRemoteKeyEntity?
+    @Query("SELECT * FROM friend_key WHERE ownerId = :ownerId AND id = (SELECT MAX(id) FROM friend_key WHERE ownerId = :ownerId)")
+    suspend fun getLastKey(ownerId: String = ""): FriendRemoteKeyEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertKey(key: FriendRemoteKeyEntity)
 
-    @Query("DELETE FROM friend_key")
-    suspend fun clearKeys()
+    @Query("DELETE FROM friend_key WHERE ownerId = :ownerId")
+    suspend fun clearKeys(ownerId: String = "")
 }

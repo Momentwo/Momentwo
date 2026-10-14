@@ -1,6 +1,7 @@
 package cord.eoeo.momentwo.feature.photo.impl
 
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import coil.ImageLoader
@@ -16,11 +17,12 @@ fun NavGraphBuilder.photoScreens(
     insetsController: WindowInsetsControllerCompat,
     popBackStack: () -> Unit,
     navigateToPhotoDetail: (Int, Int, String, Boolean) -> Unit,
+    accountGuard: @Composable (@Composable () -> Unit) -> Unit = { content -> content() },
 ) {
     composable<PhotoListDestination> {
-        PhotoListRoute(coroutineScope, imageLoader, popBackStack, navigateToPhotoDetail)
+        accountGuard { PhotoListRoute(coroutineScope, imageLoader, popBackStack, navigateToPhotoDetail) }
     }
     composable<PhotoDetailDestination> {
-        PhotoDetailRoute(coroutineScope, imageLoader, insetsController, popBackStack)
+        accountGuard { PhotoDetailRoute(coroutineScope, imageLoader, insetsController, popBackStack) }
     }
 }

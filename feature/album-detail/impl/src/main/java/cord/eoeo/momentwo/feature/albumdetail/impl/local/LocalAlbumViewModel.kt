@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import cord.eoeo.momentwo.core.common.*
 import cord.eoeo.momentwo.core.data.library.*
+import cord.eoeo.momentwo.core.data.toUiError
 import cord.eoeo.momentwo.core.model.LibraryDraft
 import cord.eoeo.momentwo.feature.albumdetail.api.LocalAlbumDetailDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,22 +16,25 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 @HiltViewModel
-internal class LocalAlbumViewModel(private val repository: LocalLibraryRepository, private val drafts: LibraryDrafts, id: String) :
+internal class LocalAlbumViewModel(private val repository: LocalLibraryRepository, private val drafts: LibraryDrafts, id: String, private val accounts: AccountLibraryRepository? = null) :
     ReducerViewModel<LocalAlbumState, LocalAlbumEvent, LocalAlbumAction, LocalAlbumEffect>(LocalAlbumState(id), LocalAlbumReducer) {
-    @Inject constructor(repository: LocalLibraryRepository, drafts: LibraryDrafts, handle: SavedStateHandle) : this(repository, drafts, handle.toRoute<LocalAlbumDetailDestination>().localId)
+    @Inject constructor(repository: LocalLibraryRepository, drafts: LibraryDrafts, accounts: AccountLibraryRepository, handle: SavedStateHandle) : this(repository, drafts, handle.toRoute<LocalAlbumDetailDestination>().localId,accounts)
     private data class Write(val key: String) : RequestKey
     private data object DraftWrite : RequestKey
+    private data object ReadAccount : RequestKey
     private val draftKey = "device:album:$id"
     private var observation: Job? = null
     fun initialize() {
         if (observation?.isActive == true) return
+        refreshAccount()
         observation = viewModelScope.launch {
             val saved = runSuspendCatching { drafts.load(draftKey) }.getOrElse { Log.e("LocalAlbum", "Draft restore failed", it); null }
             var restored = false
-            combine(repository.album(uiState.value.id), repository.subAlbums(uiState.value.id)) { album, subs -> album?.let { LocalAlbumContent(it, subs) } }
+            combine(repository.album(uiState.value.id), repository.subAlbums(uiState.value.id)) { album, subs -> album to subs }
                 .catch { if (it is CancellationException || it is Error) throw it; Log.e("LocalAlbum", "Observation failed", it); dispatch(LocalAlbumAction.Failed(UiError.Unknown)) }
-                .collect { content ->
-                    if (content == null) dispatch(LocalAlbumAction.Failed(UiError.NotFound)) else {
+                .collect { (album,subs) ->
+                    val content = album?.let { LocalAlbumContent(it,subs) }
+                    if (content == null) dispatch(LocalAlbumAction.Failed(UiError.NotFound)) else if(content.album.libraryId == "device" || (content.album.subsLoaded && content.album.role != null)) {
                         dispatch(LocalAlbumAction.Snapshot(content))
                         if (!restored && saved != null) {
                             val dialog = when {
@@ -46,9 +50,13 @@ internal class LocalAlbumViewModel(private val repository: LocalLibraryRepositor
                 }
         }
     }
+    private fun refreshAccount() {
+        val remote = accounts ?: return
+        requests.launchRequest(ReadAccount,RequestPolicy.LatestWins,{runSuspendCatching { val album=repository.album(uiState.value.id).first(); if(album != null && album.libraryId != "device") remote.refreshAlbum(album.localId) }},onSuccess={},onFailure={ Log.e("LocalAlbum","Account refresh failed",it);dispatch(LocalAlbumAction.Failed(it.toUiError())) })
+    }
     override fun handleEvent(event: LocalAlbumEvent) {
         when (event) {
-            LocalAlbumEvent.Retry -> initialize()
+            LocalAlbumEvent.Retry -> { initialize(); refreshAccount() }
             is LocalAlbumEvent.Open -> {
                 val content = (uiState.value.screen as? ScreenState.Success)?.content ?: return
                 val draft = when (val dialog = event.dialog) {

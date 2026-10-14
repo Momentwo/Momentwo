@@ -22,7 +22,7 @@ import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
         FriendRemoteKeyEntity::class,
         ProfileEntity::class,
     ],
-    version = 2,
+    version = 3,
 )
 abstract class MomentwoDatabase : RoomDatabase() {
     abstract fun libraryDao(): LibraryDao

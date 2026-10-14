@@ -21,11 +21,10 @@ class RequestLoginUseCase @Inject constructor(
         runSuspendCatching {
             val loginData = loginRepository.requestLogin(email, password).getOrThrow()
 
-            currentCoroutineContext().ensureActive()
-            preferenceRepository.storeAccessToken(loginData.accessToken)
-            currentCoroutineContext().ensureActive()
-            preferenceRepository.storeRefreshToken(loginData.refreshToken)
-            currentCoroutineContext().ensureActive()
+            require(loginData.profile.email.isNotBlank()) { "Account identity is missing" }
+            // Do not publish a token without its verified canonical owner and stored profile.
             profileRepository.storeProfile(loginData.profile).getOrThrow()
+            currentCoroutineContext().ensureActive()
+            preferenceRepository.storeSession(loginData.profile.email,loginData.accessToken,loginData.refreshToken)
         }
 }

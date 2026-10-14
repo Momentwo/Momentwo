@@ -63,21 +63,6 @@ object PhotoModule {
         @QualifierModule.LocalDataSource photoLocalDataSource: PhotoDataSource.Local,
     ): PhotoRemoteMediator.Factory = PhotoRemoteMediator.Factory(photoRemoteDataSource, photoLocalDataSource)
 
-    @Provides
-    @Singleton
-    fun providePhotoRepository(
-        @QualifierModule.RemoteDataSource photoRemoteDataSource: PhotoDataSource.Remote,
-        @QualifierModule.LocalDataSource photoLocalDataSource: PhotoDataSource.Local,
-        presignedRemoteDataSource: PresignedDataSource,
-        photoRemoteMediator: PhotoRemoteMediator.Factory,
-        @ApplicationContext applicationContext: Context,
-        @IoDispatcher dispatcher: CoroutineDispatcher,
-    ): PhotoRepository = PhotoRepositoryImpl(
-        photoRemoteDataSource,
-        photoLocalDataSource,
-        presignedRemoteDataSource,
-        photoRemoteMediator,
-        applicationContext,
-        dispatcher,
-    )
+    @Provides @Singleton
+    fun providePhotoRepository(impl: cord.eoeo.momentwo.core.data.library.AccountPhotoRepository): PhotoRepository = impl
 }

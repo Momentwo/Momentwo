@@ -20,36 +20,37 @@ class PhotoLocalDataSource(
     private val photoRemoteKeyDao: PhotoRemoteKeyDao,
     private val dispatcher: CoroutineDispatcher,
     private val database: MomentwoDatabase,
+    private val ownerId: String = "",
 ) : PhotoDataSource.Local {
     override fun getPhotoPagingSource(albumId: Int, subAlbumId: Int): PagingSource<Int, PhotoEntity> =
-        photoDao.getPhotoPagingSource(albumId, subAlbumId)
+        photoDao.getPhotoPagingSource(albumId, subAlbumId,ownerId)
 
     override suspend fun getLastPhotoId(albumId: Int, subAlbumId: Int): Int? =
         withContext(dispatcher) {
-            photoDao.getLastPhotoId(albumId, subAlbumId)
+            photoDao.getLastPhotoId(albumId, subAlbumId,ownerId)
         }
 
     override suspend fun insertPhotos(photos: List<PhotoEntity>) {
         withContext(dispatcher) {
-            photoDao.insertAll(*photos.toTypedArray())
+            photoDao.insertAll(*photos.map { it.copy(ownerId = ownerId) }.toTypedArray())
         }
     }
 
     override suspend fun deletePhotos(photoIds: List<Int>) {
         withContext(dispatcher) {
-            photoDao.deleteByIds(photoIds)
+            photoDao.deleteByIds(photoIds,ownerId)
         }
     }
 
     override suspend fun deleteByRange(photoIds: List<Int>, start: Int, end: Int, albumId: Int, subAlbumId: Int) {
         withContext(dispatcher) {
-            photoDao.deleteByRange(photoIds, start, end, albumId, subAlbumId)
+            photoDao.deleteByRange(photoIds, start, end, albumId, subAlbumId,ownerId)
         }
     }
 
     override suspend fun updateIsLiked(photoId: Int, isLiked: Boolean) {
         withContext(dispatcher) {
-            photoDao.updateIsLiked(photoId, isLiked)
+            photoDao.updateIsLiked(photoId, isLiked,ownerId)
         }
     }
 
@@ -65,28 +66,28 @@ class PhotoLocalDataSource(
 
     override suspend fun getLastKey(albumId: Int, subAlbumId: Int): PhotoRemoteKeyEntity? {
         return withContext(dispatcher) {
-            photoRemoteKeyDao.getLastKey(albumId, subAlbumId)
+            photoRemoteKeyDao.getLastKey(albumId, subAlbumId,ownerId)
         }
     }
 
     override suspend fun insertKey(key: PhotoRemoteKeyEntity) {
         withContext(dispatcher) {
-            photoRemoteKeyDao.insertKey(key)
+            photoRemoteKeyDao.insertKey(key.copy(ownerId = ownerId))
         }
     }
 
     override suspend fun clearKeys(albumId: Int, subAlbumId: Int) {
         withContext(dispatcher) {
-            photoRemoteKeyDao.clearKeys(albumId, subAlbumId)
+            photoRemoteKeyDao.clearKeys(albumId, subAlbumId,ownerId)
         }
     }
     override suspend fun replacePage(albumId: Int, subAlbumId: Int, photos: List<PhotoEntity>, start: Int, end: Int, key: PhotoRemoteKeyEntity, refresh: Boolean) {
         withContext(dispatcher) {
             database.withTransaction {
-                if (refresh) photoRemoteKeyDao.clearKeys(albumId, subAlbumId)
-                photoDao.deleteByRange(photos.map { it.id }, start, end, albumId, subAlbumId)
-                photoDao.insertAll(*photos.toTypedArray())
-                photoRemoteKeyDao.insertKey(key)
+                if (refresh) photoRemoteKeyDao.clearKeys(albumId, subAlbumId,ownerId)
+                photoDao.deleteByRange(photos.map { it.id }, start, end, albumId, subAlbumId,ownerId)
+                photoDao.insertAll(*photos.map { it.copy(ownerId = ownerId) }.toTypedArray())
+                photoRemoteKeyDao.insertKey(key.copy(ownerId = ownerId))
             }
         }
     }

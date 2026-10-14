@@ -11,4 +11,5 @@ data class PhotoRemoteKeyEntity(
     @ColumnInfo(name = "sub_album_id") val subAlbumId: Int,
     @ColumnInfo(name = "last_updated") val lastUpdated: Long,
     @ColumnInfo(name = "next_cursor") val nextCursor: Int?,
+    @ColumnInfo(defaultValue = "''") val ownerId: String = "",
 )

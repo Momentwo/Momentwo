@@ -9,7 +9,7 @@ import javax.inject.Singleton
 class ApiRequestCounter @Inject constructor() {
     private val attempts = AtomicLong()
     val count: Long get() = attempts.get()
-    internal fun record() { attempts.incrementAndGet() }
+    fun record() { attempts.incrementAndGet() }
 }
 
 @dagger.hilt.EntryPoint

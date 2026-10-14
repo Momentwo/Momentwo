@@ -39,7 +39,7 @@ object ApiModule {
             .authenticator(authAuthenticator)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
+                    level = HttpLoggingInterceptor.Level.NONE
                 },
             ).addInterceptor(authInterceptor)
             .build()

@@ -17,7 +17,11 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class LocalLibraryStorageTest {
-    private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
+    private val context by lazy {
+        val target = InstrumentationRegistry.getInstrumentation().targetContext
+        val root = java.io.File(target.cacheDir, "library-storage-${UUID.randomUUID()}")
+        object : android.content.ContextWrapper(target) { override fun getFilesDir() = root }
+    }
     @get:Rule val migration = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), MomentwoDatabase::class.java)
 
     @Test fun migrationPreservesIdentityAndDoesNotAdoptUnownedRemoteCache() {

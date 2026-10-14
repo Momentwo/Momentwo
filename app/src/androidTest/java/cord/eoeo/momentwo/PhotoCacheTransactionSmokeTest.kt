@@ -43,8 +43,8 @@ class PhotoCacheTransactionSmokeTest {
         realDao.insertAll(PhotoEntity(1, 10, 20, "old", false))
         db.photoRemoteKeyDao().insertKey(PhotoRemoteKeyEntity(albumId = 10, subAlbumId = 20, lastUpdated = 1, nextCursor = 1))
         val cancellingDao = object : PhotoDao by realDao {
-            override suspend fun deleteByRange(photoIds: List<Int>, start: Int, end: Int, albumId: Int, subAlbumId: Int) {
-                realDao.deleteByRange(photoIds, start, end, albumId, subAlbumId)
+            override suspend fun deleteByRange(photoIds: List<Int>, start: Int, end: Int, albumId: Int, subAlbumId: Int, ownerId: String) {
+                realDao.deleteByRange(photoIds, start, end, albumId, subAlbumId,ownerId)
                 currentCoroutineContext().cancel()
                 yield()
             }

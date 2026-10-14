@@ -59,6 +59,8 @@ dependencies {
     androidTestImplementation(project(":core:common"))
     androidTestImplementation(project(":core:ui"))
     androidTestImplementation(project(":core:data"))
+    androidTestImplementation(project(":core:datastore"))
+    androidTestImplementation(libs.datastore)
     androidTestImplementation(project(":core:database"))
     androidTestImplementation(libs.room)
     androidTestImplementation(libs.room.ktx)

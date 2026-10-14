@@ -9,4 +9,5 @@ data class FriendRemoteKeyEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo(name = "last_updated") val lastUpdated: Long,
     @ColumnInfo(name = "next_cursor") val nextCursor: Int?,
+    @ColumnInfo(defaultValue = "''") val ownerId: String = "",
 )

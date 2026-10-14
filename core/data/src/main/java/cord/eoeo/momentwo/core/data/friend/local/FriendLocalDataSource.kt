@@ -14,50 +14,51 @@ import kotlinx.coroutines.withContext
 class FriendLocalDataSource(
     private val friendDao: FriendDao,
     private val friendRemoteKeyDao: FriendRemoteKeyDao,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val ownerId: String = ""
 ) : FriendDataSource.Local {
     override fun getPhotoPagingSource(): PagingSource<Int, FriendEntity> =
-        friendDao.getFriendPagingSource()
+        friendDao.getFriendPagingSource(ownerId)
 
     override suspend fun getFriendList(): Result<List<FriendEntity>> =
         runSuspendCatching {
             withContext(dispatcher) {
-                friendDao.getFriendList()
+                friendDao.getFriendList(ownerId)
             }
         }
 
     override suspend fun insertFriends(friends: List<FriendEntity>) {
         withContext(dispatcher) {
-            friendDao.insertAll(*friends.toTypedArray())
+            friendDao.insertAll(*friends.map { it.copy(ownerId = ownerId) }.toTypedArray())
         }
     }
 
     override suspend fun deleteByNicknames(friendNicknames: List<String>) {
         withContext(dispatcher) {
-            friendDao.deleteByNicknames(friendNicknames)
+            friendDao.deleteByNicknames(friendNicknames,ownerId)
         }
     }
 
     override suspend fun deleteAll() {
         withContext(dispatcher) {
-            friendDao.deleteAll()
+            friendDao.deleteAll(ownerId)
         }
     }
 
     override suspend fun getLastKey(): FriendRemoteKeyEntity? =
         withContext(dispatcher) {
-            friendRemoteKeyDao.getLastKey()
+            friendRemoteKeyDao.getLastKey(ownerId)
         }
 
     override suspend fun insertKey(key: FriendRemoteKeyEntity) {
         withContext(dispatcher) {
-            friendRemoteKeyDao.insertKey(key)
+            friendRemoteKeyDao.insertKey(key.copy(ownerId = ownerId))
         }
     }
 
     override suspend fun clearKeys() {
         withContext(dispatcher) {
-            friendRemoteKeyDao.clearKeys()
+            friendRemoteKeyDao.clearKeys(ownerId)
         }
     }
 }

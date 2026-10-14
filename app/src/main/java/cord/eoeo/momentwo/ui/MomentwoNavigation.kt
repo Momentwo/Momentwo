@@ -3,6 +3,7 @@ package cord.eoeo.momentwo.ui
 import androidx.navigation.NavHostController
 import cord.eoeo.momentwo.core.model.AlbumItem
 import cord.eoeo.momentwo.feature.album.api.AlbumDestination
+import cord.eoeo.momentwo.feature.album.api.LocalLibraryDestination
 import cord.eoeo.momentwo.feature.album.api.CreateAlbumDestination
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
@@ -21,7 +22,7 @@ internal class MomentwoNavigationActions(
     val navigateToLogin: () -> Unit = {
         navController.navigate(LoginDestination) {
             launchSingleTop = true
-            popUpTo(navController.graph.id)
+            popUpTo<LocalLibraryDestination>()
         }
     }
     val navigateToSignUp: () -> Unit = {
@@ -30,7 +31,7 @@ internal class MomentwoNavigationActions(
     val navigateToAlbum: () -> Unit = {
         navController.navigate(AlbumDestination) {
             launchSingleTop = true
-            popUpTo(navController.graph.id)
+            popUpTo<LocalLibraryDestination>()
         }
     }
     val navigateToAlbumDetail: (AlbumItem) -> Unit = { (id, title, subTitle, imageUrl) ->

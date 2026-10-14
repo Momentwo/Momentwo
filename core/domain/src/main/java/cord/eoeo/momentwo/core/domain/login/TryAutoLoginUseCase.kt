@@ -10,9 +10,9 @@ class TryAutoLoginUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): Result<Unit> =
         runSuspendCatching {
-            val accessToken = preferenceRepository.getAccessToken().getOrThrow()
+            val session = preferenceRepository.getSession().getOrThrow()
 
-            if (accessToken.isEmpty()) throw Exception("AutoLogin: No login history")
+            if (session?.identity?.canSync != true) throw Exception("AutoLogin: No login history")
 
             Unit
         }

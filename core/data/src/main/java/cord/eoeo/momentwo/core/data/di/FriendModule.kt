@@ -61,12 +61,6 @@ object FriendModule {
     ): FriendRemoteMediator =
         FriendRemoteMediator(friendRemoteDataSource, friendLocalDataSource)
 
-    @Provides
-    @Singleton
-    fun provideFriendRepository(
-        @QualifierModule.RemoteDataSource friendRemoteDataSource: FriendDataSource.Remote,
-        @QualifierModule.LocalDataSource friendLocalDataSource: FriendDataSource.Local,
-        friendRemoteMediator: FriendRemoteMediator,
-    ): FriendRepository =
-        FriendRepositoryImpl(friendRemoteDataSource, friendLocalDataSource, friendRemoteMediator)
+    @Provides @Singleton
+    fun provideFriendRepository(impl: cord.eoeo.momentwo.core.data.library.AccountFriendRepository): FriendRepository = impl
 }

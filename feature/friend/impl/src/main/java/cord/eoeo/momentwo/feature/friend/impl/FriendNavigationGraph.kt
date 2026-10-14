@@ -1,5 +1,6 @@
 package cord.eoeo.momentwo.feature.friend.impl
 
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import coil.ImageLoader
@@ -10,8 +11,9 @@ fun NavGraphBuilder.friendScreen(
     coroutineScope: CoroutineScope,
     imageLoader: ImageLoader,
     popBackStack: () -> Unit,
+    accountGuard: @Composable (@Composable () -> Unit) -> Unit = { content -> content() },
 ) {
     composable<FriendDestination> {
-        FriendRoute(coroutineScope = coroutineScope, imageLoader = imageLoader, popBackStack = popBackStack)
+        accountGuard { FriendRoute(coroutineScope = coroutineScope, imageLoader = imageLoader, popBackStack = popBackStack) }
     }
 }

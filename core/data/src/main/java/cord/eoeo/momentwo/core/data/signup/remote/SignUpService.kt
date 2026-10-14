@@ -10,18 +10,20 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 
 interface SignUpService {
-    @Headers("content-type: application/json")
+    @Headers("content-type: application/json", "isAuthorizable: false")
     @POST(MomentwoApi.POST_SIGN_UP)
     suspend fun postSignUp(
         @Body user: User,
     )
 
+    @Headers("isAuthorizable: false")
     @FormUrlEncoded
     @POST(MomentwoApi.POST_CHECK_EMAIL)
     suspend fun postCheckEmail(
         @Field("email") email: String,
     ): Response<Unit>
 
+    @Headers("isAuthorizable: false")
     @FormUrlEncoded
     @POST(MomentwoApi.POST_CHECK_NICKNAME)
     suspend fun postCheckNickname(

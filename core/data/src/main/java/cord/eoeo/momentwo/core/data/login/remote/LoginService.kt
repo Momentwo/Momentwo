@@ -9,7 +9,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 
 interface LoginService {
-    @Headers("content-type: application/json")
+    @Headers("content-type: application/json", "isAuthorizable: false")
     @POST(MomentwoApi.POST_LOGIN)
     suspend fun postLogin(
         @Body loginData: LoginRequest,

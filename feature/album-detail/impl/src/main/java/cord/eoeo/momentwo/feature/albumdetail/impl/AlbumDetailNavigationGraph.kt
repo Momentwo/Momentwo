@@ -13,8 +13,9 @@ fun NavGraphBuilder.albumDetailScreen(
     popBackStack: () -> Unit,
     navigateToPhotoList: (Int, Int, String, String) -> Unit,
     subAlbumContent: @Composable (SubAlbumContentState, SubAlbumContentActions) -> Unit,
+    accountGuard: @Composable (@Composable () -> Unit) -> Unit = { content -> content() },
 ) {
     composable<AlbumDetailDestination> {
-        AlbumDetailRoute(coroutineScope, imageLoader, popBackStack, navigateToPhotoList, subAlbumContent)
+        accountGuard { AlbumDetailRoute(coroutineScope, imageLoader, popBackStack, navigateToPhotoList, subAlbumContent) }
     }
 }

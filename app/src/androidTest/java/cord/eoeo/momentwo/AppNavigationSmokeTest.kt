@@ -96,6 +96,7 @@ class AppNavigationSmokeTest {
     @Test
     fun loginSignUpAndBackUseFeatureGraph() {
         compose.onNodeWithText("계정 연결").performClick()
+        compose.onNodeWithText("로그인").performClick()
         compose.onNodeWithText("회원가입").performClick()
         compose.waitForIdle()
         compose.runOnIdle {

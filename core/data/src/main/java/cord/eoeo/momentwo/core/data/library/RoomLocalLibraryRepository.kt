@@ -9,22 +9,31 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 
-class RoomLocalLibraryRepository @Inject constructor(private val db: MomentwoDatabase, @ApplicationContext private val context: Context, private val media: LocalMediaStore = LocalMediaStore(context, db)) : LocalLibraryRepository {
+class RoomLocalLibraryRepository @Inject constructor(private val db: MomentwoDatabase, @ApplicationContext private val context: Context, private val media: LocalMediaStore = LocalMediaStore(context, db), private val preferences: cord.eoeo.momentwo.core.datastore.PreferenceRepository? = null) : LocalLibraryRepository {
     private val dao get() = db.libraryDao()
     override suspend fun initialize() { dao.insertLibrary(LibraryEntity(LibraryScope.Device.id, null, "이 기기")) }
     private fun uri(name: String?): String = name?.let { media.file(it).toUri().toString() }.orEmpty()
-    private fun LocalAlbumEntity.model() = LocalAlbum(localId, libraryId, title, subtitle, uri(coverMediaName), remoteId, revision)
-    private fun LocalSubAlbumEntity.model() = LocalSubAlbum(localId, albumId, title, remoteId, revision)
+    private fun LocalAlbumEntity.model() = LocalAlbum(localId, libraryId, title, subtitle, if (coverMediaName == null) remoteCoverUrl else uri(coverMediaName), remoteId, revision, role, subsLoaded)
+    private fun LocalSubAlbumEntity.model() = LocalSubAlbum(localId, albumId, title, remoteId, revision, photosLoaded)
     private fun LocalPhotoEntity.model() = LocalPhoto(localId, subAlbumId, if (mediaName == null) remoteUrl else uri(mediaName), mediaName, remoteId, description, descriptionKnown, favorite, isLiked, likeCount, revision)
-    override fun albums(scope: LibraryScope) = dao.albums(scope.id).map { rows -> rows.map { it.model() } }
-    override fun album(id: String) = dao.observeAlbum(id).map { it?.model() }
-    override fun subAlbums(albumId: String) = dao.subAlbums(albumId).map { rows -> rows.map { it.model() } }
-    override fun subAlbum(id: String) = dao.observeSubAlbum(id).map { it?.model() }
-    override fun photos(subAlbumId: String) = dao.photos(subAlbumId).map { rows -> rows.map { it.model() } }
-    override fun photo(id: String) = dao.observePhoto(id).map { it?.model() }
-    override fun memos(photoId: String) = dao.memos(photoId).map { rows -> rows.map { LocalMemo(it.localId, it.photoId, it.text, it.createdAt) } }
+    override fun albums(scope: LibraryScope): Flow<List<LocalAlbum>> = when(scope) {
+        LibraryScope.Device -> dao.albums(scope.id).map { rows -> rows.map { it.model() } }
+        is LibraryScope.Account -> combine(dao.albums(scope.id), preferences?.identities() ?: flowOf(null)) { rows, identity -> if(identity?.accountId == scope.accountId) rows.map { it.model() } else emptyList() }
+    }
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    override fun album(id: String): Flow<LocalAlbum?> = dao.observeAlbum(id).flatMapLatest { row ->
+        if(row == null || row.libraryId == LibraryScope.Device.id) flowOf(row?.model())
+        else (preferences?.identities() ?: flowOf(null)).map { if(row.libraryId == it?.accountId?.let { account -> LibraryScope.Account(account).id }) row.model() else null }
+    }
+    override fun subAlbums(albumId: String) = combine(album(albumId),dao.subAlbums(albumId)) { parent, rows -> if(parent != null) rows.map { it.model() } else emptyList() }
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    override fun subAlbum(id: String) = dao.observeSubAlbum(id).flatMapLatest { row -> if(row == null) flowOf(null) else album(row.albumId).map { parent -> if(parent != null) row.model() else null } }
+    override fun photos(subAlbumId: String) = combine(subAlbum(subAlbumId),dao.photos(subAlbumId)) { parent,rows -> if(parent != null) rows.map { it.model() } else emptyList() }
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    override fun photo(id: String) = dao.observePhoto(id).flatMapLatest { row -> if(row == null) flowOf(null) else subAlbum(row.subAlbumId).map { parent -> if(parent != null) row.model() else null } }
+    override fun memos(photoId: String) = combine(photo(photoId),dao.memos(photoId)) { parent,rows -> if(parent != null) rows.map { LocalMemo(it.localId,it.photoId,it.text,it.createdAt) } else emptyList() }
     override suspend fun createAlbum(title: String, localId: String): String = db.withTransaction {
         require(title.isNotBlank()) { "앨범 이름을 입력해주세요" }; initialize()
         val existing = dao.album(localId)

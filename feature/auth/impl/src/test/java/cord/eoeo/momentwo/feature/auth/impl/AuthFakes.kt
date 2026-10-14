@@ -21,6 +21,13 @@ internal class FakeLoginRepository : LoginRepository {
 }
 
 internal class FakePreferenceRepository : PreferenceRepository {
+    override fun identities() = kotlinx.coroutines.flow.flowOf<cord.eoeo.momentwo.core.model.AccountIdentity?>(null)
+    override suspend fun getSession(): Result<cord.eoeo.momentwo.core.datastore.StoredSession?> = getAccessToken().map { token -> if(token.isEmpty()) null else cord.eoeo.momentwo.core.datastore.StoredSession(cord.eoeo.momentwo.core.model.AccountIdentity("fixture@example.com","epoch",true),token,refreshToken) }
+    override suspend fun storeSession(accountId: String, accessToken: String, refreshToken: String) {this.accessToken=accessToken;this.refreshToken=refreshToken}
+    override suspend fun updateSessionTokens(session: cord.eoeo.momentwo.core.datastore.StoredSession, accessToken: String, refreshToken: String) = false
+    override suspend fun clearSession() {accessToken="";refreshToken=""}
+    override suspend fun expireSession(accountId: String, epoch: String) = Unit
+
     var accessToken = ""
     var accessReads = 0
     var accessResponse: (suspend () -> Result<String>)? = null

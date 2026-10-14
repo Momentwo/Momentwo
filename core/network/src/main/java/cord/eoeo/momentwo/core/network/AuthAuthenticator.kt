@@ -20,13 +20,15 @@ class AuthAuthenticator @Inject constructor(
 ) : Authenticator {
     override fun authenticate(route: Route?, response: Response): Request? =
         runBlocking {
-            Log.d("Auth", "AuthAuthenticator")
+            val snapshot = response.request.tag(AuthSnapshot::class.java)?.session ?: return@runBlocking null
+            val current = preferenceRepository.getSession().getOrThrow()
+            if(current?.identity?.accountId != snapshot.identity.accountId || current.identity.epoch != snapshot.identity.epoch) return@runBlocking null
             if (response.request.headers("Refresh").isNotEmpty()) {
                 // response.close()
                 return@runBlocking null
             }
 
-            val refreshToken = preferenceRepository.getRefreshToken().getOrDefault("")
+            val refreshToken = snapshot.refreshToken
 
             if (refreshToken.isEmpty()) {
                 return@runBlocking null
@@ -42,16 +44,10 @@ class AuthAuthenticator @Inject constructor(
                     val newRefreshToken = newResponse.header("Refresh") ?: ""
 
                     Log.d("Auth", "Reissue: Store Reissued Token")
-                    Log.d("Auth", "accessToken: $newAccessToken")
-                    Log.d("Auth", "refreshToken: $newRefreshToken")
 
-                    CoroutineScope(dispatcher).launch {
-                        preferenceRepository.storeAccessToken(newAccessToken)
-                        preferenceRepository.storeRefreshToken(newRefreshToken)
-                    }
-                    return@runBlocking Request.Builder()
-                        .url(response.request.url)
-                        .addHeader("Authorization", "Bearer $newAccessToken")
+                    if(!preferenceRepository.updateSessionTokens(snapshot,newAccessToken,newRefreshToken)) return@runBlocking null
+                    return@runBlocking response.request.newBuilder()
+                        .header("Authorization", "Bearer $newAccessToken")
                         .build()
                 } else {
                     Log.e("Auth", "Reissue Failure ${newResponse.code}")

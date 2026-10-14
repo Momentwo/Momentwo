@@ -19,3 +19,21 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         listOf("photo", "photo_key", "friend", "friend_key").forEach { db.execSQL("DELETE FROM $it") }
     }
 }
+
+/** Unowned legacy server caches cannot be attributed to the currently logged-in user. */
+val MIGRATION_2_3 = object : Migration(2,3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE local_album ADD COLUMN remoteCoverUrl TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE local_album ADD COLUMN role TEXT DEFAULT NULL")
+        db.execSQL("ALTER TABLE local_album ADD COLUMN subsLoaded INTEGER NOT NULL DEFAULT 1")
+        db.execSQL("ALTER TABLE local_subalbum ADD COLUMN photosLoaded INTEGER NOT NULL DEFAULT 1")
+        db.execSQL("DROP TABLE IF EXISTS photo")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `photo` (`id` INTEGER NOT NULL, `album_id` INTEGER NOT NULL, `sub_album_id` INTEGER NOT NULL, `photo_url` TEXT NOT NULL, `is_liked` INTEGER NOT NULL, `ownerId` TEXT NOT NULL DEFAULT '', PRIMARY KEY(`ownerId`, `id`))")
+        db.execSQL("DROP TABLE IF EXISTS photo_key")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `photo_key` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `album_id` INTEGER NOT NULL, `sub_album_id` INTEGER NOT NULL, `last_updated` INTEGER NOT NULL, `next_cursor` INTEGER, `ownerId` TEXT NOT NULL DEFAULT '')")
+        db.execSQL("DROP TABLE IF EXISTS friend")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `friend` (`nickname` TEXT NOT NULL, `user_profile_image` TEXT NOT NULL, `ownerId` TEXT NOT NULL DEFAULT '', PRIMARY KEY(`ownerId`, `nickname`))")
+        db.execSQL("DROP TABLE IF EXISTS friend_key")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `friend_key` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `last_updated` INTEGER NOT NULL, `next_cursor` INTEGER, `ownerId` TEXT NOT NULL DEFAULT '')")
+    }
+}

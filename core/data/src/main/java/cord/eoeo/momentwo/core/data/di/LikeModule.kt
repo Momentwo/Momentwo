@@ -32,6 +32,5 @@ object LikeModule {
 
     @Provides
     @Singleton
-    fun provideLikeRepository(likeRemoteDataSource: LikeDataSource): LikeRepository =
-        LikeRepositoryImpl(likeRemoteDataSource)
+    fun provideLikeRepository(impl:cord.eoeo.momentwo.core.data.library.AccountLikeRepository): LikeRepository = impl
 }

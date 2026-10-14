@@ -9,21 +9,21 @@ import cord.eoeo.momentwo.core.database.PhotoEntity
 
 @Dao
 interface PhotoDao {
-    @Query("SELECT * FROM photo WHERE album_id = :albumId AND sub_album_id = :subAlbumId ORDER BY id")
-    fun getPhotoPagingSource(albumId: Int, subAlbumId: Int): PagingSource<Int, PhotoEntity>
+    @Query("SELECT * FROM photo WHERE ownerId = :ownerId AND album_id = :albumId AND sub_album_id = :subAlbumId ORDER BY id")
+    fun getPhotoPagingSource(albumId: Int, subAlbumId: Int, ownerId: String = ""): PagingSource<Int, PhotoEntity>
 
-    @Query("SELECT id FROM photo WHERE album_id = :albumId AND sub_album_id = :subAlbumId ORDER BY id DESC LIMIT 1")
-    suspend fun getLastPhotoId(albumId: Int, subAlbumId: Int): Int?
+    @Query("SELECT id FROM photo WHERE ownerId = :ownerId AND album_id = :albumId AND sub_album_id = :subAlbumId ORDER BY id DESC LIMIT 1")
+    suspend fun getLastPhotoId(albumId: Int, subAlbumId: Int, ownerId: String = ""): Int?
 
-    @Query("UPDATE photo SET is_liked = :isLiked WHERE id = :photoId")
-    suspend fun updateIsLiked(photoId: Int, isLiked: Boolean)
+    @Query("UPDATE photo SET is_liked = :isLiked WHERE ownerId = :ownerId AND id = :photoId")
+    suspend fun updateIsLiked(photoId: Int, isLiked: Boolean, ownerId: String = "")
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg photos: PhotoEntity)
 
-    @Query("DELETE FROM photo WHERE id IN (:photoIds)")
-    suspend fun deleteByIds(photoIds: List<Int>)
+    @Query("DELETE FROM photo WHERE ownerId = :ownerId AND id IN (:photoIds)")
+    suspend fun deleteByIds(photoIds: List<Int>, ownerId: String = "")
 
-    @Query("DELETE FROM photo WHERE album_id = :albumId AND sub_album_id = :subAlbumId AND id BETWEEN :start AND :end AND id NOT IN (:photoIds)")
-    suspend fun deleteByRange(photoIds: List<Int>, start: Int, end: Int, albumId: Int, subAlbumId: Int)
+    @Query("DELETE FROM photo WHERE ownerId = :ownerId AND album_id = :albumId AND sub_album_id = :subAlbumId AND id BETWEEN :start AND :end AND id NOT IN (:photoIds)")
+    suspend fun deleteByRange(photoIds: List<Int>, start: Int, end: Int, albumId: Int, subAlbumId: Int, ownerId: String = "")
 }

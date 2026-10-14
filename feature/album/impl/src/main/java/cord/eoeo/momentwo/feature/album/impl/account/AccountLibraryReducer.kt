@@ -1,0 +1,3 @@
+package cord.eoeo.momentwo.feature.album.impl.account
+import cord.eoeo.momentwo.core.common.*
+internal object AccountLibraryReducer:Reducer<AccountLibraryState,AccountLibraryAction>{override fun reduce(state:AccountLibraryState,action:AccountLibraryAction)=when(action){is AccountLibraryAction.Snapshot->state.copy(screen=ScreenState.Success(action.content));is AccountLibraryAction.Failure->state.copy(screen=state.screen.failRefresh(action.error));AccountLibraryAction.Refreshed->state.copy(screen=state.screen.cancelRefresh());AccountLibraryAction.Refreshing->state.copy(screen=state.screen.startRefresh());is AccountLibraryAction.Pending->state.copy(pending=if(action.value)state.pending+action.key else state.pending-action.key)}}

@@ -5,10 +5,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import cord.eoeo.momentwo.core.model.FriendItem
 
-@Entity(tableName = "friend")
+@Entity(tableName = "friend", primaryKeys = ["ownerId", "nickname"])
 data class FriendEntity(
-    @PrimaryKey val nickname: String,
+    val nickname: String,
     @ColumnInfo(name = "user_profile_image") val userProfileImage: String,
+    @ColumnInfo(defaultValue = "''") val ownerId: String = "",
 ) {
     fun mapToFriendItem(): FriendItem =
         FriendItem(

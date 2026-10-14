@@ -9,6 +9,8 @@ internal object LocalPhotoReducer : Reducer<LocalPhotoState, LocalPhotoAction> {
         LocalPhotoAction.Dismiss -> state.copy(dialog = LocalPhotoDialog.None, interaction = state.interaction + 1)
         is LocalPhotoAction.Edited -> state.copy(draft = action.draft, interaction = state.interaction + 1)
         is LocalPhotoAction.Saved -> if (state.draft.token == action.token && state.interaction == action.interaction) state.copy(dialog = LocalPhotoDialog.None) else state
+        LocalPhotoAction.OpenComments->state.copy(commentsOpen=true)
+        is LocalPhotoAction.CommentFailed->state.copy(screen=when(val screen=state.screen){is ScreenState.Success->screen.copy(content=screen.content.copy(comments=screen.content.comments.failRefresh(action.error)));ScreenState.Loading,is ScreenState.Error->screen})
         LocalPhotoAction.ToggleImmersive -> state.copy(immersive = !state.immersive)
         is LocalPhotoAction.Pending -> state.copy(pending = if (action.value) state.pending + action.key else state.pending - action.key)
     }

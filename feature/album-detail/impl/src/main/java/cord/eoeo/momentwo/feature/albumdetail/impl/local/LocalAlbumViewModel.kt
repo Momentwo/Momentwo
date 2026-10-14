@@ -34,7 +34,7 @@ internal class LocalAlbumViewModel(private val repository: LocalLibraryRepositor
                 .catch { if (it is CancellationException || it is Error) throw it; Log.e("LocalAlbum", "Observation failed", it); dispatch(LocalAlbumAction.Failed(UiError.Unknown)) }
                 .collect { (album,subs) ->
                     val content = album?.let { LocalAlbumContent(it,subs) }
-                    if (content == null) dispatch(LocalAlbumAction.Failed(UiError.NotFound)) else if(content.album.libraryId == "device" || (content.album.subsLoaded && content.album.role != null)) {
+                    if (content == null) dispatch(LocalAlbumAction.Failed(UiError.NotFound)) else if(content.album.libraryId == "device" || content.album.locallyCreated || (content.album.subsLoaded && content.album.role != null)) {
                         dispatch(LocalAlbumAction.Snapshot(content))
                         if (!restored && saved != null) {
                             val dialog = when {

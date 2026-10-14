@@ -15,16 +15,17 @@ import cord.eoeo.momentwo.core.database.PhotoRemoteKeyEntity
 
 @Database(
     entities = [
-        LibraryEntity::class, LocalAlbumEntity::class, LocalSubAlbumEntity::class, LocalPhotoEntity::class, LocalMemoEntity::class,
+        SyncBatchEntity::class, SyncJobEntity::class, SyncLinkEntity::class, SyncMediaPinEntity::class, AccountCommentEntity::class, LibraryEntity::class, LocalAlbumEntity::class, LocalSubAlbumEntity::class, LocalPhotoEntity::class, LocalMemoEntity::class,
         PhotoEntity::class,
         PhotoRemoteKeyEntity::class,
         FriendEntity::class,
         FriendRemoteKeyEntity::class,
         ProfileEntity::class,
     ],
-    version = 3,
+    version = 4,
 )
 abstract class MomentwoDatabase : RoomDatabase() {
+    abstract fun syncDao(): SyncDao
     abstract fun libraryDao(): LibraryDao
 
     abstract fun photoDao(): PhotoDao

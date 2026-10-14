@@ -37,3 +37,30 @@ val MIGRATION_2_3 = object : Migration(2,3) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `friend_key` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `last_updated` INTEGER NOT NULL, `next_cursor` INTEGER, `ownerId` TEXT NOT NULL DEFAULT '')")
     }
 }
+
+val MIGRATION_3_4 = object: Migration(3,4) {
+    override fun migrate(db:SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE local_album ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE local_subalbum ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE local_photo ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE local_album ADD COLUMN locallyCreated INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE local_photo ADD COLUMN commentsLoaded INTEGER NOT NULL DEFAULT 1")
+        db.execSQL("ALTER TABLE local_photo ADD COLUMN likesKnown INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE local_photo ADD COLUMN commentNextCursor INTEGER")
+        db.execSQL("ALTER TABLE local_photo ADD COLUMN cacheName TEXT")
+        db.execSQL("CREATE TABLE sync_batch (id TEXT NOT NULL PRIMARY KEY,accountId TEXT NOT NULL,sourceIds TEXT NOT NULL,replicaIds TEXT NOT NULL,title TEXT NOT NULL,createdAt INTEGER NOT NULL)")
+        db.execSQL("CREATE TABLE sync_job (id TEXT NOT NULL PRIMARY KEY,accountId TEXT NOT NULL,batchId TEXT,targetId TEXT NOT NULL,parentId TEXT,kind TEXT NOT NULL,status TEXT NOT NULL,displayName TEXT NOT NULL,text TEXT NOT NULL,extra TEXT NOT NULL,mediaName TEXT,baseText TEXT,baseExtra TEXT,remoteText TEXT,remoteExtra TEXT,dependency TEXT,revision INTEGER NOT NULL,createdAt INTEGER NOT NULL,claimId TEXT,transferPhase INTEGER NOT NULL,objectKey TEXT)")
+        db.execSQL("CREATE INDEX index_sync_job_accountId ON sync_job(accountId)")
+        db.execSQL("CREATE INDEX index_sync_job_batchId ON sync_job(batchId)")
+        db.execSQL("CREATE INDEX index_sync_job_targetId ON sync_job(targetId)")
+        db.execSQL("CREATE TABLE sync_link (localId TEXT NOT NULL PRIMARY KEY,accountId TEXT NOT NULL,kind TEXT NOT NULL,parentId TEXT,remoteId INTEGER)")
+        db.execSQL("CREATE INDEX index_sync_link_accountId_kind_parentId_remoteId ON sync_link(accountId,kind,parentId,remoteId)")
+        db.execSQL("CREATE TABLE sync_media_pin (jobId TEXT NOT NULL,mediaName TEXT NOT NULL,PRIMARY KEY(jobId,mediaName),FOREIGN KEY(jobId) REFERENCES sync_job(id) ON DELETE CASCADE)")
+        db.execSQL("CREATE TABLE account_comment (localId TEXT NOT NULL PRIMARY KEY,photoId TEXT NOT NULL,remoteId INTEGER,author TEXT NOT NULL,text TEXT NOT NULL,date TEXT NOT NULL,mine INTEGER NOT NULL,revision INTEGER NOT NULL,deleted INTEGER NOT NULL DEFAULT 0,FOREIGN KEY(photoId) REFERENCES local_photo(localId) ON DELETE CASCADE)")
+        db.execSQL("CREATE INDEX index_account_comment_photoId ON account_comment(photoId)")
+        // Only already owned account rows with explicit remote IDs get links. Unowned legacy caches remain separate.
+        db.execSQL("INSERT INTO sync_link(localId,accountId,kind,parentId,remoteId) SELECT a.localId,l.accountId,'ALBUM',NULL,a.remoteId FROM local_album a JOIN library l ON a.libraryId=l.id WHERE l.accountId IS NOT NULL")
+        db.execSQL("INSERT INTO sync_link(localId,accountId,kind,parentId,remoteId) SELECT s.localId,l.accountId,'SUB',s.albumId,s.remoteId FROM local_subalbum s JOIN local_album a ON s.albumId=a.localId JOIN library l ON a.libraryId=l.id WHERE l.accountId IS NOT NULL")
+        db.execSQL("INSERT INTO sync_link(localId,accountId,kind,parentId,remoteId) SELECT p.localId,l.accountId,'PHOTO',p.subAlbumId,p.remoteId FROM local_photo p JOIN local_subalbum s ON p.subAlbumId=s.localId JOIN local_album a ON s.albumId=a.localId JOIN library l ON a.libraryId=l.id WHERE l.accountId IS NOT NULL")
+    }
+}

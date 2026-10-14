@@ -29,20 +29,22 @@ class GuestAlbumCrudSmokeTest {
         compose.onNodeWithText("완료", useUnmergedTree = true).performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest fixture")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.onNodeWithText("Guest fixture").performClick()
-        compose.waitUntil(10_000) { compose.onAllNodes(hasText("서브앨범 추가")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
-        compose.onNodeWithText("서브앨범 추가").performClick()
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText("서브 앨범")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+        compose.onNodeWithContentDescription("추가").performClick()
         compose.onNodeWithText("이름").performTextInput("Guest child")
         compose.onNodeWithText("저장").performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest child")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("저장")).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty() }
-        compose.onNodeWithText("앨범 편집").performClick()
-        compose.onNodeWithText("소제목").performTextInput("Persisted subtitle")
+        compose.onNodeWithText("설정").performClick()
+        compose.onNodeWithText("앨범 부제목 수정").performClick()
+        compose.onNodeWithText("이름").performTextInput("Persisted subtitle")
         compose.onNodeWithText("저장").performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Persisted subtitle")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("저장")).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty() }
-        compose.onNodeWithText("뒤로").performClick()
+        compose.onNodeWithContentDescription("뒤로").performClick()
         compose.onNodeWithText("Guest fixture").performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest child")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+        compose.onNodeWithText("설정").performClick()
         compose.onNodeWithText("앨범 삭제").performClick()
         compose.onNode(hasText("삭제") and hasAnyAncestor(isDialog())).performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }

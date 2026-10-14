@@ -15,6 +15,10 @@ interface LocalLibraryRepository {
     suspend fun createAlbum(title: String, localId: String = java.util.UUID.randomUUID().toString()): String
     suspend fun createSubAlbum(albumId: String, title: String, localId: String = java.util.UUID.randomUUID().toString()): String
     suspend fun editAlbum(id: String, title: String, subtitle: String)
+    suspend fun editAlbumTitle(id: String, title: String)
+    suspend fun editAlbumSubtitle(id: String, subtitle: String)
+    suspend fun deleteSubAlbums(albumId: String, ids: Set<String>)
+    suspend fun deletePhotos(subAlbumId: String, ids: Set<String>)
     suspend fun editSubAlbum(id: String, title: String)
     suspend fun setCover(id: String, source: android.net.Uri?)
     suspend fun importPhoto(subAlbumId: String, source: android.net.Uri, localId: String = java.util.UUID.randomUUID().toString()): String

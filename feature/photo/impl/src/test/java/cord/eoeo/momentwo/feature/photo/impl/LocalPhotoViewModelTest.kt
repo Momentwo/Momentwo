@@ -70,6 +70,10 @@ private class PhotoLocalFake : LocalLibraryRepository {
     override suspend fun createAlbum(title: String, localId: String): String { created += title; return create(title, localId) }
     override suspend fun createSubAlbum(albumId: String, title: String, localId: String): String = error("unused")
     override suspend fun editAlbum(id: String, title: String, subtitle: String) { edits++; edit(id,title,subtitle) }
+    override suspend fun editAlbumTitle(id: String, title: String): Unit = error("unused")
+    override suspend fun editAlbumSubtitle(id: String, subtitle: String): Unit = error("unused")
+    override suspend fun deleteSubAlbums(albumId: String, ids: Set<String>): Unit = error("unused")
+    override suspend fun deletePhotos(subAlbumId: String, ids: Set<String>): Unit = error("unused")
     override suspend fun editSubAlbum(id: String, title: String): Unit = error("unused")
     override suspend fun setCover(id: String, source: android.net.Uri?): Unit = error("unused")
     override suspend fun importPhoto(subAlbumId: String, source: android.net.Uri, localId: String): String = error("unused")

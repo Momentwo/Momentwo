@@ -50,6 +50,27 @@ class AccountSyncPersistenceTest {
         val result=cord.eoeo.momentwo.core.common.runSuspendCatching { sync.createAccountAlbum("Wrong","wrong-album",expected,listOf("친구")) }
         assertTrue(result.isFailure);assertNull(db.libraryDao().album("wrong-album"))
     }
+    @Test fun bulkDeletionValidatesParentAndRollsBackRowsAndOutboxTogether()=fixture { db,repo,sync,_ ->
+        val a=sync.createAccountAlbum("A","album-a");val b=sync.createAccountAlbum("B","album-b")
+        val first=repo.createSubAlbum(a,"One","sub-one");val second=repo.createSubAlbum(a,"Two","sub-two");val outside=repo.createSubAlbum(b,"Outside","sub-outside")
+        val before=db.syncDao().jobs("A")
+        val invalid=cord.eoeo.momentwo.core.common.runSuspendCatching { repo.deleteSubAlbums(a,linkedSetOf(first,outside)) }
+        assertTrue(invalid.isFailure);assertNotNull(repo.subAlbum(first).first());assertNotNull(repo.subAlbum(outside).first());assertEquals(before,db.syncDao().jobs("A"))
+        val job=before.single{it.targetId==second && it.kind=="CREATE_SUB"}
+        db.syncDao().updateJob(job.copy(status="UNKNOWN"))
+        val blocked=cord.eoeo.momentwo.core.common.runSuspendCatching { repo.deleteSubAlbums(a,linkedSetOf(first,second)) }
+        assertTrue(blocked.isFailure);assertNotNull(repo.subAlbum(first).first());assertNotNull(repo.subAlbum(second).first())
+        assertEquals("QUEUED",db.syncDao().jobs("A").single{it.targetId==first && it.kind=="CREATE_SUB"}.status)
+        db.syncDao().updateJob(job)
+        repo.deleteSubAlbums(a,setOf(first,second))
+        assertNull(repo.subAlbum(first).first());assertNull(repo.subAlbum(second).first());assertNotNull(repo.subAlbum(outside).first())
+    }
+    @Test fun separateAlbumFieldsPreserveLatestIndependentEdits()=fixture { _,repo,_,_ ->
+        val id=repo.createAlbum("Original")
+        repo.editAlbumSubtitle(id,"latest subtitle");repo.editAlbumTitle(id,"latest title")
+        assertEquals("latest subtitle",repo.album(id).first()!!.subtitle)
+        repo.editAlbumSubtitle(id,"");assertEquals("latest title",repo.album(id).first()!!.title);assertEquals("",repo.album(id).first()!!.subtitle)
+    }
     @Test fun offlineMutationsCoalesceAndCancellationPreservesIndependentFavorite()=fixture { db,repo,sync,prefs ->
         val library="account:A";db.libraryDao().insertLibrary(LibraryEntity(library,"A","A"))
         db.libraryDao().insertAlbum(LocalAlbumEntity("album",library,"Remote",remoteId=1,role=MemberAuth.ADMIN.roleString,createdAt=0))

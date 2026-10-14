@@ -27,7 +27,12 @@ class RoomLocalLibraryRepository @Inject constructor(private val db: MomentwoDat
         if(row == null || row.libraryId == LibraryScope.Device.id) flowOf(row?.model()?.copy(copying=copying))
         else (preferences?.identities() ?: flowOf(null)).map { if(row.libraryId == it?.accountId?.let { account -> LibraryScope.Account(account).id }) row.model().copy(copying=copying) else null }
     }
-    override fun subAlbums(albumId: String) = combine(album(albumId),dao.subAlbums(albumId)) { parent, rows -> if(parent != null) rows.map { it.model() } else emptyList() }
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    override fun subAlbums(albumId: String): Flow<List<LocalSubAlbum>> = combine(album(albumId), dao.subAlbums(albumId)) { parent, rows -> parent to rows }.flatMapLatest { (parent, rows) ->
+        if (parent == null || rows.isEmpty()) flowOf(emptyList()) else combine(rows.map { dao.photos(it.localId) }) { photos ->
+            rows.mapIndexed { index, sub -> sub.model().copy(previews = photos[index].take(4).map { photo -> LocalPhotoPreview(photo.localId, photo.model(parent.libraryId, parent.role).imageUri) }) }
+        }
+    }
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun subAlbum(id: String) = dao.observeSubAlbum(id).flatMapLatest { row -> if(row == null) flowOf(null) else album(row.albumId).map { parent -> if(parent != null) row.model() else null } }
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -95,10 +100,43 @@ class RoomLocalLibraryRepository @Inject constructor(private val db: MomentwoDat
         memoId
     }
     override suspend fun deleteMemo(id: String) { db.withTransaction { val old = requireNotNull(dao.memo(id)); writablePhoto(old.photoId); dao.deleteMemo(id) } }
-    override suspend fun deletePhoto(id: String) { db.withTransaction {val photo=writablePhoto(id,SyncKind.DELETE_PHOTO);val sub=requireNotNull(dao.subAlbum(photo.subAlbumId));val album=writableAlbum(sub.albumId,SyncKind.DELETE_PHOTO);if(album.libraryId=="device")dao.deletePhoto(id)else if(requireNotNull(sync).cancelUnsentTree(id)){dao.deletePhoto(id)}else{val next=photo.copy(deleted=true,revision=photo.revision+1);dao.updatePhoto(next);record(album,id,photo.subAlbumId,SyncKind.DELETE_PHOTO,"",null,next.revision,photo.mediaName)}}; cleanupAfterCommit() }
+    private suspend fun removePhoto(id: String) {
+        val photo=writablePhoto(id,SyncKind.DELETE_PHOTO);val sub=requireNotNull(dao.subAlbum(photo.subAlbumId));val album=writableAlbum(sub.albumId,SyncKind.DELETE_PHOTO)
+        if(album.libraryId=="device" || requireNotNull(sync).cancelUnsentTree(id)) dao.deletePhoto(id)
+        else { val next=photo.copy(deleted=true,revision=photo.revision+1);dao.updatePhoto(next);record(album,id,photo.subAlbumId,SyncKind.DELETE_PHOTO,"",null,next.revision,photo.mediaName) }
+    }
+    override suspend fun deletePhoto(id: String) { db.withTransaction { removePhoto(id) }; cleanupAfterCommit() }
+    override suspend fun deletePhotos(subAlbumId: String, ids: Set<String>) {
+        db.withTransaction {
+            writableSub(subAlbumId, SyncKind.DELETE_PHOTO)
+            ids.forEach { id -> check(writablePhoto(id, SyncKind.DELETE_PHOTO).subAlbumId == subAlbumId) { "다른 서브앨범의 사진입니다" } }
+            ids.forEach { removePhoto(it) }
+        }
+        cleanupAfterCommit()
+    }
     override suspend fun exportPhoto(id: String) { val photo=writablePhoto(id);if(photo.mediaName!=null)media.export(requireNotNull(photo.mediaName))else{val name=requireNotNull(photo.cacheName){"사진 파일을 내려받은 뒤 내보낼 수 있습니다"};check(Regex("[0-9a-f-]+\\.img").matches(name));media.exportFile(File(context.cacheDir,"server-media/$name"),"Momentwo-${photo.localId}.jpg")} }
     private suspend fun cleanupAfterCommit() { cord.eoeo.momentwo.core.common.runSuspendCatching { media.cleanUnused() }.onFailure { android.util.Log.e("LocalLibrary", "Saved; cleanup deferred", it) } }
     override suspend fun cleanUnusedMedia() { media.cleanUnused() }
     override suspend fun deleteAlbum(id: String) { db.withTransaction {val album=writableAlbum(id,SyncKind.DELETE_ALBUM);if(album.libraryId=="device")dao.deleteAlbum(id)else if(requireNotNull(sync).cancelUnsentTree(id)){dao.deleteAlbum(id)}else{val next=album.copy(deleted=true,revision=album.revision+1);dao.updateAlbum(next);val owner=requireNotNull(sync).currentOwner();requireNotNull(sync).mutation(owner,id,null,SyncKind.DELETE_ALBUM,album.title,"",null,next.revision)}}; cleanupAfterCommit() }
-    override suspend fun deleteSubAlbum(id: String) { db.withTransaction {val sub=writableSub(id,SyncKind.DELETE_SUB);val album=writableAlbum(sub.albumId,SyncKind.DELETE_SUB);if(album.libraryId=="device")dao.deleteSubAlbum(id)else if(requireNotNull(sync).cancelUnsentTree(id)){dao.deleteSubAlbum(id)}else{val next=sub.copy(deleted=true,revision=sub.revision+1);dao.updateSubAlbum(next);val owner=requireNotNull(sync).currentOwner();requireNotNull(sync).mutation(owner,id,sub.albumId,SyncKind.DELETE_SUB,album.title,"",null,next.revision)}}; cleanupAfterCommit() }
+    private suspend fun removeSub(id: String) {
+        val sub=writableSub(id,SyncKind.DELETE_SUB);val album=writableAlbum(sub.albumId,SyncKind.DELETE_SUB)
+        if(album.libraryId=="device" || requireNotNull(sync).cancelUnsentTree(id)) dao.deleteSubAlbum(id)
+        else { val next=sub.copy(deleted=true,revision=sub.revision+1);dao.updateSubAlbum(next);val owner=requireNotNull(sync).currentOwner();requireNotNull(sync).mutation(owner,id,sub.albumId,SyncKind.DELETE_SUB,album.title,"",null,next.revision) }
+    }
+    override suspend fun deleteSubAlbum(id: String) { db.withTransaction { removeSub(id) }; cleanupAfterCommit() }
+    override suspend fun deleteSubAlbums(albumId: String, ids: Set<String>) {
+        db.withTransaction {
+            writableAlbum(albumId, SyncKind.DELETE_SUB)
+            ids.forEach { id -> check(writableSub(id, SyncKind.DELETE_SUB).albumId == albumId) { "다른 앨범의 서브앨범입니다" } }
+            ids.forEach { removeSub(it) }
+        }
+        cleanupAfterCommit()
+    }
+    override suspend fun editAlbumTitle(id: String, title: String) {
+        require(title.isNotBlank())
+        db.withTransaction { val old=writableAlbum(id,SyncKind.EDIT_ALBUM_TITLE);val next=old.copy(title=title.trim(),revision=old.revision+1);dao.updateAlbum(next);record(old,id,null,SyncKind.EDIT_ALBUM_TITLE,next.title,old.title,next.revision) }
+    }
+    override suspend fun editAlbumSubtitle(id: String, subtitle: String) {
+        db.withTransaction { val old=writableAlbum(id,SyncKind.SET_SUBTITLE);val next=old.copy(subtitle=subtitle,revision=old.revision+1);dao.updateAlbum(next);record(old,id,null,SyncKind.SET_SUBTITLE,subtitle,old.subtitle,next.revision) }
+    }
 }

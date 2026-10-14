@@ -48,92 +48,15 @@ internal fun SubAlbumItemCard(
         CardDefaults.cardColors()
     }
 
-    SubAlbumItemCardScreen(
+    cord.eoeo.momentwo.core.ui.SubAlbumPreviewCard(
         imageLoader = imageLoader,
-        subAlbumItem = subAlbumItem,
+        title = subAlbumItem().title,
+        images = subAlbumItem().imageList.map { cord.eoeo.momentwo.core.ui.SubAlbumPreview(it.id.toString(), it.imageUrl) },
         isSelected = { isSelected },
         cardColors = { cardColors },
         isEditMode = isEditMode,
-        onClick = onClick,
+        onClick = { onClick(subAlbumItem().id, subAlbumItem().title) },
         onSelectedChange = { onChangeSubAlbumSelected(it, subAlbumItem().id) },
         modifier = modifier
     )
-}
-
-@Composable
-internal fun SubAlbumItemCardScreen(
-    imageLoader: ImageLoader,
-    subAlbumItem: () -> SubAlbumItem,
-    isSelected: () -> Boolean,
-    cardColors: () -> CardColors,
-    isEditMode: () -> Boolean,
-    onClick: (Int, String) -> Unit,
-    onSelectedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            ElevatedCard(
-                onClick = {
-                    if (isEditMode().not()) {
-                        onClick(subAlbumItem().id, subAlbumItem().title)
-                    } else {
-                        onSelectedChange(isSelected().not())
-                    }
-                },
-                colors = cardColors(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(4.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(4.dp),
-                ) {
-                    items(items = subAlbumItem().imageList, key = { it.id }) { item ->
-                        AsyncImage(
-                            model = item.imageUrl,
-                            contentDescription = "서브 앨범 대표 이미지",
-                            imageLoader = imageLoader,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
-                                .padding(4.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                        )
-                    }
-                }
-            }
-
-            Text(
-                text = subAlbumItem().title,
-                maxLines = 1,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp, 8.dp, 0.dp, 0.dp),
-            )
-        }
-
-        if (isEditMode()) {
-            Checkbox(
-                checked = isSelected(),
-                onCheckedChange = onSelectedChange,
-                colors = CheckboxDefaults.colors()
-                    .copy(uncheckedBoxColor = Color.Gray, uncheckedBorderColor = Color.Gray),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp),
-            )
-        }
-    }
 }

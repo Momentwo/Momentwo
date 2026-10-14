@@ -16,7 +16,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -37,13 +39,25 @@ internal fun AlbumSettingScreen(
 ) {
     BackHandler(onBack = onBack)
 
+    var confirm by rememberSaveable { mutableStateOf<String?>(null) }
+    if(confirm!=null) AlertDialog(onDismissRequest={confirm=null},title={Text(if(confirm=="delete")"앨범 삭제"else "앨범 나가기")},
+        text={Text(if(confirm=="delete")"앨범과 포함된 사진을 삭제할까요?"else "이 앨범에서 나갈까요?")},
+        confirmButton={TextButton(onClick={val action=confirm;confirm=null;if(action=="delete")onDeleteAlbum()else onExitAlbum()}){Text("확인")}},
+        dismissButton={TextButton(onClick={confirm=null}){Text("취소")}})
+    AlbumSettingsContent(scrollableState, memberAuth() != MemberAuth.MEMBER, memberAuth() == MemberAuth.ADMIN, textColor,
+        { onOpenTextFieldDialog(AlbumDetailDialog.EditTitle) }, { onOpenTextFieldDialog(AlbumDetailDialog.EditSubtitle) }, onClickChangeImage, { confirm="delete" }, { confirm="leave" })
+}
+
+@Composable
+internal fun AlbumSettingsContent(scrollableState: ScrollableState, canEdit: Boolean, canDelete: Boolean, textColor: () -> Color,
+    editTitle: () -> Unit, editSubtitle: () -> Unit, changeImage: () -> Unit, delete: () -> Unit, leave: (() -> Unit)? = null) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .scrollable(state = scrollableState, orientation = Orientation.Vertical),
     ) {
-        if (memberAuth() != MemberAuth.MEMBER) {
+        if (canEdit) {
             Text(
                 text = "관리자 설정",
                 fontSize = 13.sp,
@@ -54,24 +68,24 @@ internal fun AlbumSettingScreen(
                 AlbumSettingListItem(
                     text = { "앨범 제목 수정" },
                     onClick = {
-                        onOpenTextFieldDialog(AlbumDetailDialog.EditTitle)
+                        editTitle()
                     },
                 )
                 AlbumSettingListItem(
                     text = { "앨범 부제목 수정" },
                     onClick = {
-                        onOpenTextFieldDialog(AlbumDetailDialog.EditSubtitle)
+                        editSubtitle()
                     },
                 )
                 AlbumSettingListItem(
                     text = { "대표 이미지 수정" },
-                    onClick = onClickChangeImage,
+                    onClick = changeImage,
                 )
-                if (memberAuth() == MemberAuth.ADMIN) {
+                if (canDelete) {
                     // TODO: Dialog 추가
                     AlbumSettingListItem(
                         text = { "앨범 삭제" },
-                        onClick = onDeleteAlbum,
+                        onClick = delete,
                     )
                 }
             }
@@ -79,6 +93,7 @@ internal fun AlbumSettingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (leave != null) {
         Text(
             text = "앨범 설정",
             fontSize = 13.sp,
@@ -89,8 +104,9 @@ internal fun AlbumSettingScreen(
             // TODO: Dialog 추가
             AlbumSettingListItem(
                 text = { "앨범 나가기" },
-                onClick = onExitAlbum,
+                onClick = requireNotNull(leave),
             )
+        }
         }
     }
 }

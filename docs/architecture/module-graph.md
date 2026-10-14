@@ -1,15 +1,15 @@
 # Momentwo 실제 모듈 의존성
 
-2026-10-13 기준 settings.gradle.kts 및 각 모듈 build.gradle.kts, Feature convention plugin의 프로젝트 의존을 정리했다. 총 24개 include 모듈이며 build-logic은 별도 included build다. 아래 표는 외부 라이브러리를 제외한다. 단위·기기 테스트 전용 의존을 실행 의존과 구별한다.
+2026-10-14 기준 settings.gradle.kts 및 각 모듈 build.gradle.kts, Feature convention plugin의 프로젝트 의존을 정리했다. 총 24개 include 모듈이며 build-logic은 별도 included build다. 아래 표는 외부 라이브러리를 제외한다. 단위·기기 테스트 전용 의존을 실행 의존과 구별한다.
 
 | 모듈 | 실행 프로젝트 의존 (convention 기본값 포함) | 테스트 프로젝트 의존 |
 |---|---|---|
-| `:app` | `:feature:auth:api`, `:feature:auth:impl`, `:feature:friend:api`, `:feature:friend:impl`, `:feature:subalbum:impl`, `:feature:album-detail:api`, `:feature:album-detail:impl`, `:feature:album:api`, `:feature:album:impl`, `:feature:photo:api`, `:feature:photo:impl`, `:core:designsystem`, `:core:model` | `:core:common`, `:core:ui`, `:core:data`, `:core:database` |
+| `:app` | `:feature:auth:api`, `:feature:auth:impl`, `:feature:friend:api`, `:feature:friend:impl`, `:feature:subalbum:impl`, `:feature:album-detail:api`, `:feature:album-detail:impl`, `:feature:album:api`, `:feature:album:impl`, `:feature:photo:api`, `:feature:photo:impl`, `:core:designsystem`, `:core:model`, `:core:common` | `:core:common`, `:core:ui`, `:core:data`, `:core:database`, `:core:datastore`, `:core:network` |
 | `:core:designsystem` | 없음 | 없음 |
 | `:core:model` | 없음 | 없음 |
 | `:core:common` | 없음 | `:core:testing` |
 | `:core:ui` | `:core:common`, `:core:designsystem`, `:core:model` | `:core:testing` |
-| `:core:datastore` | `:core:common` | `:core:testing` |
+| `:core:datastore` | `:core:common`, `:core:model` | `:core:testing` |
 | `:core:network` | `:core:datastore` | 없음 |
 | `:core:database` | `:core:model` | 없음 |
 | `:core:data` | `:core:common`, `:core:model`, `:core:network`, `:core:database`, `:core:datastore` | `:core:testing` |
@@ -42,8 +42,19 @@
 
 ## 앱과 MVI
 
-app main에는 MomentwoApplication, MainActivity, MomentwoApp, MomentwoNavGraph, MomentwoNavigationActions, SubAlbumContentAdapter의 6개 파일만 남아 있다. ViewModel 9개는 auth(3), friend(1), album-detail(1), album(2), photo(2)가 소유하고 SubAlbum에는 ViewModel을 중복 생성하지 않는다.
+app main에는 MomentwoApplication, MainActivity, MomentwoApp, MomentwoNavGraph, MomentwoNavigationActions, SubAlbumContentAdapter의 6개 파일만 남아 있다. 기존 9개 ViewModel에 로컬 라이브러리·앨범·사진과 선택 계정·복사 화면의 ViewModel을 추가했다. SubAlbum에는 ViewModel을 중복 생성하지 않는다.
 
-#155에서 9개 ViewModel을 ReducerViewModel과 순수 Reducer로 전환했다. StateFlow·Channel(BUFFERED), STARTED 단일 수집과 ScreenState/Paging 표시 규칙은 [MVI 구현 가이드](mvi-guide.md)를 따른다. Orbit·공개 DTO 경계·Profile 기능은 별도 이슈다. app의 Core 데이터/UI 추가 참조는 기기 테스트 전용이며 실행 모듈 경계는 유지한다.
+#155에서 9개 ViewModel을 ReducerViewModel과 순수 Reducer로 전환했다. StateFlow·Channel(BUFFERED), STARTED 단일 수집과 ScreenState/Paging 표시 규칙은 [MVI 구현 가이드](mvi-guide.md)를 따른다. Orbit·공개 DTO 경계·Profile 기능은 별도 이슈다. app은 core:common의 BackgroundTasksInitializer로 시작 훅만 호출한다. 동기화 구현과 서비스는 core:data에 있으며 app의 Core 데이터/UI 추가 참조는 기기 테스트 전용이다. 실행 모듈 경계를 유지한다.
 
 검증 결과는 [Phase 2 실행 기록](phase2-feature-migration-plan.md), 실제 API 및 업데이트/복원 회귀는 [#150](https://github.com/Momentwo/Momentwo/issues/150)을 따른다.
+
+
+## Offline-First 저장 책임
+
+- `core:model`: Device/Account 라이브러리, UUID 콘텐츠, 계정 ID와 동기화 표시 모델.
+- `core:database`: Room v4의 영속 원본·계정 캐시·작업/연결/파일 참조와 v1→v2→v3→v4 migration.
+- `core:data`: 로컬 CRUD·영속 파일, 세션에 고정된 계정 조회, 선택 복사·동기화와 JobScheduler 서비스.
+- `core:datastore`: 원자적 세션과 화면 편집 초안. 로그인·로그아웃은 로컬 콘텐츠 수명과 분리한다.
+- `feature:album`: 기본 로컬 앨범, 선택 계정과 복사·동기화 화면. `album-detail`·`photo`는 UUID 기반 로컬/계정 콘텐츠를 렌더링한다.
+
+기존 서버 ID 경로는 유지하며 로컬 UUID 경로를 추가했다. 모듈 수와 Feature api/impl 경계는 그대로다. [Offline-First 가이드](offline-first-guide.md)를 참고한다.

@@ -21,7 +21,7 @@ class AccountSyncJobService:JobService(){
     override fun onStartJob(params:JobParameters):Boolean {
         val token=UUID.randomUUID().toString();scheduling.started(token)
         val job=scope.launch(start=CoroutineStart.LAZY){
-            val result=runSuspendCatching{withContext(Dispatchers.IO){val session=clients.snapshot();if(!session.identity.canSync)false else engine.run(session.identity.accountId,AccountSyncTransport(session,db,clients,media))}}
+            val result=runSuspendCatching{withContext(Dispatchers.IO){val session=clients.snapshot();if(!session.identity.canSync)false else engine.run(session.identity.accountId,AccountSyncTransport(session,db,clients,media)).also{runSuspendCatching{media.cleanUnused()}.onFailure{Log.e("AccountSync","Completed work; cleanup deferred",it)}}}}
             if(running?.first==token && scheduling.stopped(token)){running=null;jobFinished(params,result.getOrElse{Log.e("AccountSync","Stored work could not run",it);false})}
         }
         running=token to job;job.start();return true

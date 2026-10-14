@@ -87,7 +87,7 @@ class LocalMediaStore @Inject constructor(@ApplicationContext private val contex
                 while (true) { currentCoroutineContext().ensureActive(); val n = input.read(buffer); if (n < 0) break; output.write(buffer, 0, n) }
             } }
             currentCoroutineContext().ensureActive()
-            context.contentResolver.update(target, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null)
+            if(context.contentResolver.update(target, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null) != 1) throw IOException("갤러리 저장을 완료하지 못했습니다")
             published = true
             target
         } finally { if (!published) withContext(NonCancellable) { context.contentResolver.delete(target, null, null) } }

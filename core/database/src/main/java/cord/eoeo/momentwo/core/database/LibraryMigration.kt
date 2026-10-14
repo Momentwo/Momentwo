@@ -48,6 +48,7 @@ val MIGRATION_3_4 = object: Migration(3,4) {
         db.execSQL("ALTER TABLE local_photo ADD COLUMN likesKnown INTEGER NOT NULL DEFAULT 0")
         db.execSQL("ALTER TABLE local_photo ADD COLUMN commentNextCursor INTEGER")
         db.execSQL("ALTER TABLE local_photo ADD COLUMN cacheName TEXT")
+        db.execSQL("UPDATE local_photo SET commentsLoaded=0 WHERE subAlbumId IN (SELECT s.localId FROM local_subalbum s JOIN local_album a ON s.albumId=a.localId JOIN library l ON a.libraryId=l.id WHERE l.accountId IS NOT NULL)")
         db.execSQL("CREATE TABLE sync_batch (id TEXT NOT NULL PRIMARY KEY,accountId TEXT NOT NULL,sourceIds TEXT NOT NULL,replicaIds TEXT NOT NULL,title TEXT NOT NULL,createdAt INTEGER NOT NULL)")
         db.execSQL("CREATE TABLE sync_job (id TEXT NOT NULL PRIMARY KEY,accountId TEXT NOT NULL,batchId TEXT,targetId TEXT NOT NULL,parentId TEXT,kind TEXT NOT NULL,status TEXT NOT NULL,displayName TEXT NOT NULL,text TEXT NOT NULL,extra TEXT NOT NULL,mediaName TEXT,baseText TEXT,baseExtra TEXT,remoteText TEXT,remoteExtra TEXT,dependency TEXT,revision INTEGER NOT NULL,createdAt INTEGER NOT NULL,claimId TEXT,transferPhase INTEGER NOT NULL,objectKey TEXT)")
         db.execSQL("CREATE INDEX index_sync_job_accountId ON sync_job(accountId)")

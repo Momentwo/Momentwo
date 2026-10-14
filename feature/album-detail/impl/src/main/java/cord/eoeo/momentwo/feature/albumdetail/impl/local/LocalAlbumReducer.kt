@@ -3,7 +3,7 @@ import cord.eoeo.momentwo.core.common.*
 internal object LocalAlbumReducer : Reducer<LocalAlbumState, LocalAlbumAction> {
     override fun reduce(state: LocalAlbumState, action: LocalAlbumAction) = when (action) {
         is LocalAlbumAction.Snapshot -> state.copy(screen = ScreenState.Success(action.content))
-        is LocalAlbumAction.Failed -> state.copy(screen = if (action.error == UiError.NotFound) ScreenState.Error(action.error) else state.screen.failRefresh(action.error))
+        is LocalAlbumAction.Failed -> if(action.error==UiError.NotFound) state.copy(screen=ScreenState.Error(action.error),dialog=LocalAlbumDialog.None,draft=cord.eoeo.momentwo.core.model.LibraryDraft("","",""),interaction=state.interaction+1) else state.copy(screen=state.screen.failRefresh(action.error))
         is LocalAlbumAction.Open -> state.copy(dialog = action.dialog, draft = action.draft, interaction = state.interaction + 1)
         is LocalAlbumAction.Restored -> if (state.interaction == 0L) state.copy(dialog = action.dialog, draft = action.draft) else state
         LocalAlbumAction.Dismiss -> state.copy(dialog = LocalAlbumDialog.None, interaction = state.interaction + 1)

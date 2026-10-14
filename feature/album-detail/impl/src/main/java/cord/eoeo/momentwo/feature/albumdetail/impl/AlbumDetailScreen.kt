@@ -184,7 +184,8 @@ internal fun AlbumDetailScreen(
                 title = { uiState().albumItem.title },
                 subTitle = { uiState().albumItem.subTitle },
                 selectedNavIndex = { uiState().selectedNavIndex },
-                memberAuth = { uiState().permission },
+                canInteract = { uiState().permission != null },
+                canEdit = { uiState().permission in listOf(MemberAuth.ADMIN, MemberAuth.SUB_ADMIN) },
                 isEditMode = { uiState().isEditMode },
                 isInChangeImage = { uiState().isInChangeImage },
                 onClickBack = {
@@ -326,7 +327,8 @@ internal fun AlbumDetailTopAppBar(
     title: () -> String,
     subTitle: () -> String,
     selectedNavIndex: () -> Int,
-    memberAuth: () -> MemberAuth?,
+    canInteract: () -> Boolean,
+    canEdit: () -> Boolean,
     isEditMode: () -> Boolean,
     isInChangeImage: () -> Boolean,
     onClickBack: () -> Unit,
@@ -358,18 +360,18 @@ internal fun AlbumDetailTopAppBar(
         },
         navigationIcon = {
             IconButton(onClick = onClickBack) {
-                Icon(Icons.AutoMirrored.Default.ArrowBack, "")
+                Icon(Icons.AutoMirrored.Default.ArrowBack, "뒤로")
             }
         },
         actions = {
-            if (memberAuth() != null && isEditMode().not()) {
+            if (canInteract() && isEditMode().not()) {
                 if (selectedNavIndex() != 2) {
                     IconButton(onClick = onClickAdd) {
-                        Icon(Icons.Default.Add, "")
+                        Icon(Icons.Default.Add, "추가")
                     }
-                    if (memberAuth() != MemberAuth.MEMBER) {
+                    if (canEdit()) {
                         IconButton(onClick = onClickEdit) {
-                            Icon(Icons.Default.Settings, "")
+                            Icon(Icons.Default.Settings, "선택 편집")
                         }
                     }
                 } else if (isInChangeImage()) {
@@ -377,7 +379,7 @@ internal fun AlbumDetailTopAppBar(
                         Text(text = "적용", color = MaterialTheme.colorScheme.primary)
                     }
                 }
-            } else if (memberAuth() != null) {
+            } else if (canInteract()) {
                 TextButton(onClick = onClickCancel) {
                     Text(text = "취소", color = Color.DarkGray)
                 }

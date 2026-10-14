@@ -44,6 +44,22 @@ class LocalAlbumViewModelTest {
         assertEquals(LocalAlbumDialog.EditAlbum, vm.uiState.value.dialog); assertTrue(vm.uiState.value.pending.isEmpty())
         assertEquals("later", drafts.value!!.text)
     }
+    @Test fun bulkDeletionSnapshotsIdsAndDoesNotClearLaterSelection() = runTest(main.testDispatcher) {
+        val gate=CompletableDeferred<Unit>();repo.bulk={_,_->gate.await()}
+        val vm=vm();runCurrent();vm.onEvent(LocalAlbumEvent.Edit);vm.onEvent(LocalAlbumEvent.Select("child",true))
+        vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.DeleteSelected));vm.onEvent(LocalAlbumEvent.ConfirmDelete);runCurrent()
+        vm.onEvent(LocalAlbumEvent.Select("new",true));vm.onEvent(LocalAlbumEvent.ConfirmDelete);runCurrent()
+        gate.complete(Unit);runCurrent()
+        assertEquals(listOf("album" to setOf("child")),repo.deleted)
+        assertEquals(setOf("new"),vm.uiState.value.selected);assertTrue(vm.uiState.value.editing)
+    }
+    @Test fun cancelledBulkRequestPublishesNoResultOrMessage() = runTest(main.testDispatcher) {
+        repo.bulk={_,_->awaitCancellation()};val effects=mutableListOf<LocalAlbumEffect>()
+        val vm=vm();backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)){vm.effect.collect{effects+=it}}
+        runCurrent();vm.onEvent(LocalAlbumEvent.Edit);vm.onEvent(LocalAlbumEvent.Select("child",true))
+        vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.DeleteSelected));vm.onEvent(LocalAlbumEvent.ConfirmDelete);runCurrent()
+        val before=vm.uiState.value;store.clear();runCurrent();assertEquals(before,vm.uiState.value);assertTrue(effects.isEmpty())
+    }
     @Test fun savedDraftRestoresItsRoleButDismissCannotBeUndoneBySnapshot() = runTest(main.testDispatcher) {
         drafts.value = LibraryDraft("restored", "extra", "receipt", "edit-album")
         val vm = vm(); runCurrent(); assertEquals(LocalAlbumDialog.EditAlbum, vm.uiState.value.dialog)
@@ -73,6 +89,12 @@ private class AlbumLocalFake : LocalLibraryRepository {
     override suspend fun createAlbum(title: String, localId: String): String { created += title; return create(title, localId) }
     override suspend fun createSubAlbum(albumId: String, title: String, localId: String): String = error("unused")
     override suspend fun editAlbum(id: String, title: String, subtitle: String) { edits++; edit(id,title,subtitle) }
+    override suspend fun editAlbumTitle(id: String, title: String): Unit = error("unused")
+    override suspend fun editAlbumSubtitle(id: String, subtitle: String): Unit = error("unused")
+    var bulk: suspend (String,Set<String>)->Unit={_,_->}
+    val deleted=mutableListOf<Pair<String,Set<String>>>()
+    override suspend fun deleteSubAlbums(albumId: String, ids: Set<String>) { deleted+=albumId to ids;bulk(albumId,ids) }
+    override suspend fun deletePhotos(subAlbumId: String, ids: Set<String>): Unit = error("unused")
     override suspend fun editSubAlbum(id: String, title: String): Unit = error("unused")
     override suspend fun setCover(id: String, source: android.net.Uri?): Unit = error("unused")
     override suspend fun importPhoto(subAlbumId: String, source: android.net.Uri, localId: String): String = error("unused")

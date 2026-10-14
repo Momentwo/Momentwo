@@ -34,6 +34,35 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
             }
         }
     }
+    suspend fun refreshPermission(id: String) {
+        val album=requireNotNull(db.libraryDao().album(id));if(album.libraryId==LibraryScope.Device.id || album.remoteId==null)return
+        val session=clients.snapshot();check(album.libraryId==LibraryScope.Account(session.identity.accountId).id);clients.check(session)
+        val role=clients.client(session).create(AlbumService::class.java).getAlbumRole(requireNotNull(album.remoteId)).rules
+        check(cord.eoeo.momentwo.core.model.MemberAuth.entries.any { it.roleString==role });clients.check(session)
+        db.withTransaction { val latest=requireNotNull(db.libraryDao().album(id));db.libraryDao().updateAlbum(latest.copy(role=role)) }
+    }
+    suspend fun members(id: String): List<cord.eoeo.momentwo.core.model.MemberItem> {
+        refreshPermission(id)
+        return memberCall(id) { service, remoteId -> service.getMemberList(remoteId).memberList.map { row ->
+            check(cord.eoeo.momentwo.core.model.MemberAuth.entries.any { it.roleString==row.rules });row.mapToMemberItem()
+        } }
+    }
+    suspend fun inviteMembers(id: String, names: List<String>) = memberCall(id) { service, remoteId -> service.postInviteMembers(cord.eoeo.momentwo.core.data.model.InviteMembers(remoteId,names)) }
+    suspend fun kickMembers(id: String, ids: Set<Int>) = memberCall(id, managing=true) { service, remoteId -> service.deleteKickMembers(remoteId,ids.sorted().joinToString(",")) }
+    suspend fun leaveAlbum(id: String) {
+        val expected=clients.snapshot()
+        memberCall(id) { service, remoteId -> clients.check(expected);service.deleteExitMember(remoteId) }
+        // The device original is a different UUID and remains untouched.
+        db.withTransaction { clients.check(expected);db.libraryDao().deleteAlbum(id) }
+    }
+    private suspend fun <T> memberCall(id: String, managing: Boolean = false, request: suspend (cord.eoeo.momentwo.core.data.member.remote.MemberService,Int) -> T): T {
+        val album=requireNotNull(db.libraryDao().album(id));check(album.libraryId!=LibraryScope.Device.id && !album.deleted)
+        val session=clients.snapshot();check(album.libraryId==LibraryScope.Account(session.identity.accountId).id);clients.check(session)
+        if(managing)check(album.role in setOf("ROLE_ALBUM_ADMIN","ROLE_ALBUM_SUB_ADMIN"))
+        val result=request(clients.client(session).create(cord.eoeo.momentwo.core.data.member.remote.MemberService::class.java),requireNotNull(album.remoteId))
+        clients.check(session);return result
+    }
+
     suspend fun refreshAlbum(id: String) {
         val album=requireNotNull(db.libraryDao().album(id)); if(album.libraryId==LibraryScope.Device.id) return
         val session=clients.snapshot();check(album.libraryId==LibraryScope.Account(session.identity.accountId).id);clients.check(session)

@@ -7,8 +7,10 @@ sealed interface LibraryScope {
 }
 
 data class LocalAlbum(val localId: String, val libraryId: String, val title: String, val subtitle: String, val coverUri: String, val remoteId: Int?, val revision: Long, val role: String? = null, val subsLoaded: Boolean = true, val locallyCreated: Boolean = false, val copying: Boolean = false)
-data class LocalSubAlbum(val localId: String, val albumId: String, val title: String, val remoteId: Int?, val revision: Long, val photosLoaded: Boolean = true)
+data class LocalSubAlbum(val localId: String, val albumId: String, val title: String, val remoteId: Int?, val revision: Long, val photosLoaded: Boolean = true, val previews: List<LocalPhotoPreview> = emptyList())
 data class LocalPhoto(val localId: String, val subAlbumId: String, val imageUri: String, val mediaName: String?, val remoteId: Int?, val description: String, val descriptionKnown: Boolean, val favorite: Boolean, val isLiked: Boolean, val likeCount: Int?, val revision: Long, val libraryId: String = "device", val role: String? = null, val likesKnown: Boolean = false, val commentsLoaded: Boolean = true, val copying: Boolean = false)
 data class LocalMemo(val localId: String, val photoId: String, val text: String, val createdAt: Long)
 
 data class LibraryDraft(val text: String, val extra: String, val token: String, val context: String = "")
+
+data class LocalPhotoPreview(val localId: String, val imageUri: String)

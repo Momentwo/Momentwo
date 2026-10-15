@@ -7,7 +7,7 @@ import cord.eoeo.momentwo.core.data.signup.SignUpDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
-class SignUpRemoteDataSource(
+internal class SignUpRemoteDataSource(
     private val signUpService: SignUpService,
     private val dispatcher: CoroutineDispatcher
 ) : SignUpDataSource {

@@ -65,3 +65,7 @@ JDK 17로 전체 단위 테스트를 `./gradlew testDebugUnitTest --rerun-tasks 
 - SM_N976N API 31: 별도 앱 비행기 모드 suite 39건 + 외부 force-stop 전후 seed/verify 2건, Photo Uri Fake 계측 2건 = **43건** 통과. 기존 Navigation/Hilt/nullable Profile·Paging·Effect/lifecycle·시스템 바·오프라인/계정 격리·Room/파일 회귀를 유지했다.
 - 콘텐츠 API 요청 0인 로컬 흐름, 실제 프로세스 경계와 원본 파일 보존을 확인했다. 원본 앱 cord.eoeo.momentwo는 보존했고 비행기 모드는 원래 disabled로 복원했다. 임시 applicationId 설정·기기 산출물·인증 정보는 제품 코드에 포함하지 않는다.
 - 4개 PR은 선행 병합 후 최신 develop의 별도 브랜치에서 진행했다. #156은 현재 기능의 대응표를 충족하면 종료하며 Profile 조회 #161과 실제 서버/정식 업데이트 #150은 남긴다.
+
+## #157 후속 회원가입 입력 검증
+
+Auth의 FakeSignUpRepository는 서버 DTO 대신 SignUpInput을 기록한다. 기존 제출 성공·입력 변경 테스트는 birthdayDigits/phoneDigits의 원래 숫자 값을 검증하고, 별도 Feature Mapper 테스트로 여섯 필드 보존을 확인한다. 전송 구분자·JSON·인증 헤더 검증은 Data 테스트가 소유한다. [데이터 경계 가이드](../architecture/data-boundaries.md)를 따른다.

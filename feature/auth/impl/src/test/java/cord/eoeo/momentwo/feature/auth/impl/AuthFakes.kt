@@ -1,7 +1,7 @@
 package cord.eoeo.momentwo.feature.auth.impl
 
 import cord.eoeo.momentwo.core.data.login.LoginRepository
-import cord.eoeo.momentwo.core.data.model.User
+import cord.eoeo.momentwo.core.model.SignUpInput
 import cord.eoeo.momentwo.core.data.profile.ProfileRepository
 import cord.eoeo.momentwo.core.data.signup.SignUpRepository
 import cord.eoeo.momentwo.core.datastore.PreferenceRepository
@@ -53,9 +53,9 @@ internal class FakeProfileRepository : ProfileRepository {
 internal class FakeSignUpRepository : SignUpRepository {
     var result: Result<Unit> = Result.success(Unit)
     var response: (suspend () -> Result<Unit>)? = null
-    val requests = mutableListOf<User>()
-    override suspend fun requestSignUp(user: User): Result<Unit> {
-        requests += user
+    val requests = mutableListOf<SignUpInput>()
+    override suspend fun requestSignUp(input: SignUpInput): Result<Unit> {
+        requests += input
         return response?.invoke() ?: result
     }
     override suspend fun checkEmail(email: String) = Result.success(Unit)

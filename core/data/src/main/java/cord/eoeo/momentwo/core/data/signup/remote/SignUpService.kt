@@ -9,7 +9,7 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
-interface SignUpService {
+internal interface SignUpService {
     @Headers("content-type: application/json", "isAuthorizable: false")
     @POST(MomentwoApi.POST_SIGN_UP)
     suspend fun postSignUp(

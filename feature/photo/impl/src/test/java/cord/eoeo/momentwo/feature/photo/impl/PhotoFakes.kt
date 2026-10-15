@@ -17,12 +17,15 @@ internal class PhotoFakeRepository : PhotoRepository {
     var update: suspend () -> Unit = {}
     val deleted = mutableListOf<List<Int>>()
     val updated = mutableListOf<Pair<Int, Boolean>>()
+    var source: suspend () -> Flow<PagingData<PhotoItem>> = { flowOf(PagingData.empty()) }
+    var download: suspend () -> Result<Unit> = { Result.success(Unit) }
+    var upload: suspend (Uri) -> Result<Unit> = { Result.success(Unit) }
     var sourceCalls = 0
-    override suspend fun getPhotoPagingData(pageSize: Int, albumId: Int, subAlbumId: Int): Flow<PagingData<PhotoItem>> { sourceCalls++; return flowOf(PagingData.empty()) }
-    override suspend fun requestUploadPhoto(albumId: Int, subAlbumId: Int, image: Uri) = Result.success(Unit)
+    override suspend fun getPhotoPagingData(pageSize: Int, albumId: Int, subAlbumId: Int): Flow<PagingData<PhotoItem>> { sourceCalls++; return source() }
+    override suspend fun requestUploadPhoto(albumId: Int, subAlbumId: Int, image: Uri) = upload(image)
     override suspend fun deletePhotos(albumId: Int, subAlbumId: Int, photoIds: List<Int>): Result<Unit> { deleted += photoIds.toList(); return delete() }
     override suspend fun updateIsLiked(photoId: Int, isLiked: Boolean) { updated += photoId to isLiked; update() }
-    override suspend fun downloadPhoto(imageUrl: String) = Result.success(Unit)
+    override suspend fun downloadPhoto(imageUrl: String) = download()
 }
 internal class PhotoFakeDescription : DescriptionRepository {
     var description = fixtureDescription
@@ -35,7 +38,7 @@ internal class PhotoFakeDescription : DescriptionRepository {
         return write().onSuccess { this.description = this.description.copy(description = description) }
     }
     override suspend fun editDescription(albumId: Int, photoId: Int, description: String) = writeDescription(albumId, photoId, description)
-    override suspend fun deleteDescription(albumId: Int, photoId: Int) = Result.success(Unit)
+    override suspend fun deleteDescription(albumId: Int, photoId: Int) = writeDescription(albumId,photoId,"")
 }
 internal class PhotoFakeLike : LikeRepository {
     var count = 10
@@ -54,7 +57,7 @@ internal class PhotoFakeComment : CommentRepository {
     override suspend fun getCommentPagingData(albumId: Int, photoId: Int, pageSize: Int): Flow<PagingData<CommentItem>> { sourceCalls++; return flowOf(PagingData.empty()) }
     override suspend fun writeComment(albumId: Int, photoId: Int, comments: String): Result<Unit> { writes += comments; return write() }
     override suspend fun editComment(albumId: Int, commentId: Int, comments: String) = edit()
-    override suspend fun deleteComment(albumId: Int, commentId: Int) = Result.success(Unit)
+    override suspend fun deleteComment(albumId: Int, commentId: Int) = edit()
 }
 internal class PhotoFakeSubAlbum : SubAlbumRepository {
     var rename: suspend () -> Result<Unit> = { Result.success(Unit) }

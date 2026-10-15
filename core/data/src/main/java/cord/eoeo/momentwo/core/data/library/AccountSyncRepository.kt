@@ -8,18 +8,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.*
 @Singleton
-class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,private val preferences:PreferenceRepository,private val media:LocalMediaStore,private val scheduler:SyncScheduling,private val clients:AccountClientFactory?=null) {
+class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,private val preferences:PreferenceRepository,private val media:LocalMediaStore,private val scheduler:SyncScheduling,private val clients:AccountClientFactory?=null) : AccountSyncOperations {
     private val dao get()=db.libraryDao()
     private val work get()=db.syncDao()
-    suspend fun requireOwner(expected:AccountIdentity):AccountIdentity {
+    override suspend fun requireOwner(expected:AccountIdentity):AccountIdentity {
         val current=requireNotNull(preferences.getSession().getOrThrow()).identity
         check(current.accountId==expected.accountId && current.epoch==expected.epoch){"복사 대상 계정이 변경되었습니다"}
         return current
     }
     suspend fun currentOwner():AccountIdentity = requireNotNull(preferences.getSession().getOrThrow()).identity
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    fun observeWorks()=preferences.identities().flatMapLatest { identity -> if(identity==null) flowOf(emptyList()) else work.observeJobs(identity.accountId).map { rows->rows.map { SyncWork(it.id,it.accountId,it.batchId,it.targetId,SyncKind.valueOf(it.kind),SyncStatus.valueOf(it.status),it.displayName,it.text,it.remoteText) } } }
-    suspend fun copyAlbums(ids:Set<String>,expected:AccountIdentity,intentId:String):String {
+    override fun observeWorks()=preferences.identities().flatMapLatest { identity -> if(identity==null) flowOf(emptyList()) else work.observeJobs(identity.accountId).map { rows->rows.map { SyncWork(it.id,it.accountId,it.batchId,it.targetId,SyncKind.valueOf(it.kind),SyncStatus.valueOf(it.status),it.displayName,it.text,it.remoteText) } } }
+    override suspend fun copyAlbums(ids:Set<String>,expected:AccountIdentity,intentId:String):String {
         require(ids.isNotEmpty());requireOwner(expected)
         db.withTransaction {
             val existing=work.batch(intentId)
@@ -64,7 +64,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
         if(mediaName!=null)work.pin(SyncMediaPinEntity(id,mediaName))
         return id
     }
-    suspend fun schedulePending(){scheduler.enqueue()}
+    override suspend fun schedulePending(){scheduler.enqueue()}
     internal suspend fun ownerFor(album:LocalAlbumEntity,kind:SyncKind?=null):AccountIdentity {
         val owner=currentOwner();check(album.libraryId==LibraryScope.Account(owner.accountId).id){"다른 계정의 자료입니다"};check(!album.deleted)
         val related=work.jobs(owner.accountId).filter{it.batchId!=null && it.status !in setOf(SyncStatus.DONE.name,SyncStatus.CANCELLED.name)}
@@ -84,7 +84,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
         val parent=parentId?.let{id->jobs.lastOrNull{it.targetId==id && it.kind in setOf(SyncKind.CREATE_ALBUM.name,SyncKind.CREATE_SUB.name,SyncKind.UPLOAD_PHOTO.name) && it.status!=SyncStatus.DONE.name}}
         return enqueue(owner.accountId,targetId,parentId,kind,label,value,mediaName=mediaName,base=base,dependency=prior?.id ?: parent?.id,revision=revision)
     }
-    suspend fun createAccountAlbum(title:String,intentId:String,expected:AccountIdentity?=null,inviteNames:List<String> = emptyList()):String {
+    override suspend fun createAccountAlbum(title:String,intentId:String,expected:AccountIdentity?,inviteNames:List<String>):String {
         require(title.isNotBlank());val owner=if(expected==null)currentOwner()else requireOwner(expected);val libraryId=LibraryScope.Account(owner.accountId).id
         db.withTransaction {
             dao.insertLibrary(LibraryEntity(libraryId,owner.accountId,owner.accountId))
@@ -96,9 +96,9 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
         }
         scheduler.enqueue();return intentId
     }
-    fun comments(photoId:String):Flow<List<AccountComment>> = work.comments(photoId).map{rows->rows.map{AccountComment(it.localId,it.remoteId,it.author,it.text,it.date,it.mine)}}
+    override fun comments(photoId:String):Flow<List<AccountComment>> = work.comments(photoId).map{rows->rows.map{AccountComment(it.localId,it.remoteId,it.author,it.text,it.date,it.mine)}}
     private suspend fun albumForPhoto(photoId:String):Pair<LocalAlbumEntity,LocalPhotoEntity> {val photo=requireNotNull(dao.photo(photoId));val sub=requireNotNull(dao.subAlbum(photo.subAlbumId));return requireNotNull(dao.album(sub.albumId)) to photo}
-    suspend fun setLiked(photoId:String,liked:Boolean) {
+    override suspend fun setLiked(photoId:String,liked:Boolean) {
         db.withTransaction {
             val (album,photo)=albumForPhoto(photoId);val kind=if(liked)SyncKind.DO_LIKE else SyncKind.UNDO_LIKE;val owner=ownerFor(album,kind)
             check(photo.likesKnown && photo.remoteId!=null && !photo.deleted)
@@ -107,7 +107,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
             dao.updatePhoto(next);mutation(owner,photoId,photo.subAlbumId,kind,album.title+" / 좋아요",liked.toString(),photo.isLiked.toString(),next.revision)
         };scheduler.enqueue()
     }
-    suspend fun saveComment(photoId:String,text:String,id:String) {
+    override suspend fun saveComment(photoId:String,text:String,id:String) {
         require(text.isNotBlank())
         db.withTransaction {
             val (album,photo)=albumForPhoto(photoId);val prior=work.comment(id);val kind=if(prior==null)SyncKind.CREATE_COMMENT else SyncKind.EDIT_COMMENT;val owner=ownerFor(album,kind);check(!photo.deleted)
@@ -116,7 +116,7 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
             else{check(prior.mine && prior.photoId==photoId && !prior.deleted);val next=prior.copy(text=text,revision=prior.revision+1);work.putComment(next);mutation(owner,id,photoId,kind,album.title+" / 댓글",text,prior.text,next.revision)}
         };scheduler.enqueue()
     }
-    suspend fun deleteComment(id:String) {
+    override suspend fun deleteComment(id:String) {
         db.withTransaction{val prior=requireNotNull(work.comment(id));check(prior.mine);val(album,_)=albumForPhoto(prior.photoId);val owner=ownerFor(album,SyncKind.DELETE_COMMENT);val next=prior.copy(deleted=true,revision=prior.revision+1);work.putComment(next);mutation(owner,id,prior.photoId,SyncKind.DELETE_COMMENT,album.title+" / 댓글 삭제","",prior.text,next.revision)};scheduler.enqueue()
     }
 
@@ -125,9 +125,9 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
         val client=requireNotNull(clients){"계정 연결을 확인해주세요"};val session=client.snapshot();client.check(session)
         return job to cord.eoeo.momentwo.core.data.library.sync.AccountSyncTransport(session,db,client,media)
     }
-    suspend fun candidates(jobId:String,expected:AccountIdentity):List<RemoteCandidate>{val(job,transport)=confirmation(jobId,expected);check(job.status in setOf(SyncStatus.AWAITING_ID.name,SyncStatus.UNKNOWN.name));return transport.candidates(job)}
-    suspend fun inspect(jobId:String,expected:AccountIdentity):String {val(job,transport)=confirmation(jobId,expected);check(job.status in setOf(SyncStatus.UNKNOWN.name,SyncStatus.CONFLICT.name,SyncStatus.PERMISSION_DENIED.name,SyncStatus.NOT_FOUND.name));return transport.inspect(job)}
-    suspend fun bind(jobId:String,candidateId:Int,expected:AccountIdentity) {
+    override suspend fun candidates(jobId:String,expected:AccountIdentity):List<RemoteCandidate>{val(job,transport)=confirmation(jobId,expected);check(job.status in setOf(SyncStatus.AWAITING_ID.name,SyncStatus.UNKNOWN.name));return transport.candidates(job)}
+    override suspend fun inspect(jobId:String,expected:AccountIdentity):String {val(job,transport)=confirmation(jobId,expected);check(job.status in setOf(SyncStatus.UNKNOWN.name,SyncStatus.CONFLICT.name,SyncStatus.PERMISSION_DENIED.name,SyncStatus.NOT_FOUND.name));return transport.inspect(job)}
+    override suspend fun bind(jobId:String,candidateId:Int,expected:AccountIdentity) {
         val(job,transport)=confirmation(jobId,expected);check(job.status in setOf(SyncStatus.AWAITING_ID.name,SyncStatus.UNKNOWN.name))
         val(candidate,role)=transport.verifyBinding(job,candidateId);requireOwner(expected)
         db.withTransaction {
@@ -144,12 +144,12 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
             work.updateJob(current.copy(status=SyncStatus.DONE.name,claimId=null));work.unpin(job.id)
         };scheduler.enqueue()
     }
-    suspend fun keepMine(jobId:String,expected:AccountIdentity) {
+    override suspend fun keepMine(jobId:String,expected:AccountIdentity) {
         val(job,transport)=confirmation(jobId,expected);check(job.status==SyncStatus.CONFLICT.name)
         val fresh=transport.inspect(job);check(fresh==job.remoteText){"서버 값이 변경되었습니다. 다시 확인해주세요"};requireOwner(expected)
         db.withTransaction{val current=requireNotNull(work.job(jobId));check(current.status==job.status);work.updateJob(current.copy(status=SyncStatus.QUEUED.name,baseText=fresh,remoteText=null,claimId=null))};scheduler.enqueue()
     }
-    suspend fun useServer(jobId:String,expected:AccountIdentity,observed:String) {
+    override suspend fun useServer(jobId:String,expected:AccountIdentity,observed:String) {
         val(job,transport)=confirmation(jobId,expected);val fresh=transport.inspect(job);check(fresh==observed){"서버 값이 변경되었습니다. 다시 확인해주세요"};requireOwner(expected)
         db.withTransaction{val current=requireNotNull(work.job(jobId));check(current.status==job.status);applyRemote(current,fresh);work.updateJob(current.copy(status=SyncStatus.DONE.name,claimId=null));work.unpin(jobId)
             work.jobs(job.accountId).filter{it.dependency==job.id && it.kind==job.kind && it.status==SyncStatus.QUEUED.name}.forEach{work.updateJob(it.copy(baseText=fresh))}
@@ -173,12 +173,12 @@ class AccountSyncRepository @Inject constructor(private val db:MomentwoDatabase,
             SyncKind.CREATE_ALBUM,SyncKind.CREATE_SUB,SyncKind.UPLOAD_PHOTO,SyncKind.CREATE_COMMENT->error("Link the created resource")
         }
     }
-    suspend fun retryConfirmed(jobId:String,expected:AccountIdentity) {
+    override suspend fun retryConfirmed(jobId:String,expected:AccountIdentity) {
         val(job,_)=confirmation(jobId,expected);check(job.status==SyncStatus.UNKNOWN.name)
         db.withTransaction{val current=requireNotNull(work.job(jobId));check(current.status==job.status);work.updateJob(current.copy(status=SyncStatus.QUEUED.name,claimId=null))};scheduler.enqueue()
     }
 
-    suspend fun cancel(jobId:String,expected:AccountIdentity) {
+    override suspend fun cancel(jobId:String,expected:AccountIdentity) {
         requireOwner(expected)
         db.withTransaction {
             val job=requireNotNull(work.job(jobId));check(job.accountId==expected.accountId)

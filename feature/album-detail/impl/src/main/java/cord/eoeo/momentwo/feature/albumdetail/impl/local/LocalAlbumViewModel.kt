@@ -17,9 +17,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 @HiltViewModel
-internal class LocalAlbumViewModel(private val repository: LocalLibraryRepository, private val drafts: LibraryDrafts, id: String, private val accounts: AccountLibraryRepository? = null, private val getFriends: GetFriendListUseCase? = null) :
+internal class LocalAlbumViewModel(private val repository: LocalLibraryRepository, private val drafts: LibraryDrafts, id: String, private val accounts: AccountLibraryAccess? = null, private val getFriends: GetFriendListUseCase? = null) :
     ReducerViewModel<LocalAlbumState, LocalAlbumEvent, LocalAlbumAction, LocalAlbumEffect>(LocalAlbumState(id), LocalAlbumReducer) {
-    @Inject constructor(repository: LocalLibraryRepository, drafts: LibraryDrafts, accounts: AccountLibraryRepository, getFriends: GetFriendListUseCase, handle: SavedStateHandle) : this(repository, drafts, handle.toRoute<LocalAlbumDetailDestination>().localId,accounts,getFriends)
+    @Inject constructor(repository: LocalLibraryRepository, drafts: LibraryDrafts, accounts: AccountLibraryAccess, getFriends: GetFriendListUseCase, handle: SavedStateHandle) : this(repository, drafts, handle.toRoute<LocalAlbumDetailDestination>().localId,accounts,getFriends)
     private data class Write(val key: String) : RequestKey
     private data object DraftWrite : RequestKey
     private data object ReadAccount : RequestKey

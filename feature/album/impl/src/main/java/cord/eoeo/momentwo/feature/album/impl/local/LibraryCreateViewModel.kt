@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.first
 @HiltViewModel
 internal class LibraryCreateViewModel(
     private val local: LocalLibraryRepository, private val drafts: LibraryDrafts, account: Boolean = false,
-    private val accounts: AccountLibraryRepository? = null, private val sync: AccountSyncRepository? = null, private val friends: GetFriendListUseCase? = null,
+    private val accounts: AccountLibraryAccess? = null, private val sync: AccountSyncOperations? = null, private val friends: GetFriendListUseCase? = null,
 ) : ReducerViewModel<LibraryCreateState, LibraryCreateEvent, LibraryCreateAction, LibraryCreateEffect>(
     LibraryCreateState(account = account), LibraryCreateReducer) {
-    @Inject constructor(handle: SavedStateHandle, local: LocalLibraryRepository, accounts: AccountLibraryRepository, sync: AccountSyncRepository, drafts: LibraryDrafts, friends: GetFriendListUseCase): this(local,drafts,handle.toRoute<LibraryCreateAlbumDestination>().account,accounts,sync,friends)
+    @Inject constructor(handle: SavedStateHandle, local: LocalLibraryRepository, accounts: AccountLibraryAccess, sync: AccountSyncOperations, drafts: LibraryDrafts, friends: GetFriendListUseCase): this(local,drafts,handle.toRoute<LibraryCreateAlbumDestination>().account,accounts,sync,friends)
     private data object Save : RequestKey
     private data object Draft : RequestKey
     private data object Friends : RequestKey

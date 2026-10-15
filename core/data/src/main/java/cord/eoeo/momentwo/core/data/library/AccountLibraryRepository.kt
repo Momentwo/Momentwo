@@ -14,11 +14,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
-class AccountLibraryRepository @Inject constructor(private val db:MomentwoDatabase,private val preferences:PreferenceRepository,private val clients:AccountClientFactory,@ApplicationContext private val context:Context,private val media:LocalMediaStore=LocalMediaStore(context,db)) {
-    fun identities()=preferences.identities()
-    suspend fun logout()=preferences.clearSession()
-    suspend fun storage():Pair<Long,Long> = withContext(Dispatchers.IO) { File(context.filesDir,"library-media").listFiles().orEmpty().sumOf {it.length()} to StatFs(context.filesDir.path).availableBytes }
-    suspend fun refresh() {
+class AccountLibraryRepository @Inject constructor(private val db:MomentwoDatabase,private val preferences:PreferenceRepository,private val clients:AccountClientFactory,@ApplicationContext private val context:Context,private val media:LocalMediaStore=LocalMediaStore(context,db)) : AccountLibraryAccess {
+    override fun identities()=preferences.identities()
+    override suspend fun logout()=preferences.clearSession()
+    override suspend fun storage():Pair<Long,Long> = withContext(Dispatchers.IO) { File(context.filesDir,"library-media").listFiles().orEmpty().sumOf {it.length()} to StatFs(context.filesDir.path).availableBytes }
+    override suspend fun refresh() {
         val session=clients.snapshot();clients.check(session)
         check(db.syncDao().jobs(session.identity.accountId).none{it.kind=="CREATE_ALBUM" && it.status !in setOf("DONE","CANCELLED")}){"새 앨범의 서버 연결을 먼저 확인해주세요"}
         val albums=clients.client(session).create(AlbumService::class.java).getAlbumList().albumList
@@ -34,22 +34,22 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
             }
         }
     }
-    suspend fun refreshPermission(id: String) {
+    override suspend fun refreshPermission(id: String) {
         val album=requireNotNull(db.libraryDao().album(id));if(album.libraryId==LibraryScope.Device.id || album.remoteId==null)return
         val session=clients.snapshot();check(album.libraryId==LibraryScope.Account(session.identity.accountId).id);clients.check(session)
         val role=clients.client(session).create(AlbumService::class.java).getAlbumRole(requireNotNull(album.remoteId)).rules
         check(cord.eoeo.momentwo.core.model.MemberAuth.entries.any { it.roleString==role });clients.check(session)
         db.withTransaction { val latest=requireNotNull(db.libraryDao().album(id));db.libraryDao().updateAlbum(latest.copy(role=role)) }
     }
-    suspend fun members(id: String): List<cord.eoeo.momentwo.core.model.MemberItem> {
+    override suspend fun members(id: String): List<cord.eoeo.momentwo.core.model.MemberItem> {
         refreshPermission(id)
         return memberCall(id) { service, remoteId -> service.getMemberList(remoteId).memberList.map { row ->
             check(cord.eoeo.momentwo.core.model.MemberAuth.entries.any { it.roleString==row.rules });row.mapToMemberItem()
         } }
     }
-    suspend fun inviteMembers(id: String, names: List<String>) = memberCall(id) { service, remoteId -> service.postInviteMembers(cord.eoeo.momentwo.core.data.model.InviteMembers(remoteId,names)) }
-    suspend fun kickMembers(id: String, ids: Set<Int>) = memberCall(id, managing=true) { service, remoteId -> service.deleteKickMembers(remoteId,ids.sorted().joinToString(",")) }
-    suspend fun leaveAlbum(id: String) {
+    override suspend fun inviteMembers(id: String, names: List<String>) = memberCall(id) { service, remoteId -> service.postInviteMembers(cord.eoeo.momentwo.core.data.model.InviteMembers(remoteId,names)) }
+    override suspend fun kickMembers(id: String, ids: Set<Int>) = memberCall(id, managing=true) { service, remoteId -> service.deleteKickMembers(remoteId,ids.sorted().joinToString(",")) }
+    override suspend fun leaveAlbum(id: String) {
         val expected=clients.snapshot()
         memberCall(id) { service, remoteId -> clients.check(expected);service.deleteExitMember(remoteId) }
         // The device original is a different UUID and remains untouched.
@@ -63,7 +63,7 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
         clients.check(session);return result
     }
 
-    suspend fun refreshAlbum(id: String) {
+    override suspend fun refreshAlbum(id: String) {
         val album=requireNotNull(db.libraryDao().album(id)); if(album.libraryId==LibraryScope.Device.id) return
         val session=clients.snapshot();check(album.libraryId==LibraryScope.Account(session.identity.accountId).id);clients.check(session)
         val remoteId=album.remoteId ?: return
@@ -90,7 +90,7 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
         if(album.libraryId==LibraryScope.Device.id)return null
         val session=clients.snapshot();check(album.libraryId==LibraryScope.Account(session.identity.accountId).id);return Triple(album,sub,session)
     }
-    suspend fun refreshPhotos(id:String) {
+    override suspend fun refreshPhotos(id:String) {
         val(album,sub,session)=accountSub(id) ?: return;val albumId=album.remoteId ?: return;val subId=sub.remoteId ?: return
         val pending=db.syncDao().jobs(session.identity.accountId)
         if(pending.any{it.parentId==id && it.kind=="UPLOAD_PHOTO" && it.status !in setOf("DONE","CANCELLED")})return
@@ -112,7 +112,7 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
         }
         db.withTransaction{db.libraryDao().allPhotos(id).filter{it.remoteId!=null && it.remoteId !in found && it.mediaName==null && pending.none{job->job.targetId==it.localId && job.status !in setOf("DONE","CANCELLED")}}.forEach{db.libraryDao().deletePhoto(it.localId)}}
     }
-    suspend fun refreshPhoto(id:String) {
+    override suspend fun refreshPhoto(id:String) {
         val photo=requireNotNull(db.libraryDao().photo(id));val(album,sub,session)=accountSub(photo.subAlbumId) ?: return
         val albumId=album.remoteId ?: return;val photoId=photo.remoteId ?: return
         val transport=clients.client(session)
@@ -145,7 +145,7 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
             db.withTransaction{val latest=db.libraryDao().photo(photo.localId);if(latest!=null && !latest.deleted && latest.remoteUrl==photo.remoteUrl){db.libraryDao().updatePhoto(latest.copy(cacheName=name));accepted=true}}
         }finally{if(!accepted)target.delete()}
     }
-    suspend fun refreshComments(id:String) {
+    override suspend fun refreshComments(id:String) {
         val photo=requireNotNull(db.libraryDao().photo(id));val(album,_,session)=accountSub(photo.subAlbumId) ?: return
         val albumId=album.remoteId ?: return;val photoId=photo.remoteId ?: return
         val service=clients.client(session).create(cord.eoeo.momentwo.core.data.comment.remote.CommentService::class.java)

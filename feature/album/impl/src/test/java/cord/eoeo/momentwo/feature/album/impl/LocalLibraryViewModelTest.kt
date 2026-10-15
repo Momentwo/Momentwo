@@ -92,15 +92,21 @@ class LibraryCreateDeviceViewModelTest {
         assertTrue(vm.uiState.value.ready);assertEquals("saved",vm.uiState.value.draft.text)
     }
 }
-private class LocalLibraryFake : LocalLibraryRepository {
+internal class LocalLibraryFake : LocalLibraryRepository {
     var create: suspend (String, String) -> String = { _, id -> id }
     val created = mutableListOf<String>()
     var starts = 0
     var observed: LibraryScope? = null
     var initialize: suspend () -> Unit = {}
     val rows = MutableStateFlow<List<LocalAlbum>>(emptyList())
+    val accountRows = mutableMapOf<String, MutableStateFlow<List<LocalAlbum>>>()
+    val subscriptions = mutableMapOf<String, Int>()
     override suspend fun initialize() { starts++; initialize.invoke() }
-    override fun albums(scope: LibraryScope): Flow<List<LocalAlbum>> { observed = scope; return rows }
+    override fun albums(scope: LibraryScope): Flow<List<LocalAlbum>> { observed = scope; return flow {
+        subscriptions[scope.id] = (subscriptions[scope.id] ?: 0) + 1
+        try { emitAll(if(scope == LibraryScope.Device) rows else accountRows.getOrPut(scope.id) { MutableStateFlow(emptyList()) }) }
+        finally { subscriptions[scope.id] = subscriptions.getValue(scope.id) - 1 }
+    } }
     override fun album(id: String): Flow<LocalAlbum?> = flowOf(null)
     override fun subAlbums(albumId: String): Flow<List<LocalSubAlbum>> = flowOf(emptyList())
     override fun subAlbum(id: String): Flow<LocalSubAlbum?> = flowOf(null)
@@ -128,7 +134,7 @@ private class LocalLibraryFake : LocalLibraryRepository {
     override suspend fun deleteSubAlbum(id: String): Unit = error("unused")
 }
 
-private class EmptyLibraryDrafts : cord.eoeo.momentwo.core.data.library.LibraryDrafts {
+internal class EmptyLibraryDrafts : cord.eoeo.momentwo.core.data.library.LibraryDrafts {
     var value: LibraryDraft? = null
     var failLoad = false
     override suspend fun load(key: String): LibraryDraft? { if (failLoad) throw IOException("draft storage"); return value }

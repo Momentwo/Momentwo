@@ -15,8 +15,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 @HiltViewModel
-internal class LocalPhotoViewModel(private val repository: LocalLibraryRepository, private val drafts: LibraryDrafts, id: String,private val accounts:AccountLibraryRepository?=null,private val sync:AccountSyncRepository?=null) : ReducerViewModel<LocalPhotoState, LocalPhotoEvent, LocalPhotoAction, LocalPhotoEffect>(LocalPhotoState(id),LocalPhotoReducer) {
-    @Inject constructor(repository:LocalLibraryRepository,drafts:LibraryDrafts,accounts:AccountLibraryRepository,sync:AccountSyncRepository,handle:SavedStateHandle):this(repository,drafts,handle.toRoute<LocalPhotoDetailDestination>().localId,accounts,sync)
+internal class LocalPhotoViewModel(private val repository: LocalLibraryRepository, private val drafts: LibraryDrafts, id: String,private val accounts:AccountLibraryAccess?=null,private val sync:AccountSyncOperations?=null) : ReducerViewModel<LocalPhotoState, LocalPhotoEvent, LocalPhotoAction, LocalPhotoEffect>(LocalPhotoState(id),LocalPhotoReducer) {
+    @Inject constructor(repository:LocalLibraryRepository,drafts:LibraryDrafts,accounts:AccountLibraryAccess,sync:AccountSyncOperations,handle:SavedStateHandle):this(repository,drafts,handle.toRoute<LocalPhotoDetailDestination>().localId,accounts,sync)
     private data class Write(val key: String) : RequestKey
     private data object DraftWrite : RequestKey
     private data object ReadPhoto:RequestKey

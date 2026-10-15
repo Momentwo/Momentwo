@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import cord.eoeo.momentwo.core.common.*
 import cord.eoeo.momentwo.core.data.library.LocalLibraryRepository
-import cord.eoeo.momentwo.core.data.library.AccountLibraryRepository
+import cord.eoeo.momentwo.core.data.library.AccountLibraryAccess
 import cord.eoeo.momentwo.core.data.library.LibraryDrafts
 import cord.eoeo.momentwo.core.model.LibraryDraft
 import cord.eoeo.momentwo.core.data.toUiError
@@ -16,8 +16,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.UUID
 @HiltViewModel
-internal class LocalPhotoListViewModel(private val repository: LocalLibraryRepository, id: String, private val accounts: AccountLibraryRepository? = null, private val drafts: LibraryDrafts? = null) : ReducerViewModel<LocalPhotoListState, LocalPhotoListEvent, LocalPhotoListAction, LocalPhotoListEffect>(LocalPhotoListState(id), LocalPhotoListReducer) {
-    @Inject constructor(repository: LocalLibraryRepository, accounts: AccountLibraryRepository, drafts: LibraryDrafts, handle: SavedStateHandle) : this(repository, handle.toRoute<LocalPhotoListDestination>().subAlbumId,accounts,drafts)
+internal class LocalPhotoListViewModel(private val repository: LocalLibraryRepository, id: String, private val accounts: AccountLibraryAccess? = null, private val drafts: LibraryDrafts? = null) : ReducerViewModel<LocalPhotoListState, LocalPhotoListEvent, LocalPhotoListAction, LocalPhotoListEffect>(LocalPhotoListState(id), LocalPhotoListReducer) {
+    @Inject constructor(repository: LocalLibraryRepository, accounts: AccountLibraryAccess, drafts: LibraryDrafts, handle: SavedStateHandle) : this(repository, handle.toRoute<LocalPhotoListDestination>().subAlbumId,accounts,drafts)
     private data class Write(val key: String): RequestKey
     private data object DraftWrite: RequestKey
     private val draftKey="sub:${id}:rename"

@@ -10,7 +10,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 @HiltViewModel
-internal class AccountLibraryViewModel @Inject constructor(private val accounts:AccountLibraryRepository,private val local:LocalLibraryRepository):ReducerViewModel<AccountLibraryState,AccountLibraryEvent,AccountLibraryAction,AccountLibraryEffect>(AccountLibraryState(),AccountLibraryReducer){
+internal class AccountLibraryViewModel @Inject constructor(private val accounts:AccountLibraryAccess,private val local:LocalLibraryRepository):ReducerViewModel<AccountLibraryState,AccountLibraryEvent,AccountLibraryAction,AccountLibraryEffect>(AccountLibraryState(),AccountLibraryReducer){
     private data object Refresh:RequestKey;private data object Logout:RequestKey
     private var observation:Job?=null
     @OptIn(ExperimentalCoroutinesApi::class)

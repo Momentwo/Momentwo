@@ -11,7 +11,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 @HiltViewModel
-internal class AccountSyncViewModel @Inject constructor(private val account:AccountLibraryRepository,private val local:LocalLibraryRepository,private val sync:AccountSyncRepository):ReducerViewModel<AccountSyncState,AccountSyncEvent,AccountSyncAction,AccountSyncEffect>(AccountSyncState(),AccountSyncReducer){
+internal class AccountSyncViewModel @Inject constructor(private val account:AccountLibraryAccess,private val local:LocalLibraryRepository,private val sync:AccountSyncOperations):ReducerViewModel<AccountSyncState,AccountSyncEvent,AccountSyncAction,AccountSyncEffect>(AccountSyncState(),AccountSyncReducer){
     private data class Write(val key:String):RequestKey;private data object Read:RequestKey
     private var observation:Job?=null
     @OptIn(ExperimentalCoroutinesApi::class)

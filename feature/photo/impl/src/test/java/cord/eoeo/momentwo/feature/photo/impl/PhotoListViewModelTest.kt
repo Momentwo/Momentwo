@@ -20,7 +20,7 @@ class PhotoListViewModelTest {
     private val sub = PhotoFakeSubAlbum()
     private val store = ViewModelStore()
     private fun vm() = PhotoListViewModel(repository, ChangeSubAlbumTitleUseCase(sub), PhotoListState(1, 2, "album", "sub")).also { store.put("list", it) }
-    @After fun clear() { store.clear() }
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun initializationAndReturnRefreshDoNotRecreatePagingSource() = runTest(main.testDispatcher) {
         val vm = vm(); vm.initialize(); advanceUntilIdle(); vm.initialize(); advanceUntilIdle()
         vm.onEvent(PhotoListEvent.OnPhotoVisited); vm.initialize(); advanceUntilIdle()

@@ -24,7 +24,7 @@ class PhotoDetailViewModelTest {
     private var now = 0L
     private fun vm() = PhotoDetailViewModel(description, likes, comments, DownloadPhotoUseCase(photo), UpdateIsLikedUseCase(photo),
         PhotoDetailState(1, 2, "fixture", false), { now }).also { store.put("detail", it) }
-    @After fun clear() { store.clear() }
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     private fun content(vm: PhotoDetailViewModel) = (vm.uiState.value.screen as ScreenState.Success).content
 
     @Test fun initialSuccessWaitsForBothResponsesAndCommentsAreLazy() = runTest(main.testDispatcher) {

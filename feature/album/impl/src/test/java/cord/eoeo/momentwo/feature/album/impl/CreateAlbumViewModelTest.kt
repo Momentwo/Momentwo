@@ -22,7 +22,7 @@ class CreateAlbumViewModelTest {
     private val handle = SavedStateHandle()
     private val store = ViewModelStore()
     private fun vm() = CreateAlbumViewModel(RequestCreateAlbumUseCase(repository), GetFriendListUseCase(friends), handle).also { store.put("create", it) }
-    @After fun clear() { store.clear() }
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun pendingCreationCapturesInputsAndKeepsNewEditsWithoutClosing() = runTest(main.testDispatcher) {
         val response = CompletableDeferred<Unit>()
         repository.create = { response.await(); Result.success(Unit) }

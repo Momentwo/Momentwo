@@ -18,7 +18,7 @@ class AlbumViewModelTest {
     private val repository = AlbumFakeRepository()
     private val store = ViewModelStore()
     private fun vm() = AlbumViewModel(GetAlbumListUseCase(repository)).also { store.put("album", it) }
-    @After fun clear() { store.clear() }
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun initialEmptySuccessAndInitializationAreDistinctFromLoading() = runTest(main.testDispatcher) {
         val vm = vm(); assertEquals(ScreenState.Loading, vm.uiState.value.screen)
         vm.initialize(); advanceUntilIdle(); vm.initialize(); advanceUntilIdle()

@@ -20,7 +20,7 @@ class LocalLibraryViewModelTest {
     private val drafts = EmptyLibraryDrafts()
     private val store = ViewModelStore()
     private fun vm() = LocalLibraryViewModel(repository).also { store.put("device", it) }
-    @After fun clear() = store.clear()
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun deviceEmptySuccessDoesNotNeedLoginAndInitializationIsIdempotent() = runTest(main.testDispatcher) {
         val vm = vm(); vm.initialize(); runCurrent(); vm.initialize(); runCurrent()
         assertEquals(ScreenState.Success(emptyList<LocalAlbum>()), vm.uiState.value.screen)
@@ -50,7 +50,7 @@ class LibraryCreateDeviceViewModelTest {
     @get:Rule val main=MainDispatcherRule(StandardTestDispatcher())
     private val repository=LocalLibraryFake();private val drafts=EmptyLibraryDrafts();private val store=ViewModelStore()
     private fun vm()=LibraryCreateViewModel(repository,drafts).also{store.put("create",it)}
-    @After fun clear()=store.clear()
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun submissionSnapshotsInputSkipsDuplicatesAndKeepsNewDraft() = runTest(main.testDispatcher) {
         val response = CompletableDeferred<Unit>()
         repository.create = { _, id -> response.await(); id }

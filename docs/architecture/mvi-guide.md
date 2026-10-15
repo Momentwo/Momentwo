@@ -76,10 +76,14 @@ Navigation은 즉시 처리한다. Snackbar·애니메이션은 핸들러의 STA
 
 가상 시간·제어 가능한 Fake로 부분 실패, 취소, 응답 역전, 중복, 최신 입력/선택 보존과 Effect 순서를 검증한다. 실제 기기에서는 Hilt 경로·UI 상태·Paging 수집·STARTED 복귀·시스템 바와 실제 Room 트랜잭션을 검증한다. 영향 모듈 테스트/빌드/Lint 후 전체 검증을 수행한다.
 
-백엔드 중단으로 실제 API 골든 패스 및 정식 업데이트·프로세스 복원 회귀는 [#150](https://github.com/Momentwo/Momentwo/issues/150)에 남긴다. 별도 applicationId의 테스트 앱으로 원래 앱을 보존하며 임시 Gradle 설정은 제품 코드에 커밋하지 않는다. API 직렬화·모듈 경계와 라이브러리 버전은 유지한다. DTO #157, Orbit #159, Profile #161, Offline-First #162, 디자인 시스템 #163, HTTP 인증 재설계와 추가 테스트 확장 #156은 별도 범위다.
+백엔드 중단으로 실제 API 골든 패스 및 정식 업데이트·프로세스 복원 회귀는 [#150](https://github.com/Momentwo/Momentwo/issues/150)에 남긴다. 별도 applicationId의 테스트 앱으로 원래 앱을 보존하며 임시 Gradle 설정은 제품 코드에 커밋하지 않는다. API 직렬화·모듈 경계와 라이브러리 버전은 유지한다. DTO #157, Orbit #159, Profile #161, 디자인 시스템 #163과 HTTP 인증 재설계는 별도 작업이다. 후속 Offline-First #162와 회귀 테스트 #156의 구현·검증 결과는 각 가이드에서 관리한다.
 
 ## 설계 참고
 
 - [Kotlin sealed 타입의 모듈·패키지 제한](https://kotlinlang.org/docs/sealed-classes.html)
 - [Android 상태 생성과 초기화](https://developer.android.com/topic/architecture/ui-layer/state-production)
 - [Paging LoadState](https://developer.android.com/topic/libraries/architecture/paging/load-state)
+
+## Feature 회귀 검증 (#156)
+
+17개 ViewModel의 테스트 대응표·Fake 주입 경계·취소/Effect 수명 규칙과 실행 방법은 [ViewModel 회귀 가이드](../testing/viewmodel-regression.md)를 따른다. 계정 Repository는 core:data의 AccountLibraryAccess/AccountSyncOperations를 통해 주입하며 기존 저장·인증 정책은 구현이 소유한다. Profile 조회는 #161, 실제 서버/정식 업데이트 검증은 #150에서 이어간다.

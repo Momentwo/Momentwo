@@ -24,7 +24,7 @@ class SignUpViewModelTest {
     private val repository = FakeSignUpRepository()
     private val store = ViewModelStore()
     private fun viewModel() = SignUpViewModel(repository).also { store.put("signup", it) }
-    @After fun clearViewModel() { store.clear() }
+    @After fun clearViewModel() { store.clear(); mainDispatcherRule.testDispatcher.scheduler.runCurrent() }
 
     @Test
     fun emptyEmailStopsProgressAndShowsValidationMessage() = runTest(mainDispatcherRule.testDispatcher) {

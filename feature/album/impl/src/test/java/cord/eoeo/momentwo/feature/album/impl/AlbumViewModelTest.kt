@@ -54,4 +54,13 @@ class AlbumViewModelTest {
         vm.onEvent(AlbumEvent.OnGetAlbumList); advanceUntilIdle()
         assertEquals(ScreenState.Loading, vm.uiState.value.screen)
     }
+    @Test fun initialErrorRetrySucceedsWithoutAnErrorEffect() = runTest(main.testDispatcher) {
+        repository.read={Result.failure(IOException("first"))};val vm=vm()
+        val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        vm.initialize();runCurrent();assertTrue(vm.uiState.value.screen is ScreenState.Error)
+        repository.read={Result.success(emptyList())};vm.onEvent(AlbumEvent.OnGetAlbumList);runCurrent()
+        assertEquals(ScreenState.Success(AlbumContent(emptyList())),vm.uiState.value.screen)
+        assertTrue(effects.values.isEmpty())
+    }
+
 }

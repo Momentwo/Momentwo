@@ -67,4 +67,19 @@ class CreateAlbumViewModelTest {
         handle["create_album_title"] = "restored"
         assertEquals("restored", vm().uiState.value.title)
     }
+    @Test fun failedCreationKeepsConfirmedInvitationsAndRetrySendsSamePayloadOnce() = runTest(main.testDispatcher) {
+        val vm=vm();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        val friend=FriendItem("invited","")
+        vm.onEvent(CreateAlbumEvent.OnTitleChanged("album"))
+        vm.onEvent(CreateAlbumEvent.OnCheckedChange(true,friend));vm.onEvent(CreateAlbumEvent.OnConfirmInviteFriend)
+        repository.create={Result.failure(java.io.IOException("offline"))}
+        vm.onEvent(CreateAlbumEvent.OnRequestCreateAlbum("album"));runCurrent()
+        assertTrue(vm.uiState.value.status is CreateAlbumStatus.Failed)
+        assertEquals("album",vm.uiState.value.title);assertEquals(listOf(friend),vm.uiState.value.selectedFriendList)
+        assertFalse(effects.values.any{it==CreateAlbumEffect.PopBackStack})
+        repository.create={Result.success(Unit)};vm.onEvent(CreateAlbumEvent.OnRequestCreateAlbum("album"));runCurrent()
+        assertEquals(listOf("album" to listOf("invited"),"album" to listOf("invited")),repository.creations)
+        assertEquals(1,effects.values.count{it==CreateAlbumEffect.PopBackStack})
+    }
+
 }

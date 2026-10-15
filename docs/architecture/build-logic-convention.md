@@ -364,7 +364,7 @@ Phase 1~2에서 23개 모듈을 새로 만들어야 한다. 새 `build.gradle.kt
 - **첫 빌드 cold-start 오버헤드**: `:build-logic:convention:compileKotlin`이 한 번 더 실행된다. 이후 incremental 빌드에는 영향이 없다.
 - **Convention plugin 자체를 수정하면 적용 모듈 전체가 재구성된다.** 빈번한 수정은 피한다. 대신 catalog 값(`libs.versions.toml`) 조정으로 처리 가능한 변경은 그쪽을 우선한다.
 - **IDE 인덱싱 부담 증가**: Android Studio가 build-logic을 별도 모듈처럼 인덱싱한다. 큰 문제는 아니나, 동기화가 더 길어진 인상을 받을 수 있다.
-- **`version = "unspecified"`의 의미**: includeBuild plugin의 관용적 표기다. 메인 빌드와 빌드 시점이 동일하므로 SemVer 관리가 무의미하다. version catalog가 “버전 미지정”을 허용한다는 점을 알아두면 충분하다.
+- **`version = "unspecified"`의 의미**: included build의 로컬 plugin 요청에 사용하는 표기다. Gradle 8.7의 catalog alias에는 빈 version을 전달할 수 없으므로 이 값을 유지한다. 루트에서 같은 convention artifact를 먼저 적용하는 경우 형제 plugin의 요청도 `apply false`로 등록해 unknown-version classpath 충돌을 피한다.
 - **순환 의존**: convention plugin 안에서 다른 convention plugin을 `apply("momentwo.android.library")` 식으로 적용할 수 있지만, plugin 간 순환 의존이 생기지 않도록 조심한다. 본 구성에서는 `feature → library + library.compose + hilt`의 단방향 호출만 사용한다.
 
 ## 9. 마이그레이션 적용 결과
@@ -376,7 +376,13 @@ Phase 1~3에서 다음 설정을 적용했다.
 - `momentwo.android.network`은 `:core:network`에 적용한다.
 - `momentwo.jvm.library`는 순수 Kotlin `:core:model`에 적용한다. BaseViewModel을 사용하는 `:core:common`은 Android library다.
 
-Plugin 수는 9개로 고정해두고, 의존성 디테일만 catalog/plugin 내부에서 조정한다. 새 plugin을 추가하는 결정은 “이 plugin이 3개 이상 모듈에 동일하게 적용되는가?”를 기준으로 한다.
+기존 모듈용 Convention 9개에 루트 검사용 `momentwo.module-architecture`를 추가했다. 모듈 공통 설정과 루트 전체 그래프 검사는 적용 책임을 구분한다.
+
+### 루트 아키텍처 검사 (#158)
+
+루트는 `momentwo.module-architecture`를 적용하고 같은 artifact의 형제 Convention 요청은 `apply false`로 등록한다. 수집기는 설정 완료 후 실제 프로젝트 configuration의 의존을 스냅샷으로 만들고, task는 이 값과 소스 입력만 검사한다. 앱 컴파일이나 dependency resolution 없이 경계·사이클을 진단한다. 루트/각 모듈 `check`에 연결되며 included build 자체는 별도 JUnit/TestKit으로 검증한다.
+
+규칙·variant/테스트 맥락·지원하지 않는 의존의 처리·CI 범위는 [모듈 경계 가이드](module-boundaries.md)를 따른다. 모듈 수를 고정하지 않으므로 #160의 빈 navigation 삭제에도 적용된다.
 
 ## 10. 참고 자료
 

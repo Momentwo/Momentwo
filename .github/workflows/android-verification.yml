@@ -1,0 +1,73 @@
+name: Android verification
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-verification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: ${{ github.event_name == 'pull_request' && 'PR checks' || 'Full checks' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          cmdline-tools-version: '12266719' # 16.0, compatible with JDK 17
+          packages: platform-tools platforms;android-34 build-tools;34.0.0
+          log-accepted-android-sdk-licenses: false
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          dependency-graph: disabled
+      - name: Configure non-production endpoint
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          sdk = os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT']
+          Path('local.properties').write_text(f'sdk.dir={sdk}\nBASE_URL="https://example.invalid/"\n')
+          PY
+      - name: Test architecture checker (JUnit and Gradle TestKit)
+        run: ./gradlew --no-daemon -p build-logic :convention:test --rerun-tasks --no-build-cache --max-workers=2 --console=plain
+      - name: Check boundaries, imports and dependency cycles
+        run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' checkArchitecture --max-workers=2 --console=plain
+      - name: Run all JVM and Android Debug unit tests
+        run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' :core:model:test testDebugUnitTest --rerun-tasks --no-build-cache --max-workers=2 --console=plain
+      - name: Build Debug
+        run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' :app:assembleDebug --max-workers=2 --console=plain
+      - name: Lint all Android modules
+        run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' lintDebug --max-workers=2 --console=plain
+      - name: Build Release and instrumentation APKs (no device execution)
+        if: github.event_name != 'pull_request'
+        run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' :app:assembleRelease :app:lintVitalRelease assembleDebugAndroidTest --max-workers=2 --console=plain
+      - name: Upload verification reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verification-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            build/reports/module-architecture/
+            **/build/reports/tests/
+            **/build/test-results/
+            **/build/reports/lint-results-*

@@ -394,8 +394,11 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 ### 빌드·Lint·단위 테스트
 
 ```bash
-./gradlew clean :core:model:assemble assembleDebug lintDebug testDebugUnitTest
+./gradlew checkArchitecture
+./gradlew clean :core:model:test assembleDebug lintDebug testDebugUnitTest
 ```
+
+모듈 경계·import와 운영/단위/기기 테스트 맥락별 의존 사이클을 검사합니다. 각 모듈의 `check`에도 연결되어 있습니다. PR CI는 경계 검사·전체 단위 테스트·Debug·Lint를 실행하고, `develop` 반영 후 Release·계측 APK 빌드를 추가합니다. 운영 인증 정보 없이 실행하며, 계측 APK 빌드는 기기 테스트 실행과 구분합니다. [검사 규칙·로컬 실행·CI 가이드](docs/architecture/module-boundaries.md)를 참고하세요.
 
 ### 기기 Navigation 테스트
 
@@ -413,6 +416,7 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 
 ### 아키텍처 문서
 
+- [모듈 경계·사이클 검사 및 CI](docs/architecture/module-boundaries.md)
 - [Offline-First 저장·복사·복구 가이드](docs/architecture/offline-first-guide.md)
 - [Offline-First 구현·검증 기록](docs/architecture/offline-first-plan.md)
 

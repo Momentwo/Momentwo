@@ -10,6 +10,8 @@ java {
 }
 
 dependencies {
+    testImplementation(libs.junit)
+    testImplementation(gradleTestKit())
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
@@ -20,6 +22,10 @@ dependencies {
 
 gradlePlugin {
     plugins {
+        register("moduleArchitecture") {
+            id = "momentwo.module-architecture"
+            implementationClass = "cord.eoeo.momentwo.convention.architecture.ModuleArchitecturePlugin"
+        }
         register("androidApplication") {
             id = "momentwo.android.application"
             implementationClass = "cord.eoeo.momentwo.convention.AndroidApplicationConventionPlugin"

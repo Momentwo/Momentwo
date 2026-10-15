@@ -3,14 +3,16 @@ package cord.eoeo.momentwo.core.data.model
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class User(
+internal data class User(
     val name: String,
     val username: String,
     val password: String,
     val nickname: String,
     val birthday: String,
     val phone: String,
-)
+) {
+    override fun toString(): String = "User(redacted)"
+}
 
 @JsonClass(generateAdapter = true)
 data class UserProfile(

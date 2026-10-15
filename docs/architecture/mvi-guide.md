@@ -87,3 +87,7 @@ Navigation은 즉시 처리한다. Snackbar·애니메이션은 핸들러의 STA
 ## Feature 회귀 검증 (#156)
 
 17개 ViewModel의 테스트 대응표·Fake 주입 경계·취소/Effect 수명 규칙과 실행 방법은 [ViewModel 회귀 가이드](../testing/viewmodel-regression.md)를 따른다. 계정 Repository는 core:data의 AccountLibraryAccess/AccountSyncOperations를 통해 주입하며 기존 저장·인증 정책은 구현이 소유한다. Profile 조회는 #161, 실제 서버/정식 업데이트 검증은 #150에서 이어간다.
+
+## 회원가입 입력 경계 (#157)
+
+SignUpState.toSignUpInput은 원래 숫자 입력을 core:model의 SignUpInput으로 복사한다. 서버 User DTO와 생일·전화번호의 전송 형식 변환은 core:data 내부에 둔다. Repository의 실패·취소 계약과 payload 보존은 [데이터 경계 가이드](data-boundaries.md)를 따른다.

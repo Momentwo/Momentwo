@@ -42,10 +42,10 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private fun submit() {
-        val submittedUser = uiState.value.mapToUser()
+        val submittedInput = uiState.value.toSignUpInput()
         requests.launchRequest(
             Submit, RequestPolicy.IgnoreWhileRunning,
-            request = { signUpRepository.requestSignUp(submittedUser) },
+            request = { signUpRepository.requestSignUp(submittedInput) },
             onStarted = { dispatch(SignUpAction.Started) },
             onSuccess = {
                 dispatch(SignUpAction.Succeeded)

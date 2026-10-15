@@ -16,7 +16,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object SignUpModule {
+internal object SignUpModule {
     @Provides
     @Singleton
     fun provideSignUpService(retrofit: Retrofit) =

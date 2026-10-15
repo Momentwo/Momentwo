@@ -62,7 +62,7 @@ class SignUpViewModelTest {
     }
 
     @Test
-    fun successfulSignUpFormatsRequestAndNavigatesToLogin() = runTest(mainDispatcherRule.testDispatcher) {
+    fun successfulSignUpCapturesInputAndNavigatesToLogin() = runTest(mainDispatcherRule.testDispatcher) {
         val vm = viewModel()
         listOf(
             SignUpEvent.OnEmailEntered("fixture@example.com"),
@@ -76,8 +76,8 @@ class SignUpViewModelTest {
         val effect = backgroundScope.async(UnconfinedTestDispatcher(testScheduler)) { vm.effect.first() }
         vm.onEvent(SignUpEvent.OnAcceptClicked)
         advanceUntilIdle()
-        assertEquals("2000-01-02", repository.requests.single().birthday)
-        assertEquals("010-1234-5678", repository.requests.single().phone)
+        assertEquals("20000102", repository.requests.single().birthdayDigits)
+        assertEquals("01012345678", repository.requests.single().phoneDigits)
         assertTrue(vm.uiState.value.isSuccess)
         assertFalse(vm.uiState.value.isLoading)
         assertEquals(SignUpEffect.NavigateToLogin, effect.await())
@@ -108,7 +108,7 @@ class SignUpViewModelTest {
         advanceUntilIdle()
         assertEquals(1, repository.requests.size)
         assertEquals("Fixture", repository.requests.single().name)
-        assertEquals("2000-01-02", repository.requests.single().birthday)
+        assertEquals("20000102", repository.requests.single().birthdayDigits)
         assertEquals("Edited", vm.uiState.value.name.value)
         assertEquals("19990101", vm.uiState.value.birthday.value)
         assertTrue(vm.uiState.value.isSuccess)

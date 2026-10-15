@@ -70,4 +70,24 @@ class PhotoListViewModelTest {
         assertEquals(listOf(1), vm.uiState.value.selectedPhotoIds)
         assertTrue(vm.uiState.value.pendingWrites.isEmpty())
     }
+    @Test fun pagingSourceFailureRetriesAndReusesSuccessfulSource()=runTest(main.testDispatcher){
+        repository.source={throw IOException("source")};val vm=vm()
+        val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        vm.initialize();runCurrent();assertEquals(ScreenState.Error(UiError.Network),vm.uiState.value.source)
+        repository.source={kotlinx.coroutines.flow.flowOf(androidx.paging.PagingData.empty())}
+        vm.initialize();runCurrent();vm.initialize();runCurrent()
+        assertTrue(vm.uiState.value.source is ScreenState.Success);assertEquals(2,repository.sourceCalls);assertTrue(effects.values.isEmpty())
+    }
+    @Test fun failedDeletionAndRenameKeepSelectionAndDialogWithoutRefreshEffect()=runTest(main.testDispatcher){
+        val vm=vm();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        repository.delete={Result.failure(IOException("delete"))};sub.rename={Result.failure(IOException("rename"))}
+        vm.onEvent(PhotoListEvent.OnChangeIsEditMode(true));vm.onEvent(PhotoListEvent.OnChangeIsSelected(true,1))
+        vm.onEvent(PhotoListEvent.OnClickConfirmEdit);runCurrent()
+        assertEquals(listOf(1),vm.uiState.value.selectedPhotoIds);assertTrue(vm.uiState.value.isEditMode)
+        vm.onEvent(PhotoListEvent.OnChangeIsDialogOpened(true));vm.onEvent(PhotoListEvent.OnConfirmDialog("new"));runCurrent()
+        assertTrue(vm.uiState.value.isDialogOpened);assertEquals("sub",vm.uiState.value.subAlbumTitle)
+        assertEquals(2,effects.values.size);assertTrue(effects.values.all{it is PhotoListEffect.ShowSnackbar})
+        vm.onEvent(PhotoListEvent.OnClickCancelEdit);assertTrue(vm.uiState.value.selectedPhotoIds.isEmpty())
+    }
+
 }

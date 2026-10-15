@@ -49,8 +49,42 @@ class LocalPhotoViewModelTest {
         store.clear();val before=vm.uiState.value;repo.photo.value=null;runCurrent();assertEquals(before,vm.uiState.value)
         val other=vm();runCurrent();assertEquals(ScreenState.Error(UiError.NotFound),other.uiState.value.screen)
     }
+    @Test fun exportFailureAndCancellationPreserveContentAndImmersiveState()=runTest(main.testDispatcher){
+        val vm=vm();runCurrent();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        repo.export={throw IOException("gallery")};vm.onEvent(LocalPhotoEvent.Export);runCurrent()
+        assertEquals(1,effects.values.size);assertTrue(vm.uiState.value.screen is ScreenState.Success)
+        repo.export={throw CancellationException()};vm.onEvent(LocalPhotoEvent.Export);runCurrent();assertEquals(1,effects.values.size)
+        vm.onEvent(LocalPhotoEvent.ToggleImmersive);val bars=vm.uiState.value
+        repo.photo.value=repo.photo.value!!.copy(favorite=true);runCurrent()
+        assertEquals(bars.immersive,vm.uiState.value.immersive)
+    }
+
+    @Test fun accountLikeAndCommentStaySeparateFromPersonalFavoriteAndMemo()=runTest(main.testDispatcher){
+        val owner=AccountIdentity("A","one",true)
+        repo.photo.value=repo.photo.value!!.copy(libraryId="account:A",role=MemberAuth.ADMIN.roleString)
+        val account=object:StrictAccountLibraryAccess(){
+            override fun identities()=flowOf(owner)
+            override suspend fun refreshPhoto(id:String) {}
+        }
+        val calls=mutableListOf<String>()
+        val sync=object:StrictAccountSyncOperations(){
+            override fun comments(photoId:String)=flowOf(emptyList<AccountComment>())
+            override suspend fun setLiked(photoId:String,liked:Boolean){calls+="like:$photoId:$liked"}
+            override suspend fun saveComment(photoId:String,text:String,id:String){calls+="comment:$photoId:$text"}
+        }
+        val vm=LocalPhotoViewModel(repo,drafts,"photo",account,sync).also{store.put("photo",it);it.initialize()};runCurrent()
+        vm.onEvent(LocalPhotoEvent.Favorite);runCurrent();assertTrue(calls.isEmpty())
+        vm.onEvent(LocalPhotoEvent.Open(LocalPhotoDialog.Memo(null)));vm.onEvent(LocalPhotoEvent.Text("private"));runCurrent()
+        vm.onEvent(LocalPhotoEvent.Save);runCurrent();assertTrue(calls.isEmpty());assertEquals("private",repo.notes.value.single().text)
+        vm.onEvent(LocalPhotoEvent.Like);runCurrent()
+        vm.onEvent(LocalPhotoEvent.Open(LocalPhotoDialog.Comment(null)));vm.onEvent(LocalPhotoEvent.Text("shared"));runCurrent()
+        vm.onEvent(LocalPhotoEvent.Save);runCurrent()
+        assertEquals(listOf("like:photo:true","comment:photo:shared"),calls)
+        assertEquals("private",repo.notes.value.single().text);assertTrue(repo.photo.value!!.favorite)
+    }
+
 }
-private class PhotoLocalFake : LocalLibraryRepository {
+internal class PhotoLocalFake : LocalLibraryRepository {
     var create: suspend (String, String) -> String = { _, id -> id }
     val created = mutableListOf<String>()
     var starts = 0
@@ -87,13 +121,14 @@ private class PhotoLocalFake : LocalLibraryRepository {
     override suspend fun saveMemo(photoId: String, text: String, memoId: String): String { notes.value = notes.value + LocalMemo(memoId,photoId,text,0); return memoId }
     override suspend fun deleteMemo(id: String): Unit = error("unused")
     override suspend fun deletePhoto(id: String): Unit = error("unused")
-    override suspend fun exportPhoto(id: String): Unit = error("unused")
+    var export: suspend () -> Unit = {}
+    override suspend fun exportPhoto(id: String) { export() }
     override suspend fun cleanUnusedMedia() {}
     override suspend fun deleteAlbum(id: String): Unit = error("unused")
     override suspend fun deleteSubAlbum(id: String): Unit = error("unused")
 }
 
-private class EmptyLibraryDrafts : cord.eoeo.momentwo.core.data.library.LibraryDrafts {
+internal class EmptyLibraryDrafts : cord.eoeo.momentwo.core.data.library.LibraryDrafts {
     var value: LibraryDraft? = null
     var failLoad = false
     override suspend fun load(key: String): LibraryDraft? { if (failLoad) throw IOException("draft storage"); return value }

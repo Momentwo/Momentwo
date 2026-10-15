@@ -139,4 +139,32 @@ class PhotoDetailViewModelTest {
         store.clear(); response.complete(fixtureDescription); advanceUntilIdle()
         assertEquals(before, vm.uiState.value)
     }
+    @Test fun retryAndRefreshFailureRetainContentAndAvoidDuplicateErrorEffects()=runTest(main.testDispatcher){
+        val vm=vm();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        description.read={Result.failure(IOException("initial"))};vm.initialize();runCurrent()
+        description.read={Result.success(fixtureDescription)};vm.onEvent(PhotoDetailEvent.OnRetry);runCurrent()
+        assertEquals(fixtureDescription,content(vm).description)
+        description.read={Result.failure(IOException("refresh"))};vm.onEvent(PhotoDetailEvent.OnRetry);runCurrent()
+        assertEquals(fixtureDescription,content(vm).description)
+        assertEquals(RefreshState.Error(UiError.Network),(vm.uiState.value.screen as ScreenState.Success).refresh)
+        assertTrue(effects.values.isEmpty())
+    }
+    @Test fun downloadFailureAndCancellationDoNotNavigateAndBackIsSingle()=runTest(main.testDispatcher){
+        val vm=vm();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        photo.download={Result.failure(IOException("download"))};vm.onEvent(PhotoDetailEvent.OnDownloadPhoto);runCurrent()
+        assertEquals(1,effects.values.size);assertTrue(effects.values.single() is PhotoDetailEffect.ShowSnackbar)
+        photo.download={Result.failure(CancellationException())};vm.onEvent(PhotoDetailEvent.OnDownloadPhoto);runCurrent()
+        assertEquals(1,effects.values.size);vm.onEvent(PhotoDetailEvent.OnBack);runCurrent()
+        assertEquals(PhotoDetailEffect.PopBackStack,effects.values.last())
+    }
+    @Test fun descriptionDeletionRefreshesAndFailedCommentDeletionKeepsDialog()=runTest(main.testDispatcher){
+        val vm=vm();vm.initialize();runCurrent();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        vm.onEvent(PhotoDetailEvent.OnDeleteDescription);runCurrent()
+        assertEquals("",content(vm).description.description);assertEquals(listOf(""),description.writes)
+        comments.edit={Result.failure(IOException("comment"))}
+        vm.onEvent(PhotoDetailEvent.OnOpenCommentDialog(7,"keep"));vm.onEvent(PhotoDetailEvent.OnDeleteComment(7));runCurrent()
+        assertEquals(PhotoCommentDialog.Edit(7,"keep"),vm.uiState.value.commentDialog)
+        assertTrue(effects.values.last() is PhotoDetailEffect.ShowSnackbar)
+    }
+
 }

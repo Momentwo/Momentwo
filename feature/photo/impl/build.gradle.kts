@@ -4,10 +4,16 @@ plugins {
 
 android {
     namespace = "cord.eoeo.momentwo.feature.photo.impl"
+    testNamespace = "cord.eoeo.momentwo.photo.migrationcheck.test"
+    defaultConfig.testApplicationId = "cord.eoeo.momentwo.photo.migrationcheck.test"
+    defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     testOptions.unitTests.isReturnDefaultValues = true
 }
 
 dependencies {
+    androidTestImplementation(project(":core:testing"))
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
     testImplementation(project(":core:testing"))
     implementation(project(":feature:photo:api"))
     implementation(project(":core:common"))

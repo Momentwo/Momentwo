@@ -34,3 +34,4 @@
 - PR 1: 계정 인터페이스와 Hilt binding, 계정 gate/library의 구독·실패·전환·Effect 신규 8건. Album impl 단위 33건과 app Debug/Hilt 빌드, 영향 모듈 테스트·Lint 검증.
 - 나머지 항목은 각 PR에서 대응표와 검증 결과를 갱신한다.
 - PR 2: Friend 14건, Album 38건, AlbumDetail 33건 (합계 85건, 신규 16건) 통과. 검색 취소/불일치 인자, 양쪽 요청 탭 실패·재시도, 쓰기 실패·취소, 초대 payload와 계정 epoch, 상세 쓰기/후속 조회 실패, 로컬 멤버 재시도·계정 연결 안내를 보완했다. 영향 모듈 Debug 빌드와 app Lint 통과. 기존 요청 목록은 제거 대신 isUpdated로 표시하는 계약을 유지한다.
+- PR 3: Photo impl JVM 35건 (신규 11건), 별도 PhotoUriViewModelTest 기기 2건 통과. Paging source 확보 재시도·삭제/이름 변경 실패·초안·내보내기·개인/공유 기록 분리와 실제 Uri의 업로드 중복/실패/취소·가져오기 부분 실패/취소를 보완했다. 별도 패키지는 cord.eoeo.momentwo.photo.migrationcheck.test이며 AndroidJUnitRunner는 기존 app의 해석 버전 1.6.1을 명시했다. APK 빌드·Lint 통과. 서버/파일 자체 대신 Fake 요청 결과를 제어하며 실제 저장소 검증은 기존 기기 회귀를 유지한다.

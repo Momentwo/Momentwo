@@ -36,9 +36,11 @@ room = "2.6.1"
 # Test
 junit = "4.13.2"
 androidx-test-ext-junit = "1.2.1"
+androidx-test-runner = "1.6.1"
 espresso-core = "3.6.1"
 
 [libraries]
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
 # AndroidX Core
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }

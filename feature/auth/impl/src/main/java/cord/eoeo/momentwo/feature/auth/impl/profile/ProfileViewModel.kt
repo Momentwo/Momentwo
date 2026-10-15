@@ -8,10 +8,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-internal class ProfileViewModel @Inject constructor(savedStateHandle: SavedStateHandle) :
+internal class ProfileViewModel(initialState: ProfileState) :
     ReducerViewModel<ProfileState, ProfileEvent, Nothing, ProfileEffect>(
-        ProfileState(savedStateHandle.toRoute<ProfileDestination>().nickname), ProfileReducer,
+        initialState, ProfileReducer,
     ) {
+    @Inject constructor(savedStateHandle: SavedStateHandle) :
+        this(ProfileState(savedStateHandle.toRoute<ProfileDestination>().nickname))
+
     override fun handleEvent(event: ProfileEvent) {
         when (event) {
             is ProfileEvent.OnError -> sendEffect(ProfileEffect.ShowSnackbar(event.errorMessage))

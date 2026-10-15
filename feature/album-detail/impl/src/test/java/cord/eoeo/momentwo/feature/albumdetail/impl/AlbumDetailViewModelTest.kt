@@ -20,7 +20,7 @@ class AlbumDetailViewModelTest {
     private val member = DetailMemberRepository()
     private fun vm() = AlbumDetailViewModel(GetFriendListUseCase(DetailFriendRepository()), sub, member, album,
         AlbumDetailState(AlbumHeader(123, "fixture", "subtitle", ""))).also { store.put("detail", it) }
-    @After fun clear() { store.clear() }
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
 
     @Test fun successWaitsForPermissionAndListTogether() = runTest(main.testDispatcher) {
         val role = CompletableDeferred<MemberAuth>()

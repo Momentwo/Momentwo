@@ -24,7 +24,7 @@ class LocalPhotoListViewModelTest {
         override suspend fun editSubAlbum(id:String,title:String){delete()}
     }
     private fun vm()=LocalPhotoListViewModel(repo,"child",drafts=drafts).also{store.put("list",it);it.initialize()}
-    @After fun clear()=store.clear()
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun emptySuccessIsAvailableAndBackCancelsSelectionBeforeNavigating()=runTest(main.testDispatcher){
         val vm=vm();runCurrent();val effects=EffectRecorder(vm.effect,backgroundScope)
         assertTrue(vm.uiState.value.screen is ScreenState.Success)

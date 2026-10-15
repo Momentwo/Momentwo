@@ -20,7 +20,7 @@ class FriendViewModelTest {
     private val store = ViewModelStore()
     private val repository = FakeFriendRepository()
     private fun vm() = FriendViewModel(repository).also { store.put("friend", it) }
-    @After fun clear() { store.clear() }
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
 
     @Test fun onlySelectedRequestTabIsLoadedAndInitializationIsIdempotent() = runTest(main.testDispatcher) {
         val vm = vm()
@@ -117,6 +117,8 @@ class FriendViewModelTest {
         assertEquals(listOf(1),(vm.uiState.value.sent as ScreenState.Success).content.requests.filter{it.isUpdated}.map{it.userId})
         vm.onEvent(FriendEvent.OnResponseFriendRequest(2,"two",true));runCurrent()
         assertEquals(1L,vm.uiState.value.friendListRevision)
+        assertEquals(listOf("one" to false,"two" to true),repository.responseArgs)
+        assertEquals(listOf(1),repository.cancelledIds)
     }
     @Test fun backEffectIsSingleAndClearPreventsNewEvents() = runTest(main.testDispatcher) {
         val vm=vm();val effects=EffectRecorder(vm.effect,backgroundScope)
@@ -124,10 +126,33 @@ class FriendViewModelTest {
         store.clear();vm.onEvent(FriendEvent.OnBack);runCurrent();assertEquals(1,effects.values.size)
     }
 
+    @Test fun failedSearchKeepsQueryAndCancellationProducesNoSecondMessage()=runTest(main.testDispatcher){
+        val vm=vm();val effects=EffectRecorder(vm.effect,backgroundScope)
+        vm.onEvent(FriendEvent.OnClickRequestFriend);vm.onEvent(FriendEvent.OnSearchQueryChanged("query"))
+        repository.search={throw IOException("search")};vm.onEvent(FriendEvent.OnGetSearchUser("query"));runCurrent()
+        assertEquals("query",vm.uiState.value.searchQuery);assertTrue(vm.uiState.value.isRequestDialogOpened)
+        assertEquals(1,effects.values.size);assertTrue(effects.values.single() is FriendEffect.ShowSnackbar)
+        repository.search={throw CancellationException()};vm.onEvent(FriendEvent.OnGetSearchUser("query"));runCurrent()
+        assertEquals(1,effects.values.size);assertEquals(listOf("query","query"),repository.searches)
+    }
+    @Test fun latestSearchKeepsSuccessfulSourceAfterOlderQueryCompletes()=runTest(main.testDispatcher){
+        val old=CompletableDeferred<Unit>();val vm=vm();val effects=EffectRecorder(vm.effect,backgroundScope)
+        repository.search={if(repository.searches.last()=="old")withContext(NonCancellable){old.await()};flowOf(PagingData.empty())}
+        vm.onEvent(FriendEvent.OnClickRequestFriend);vm.onEvent(FriendEvent.OnSearchQueryChanged("old"))
+        vm.onEvent(FriendEvent.OnGetSearchUser("old"));runCurrent()
+        vm.onEvent(FriendEvent.OnSearchQueryChanged("latest"));val empty=vm.uiState.value.searchUserPagingData
+        vm.onEvent(FriendEvent.OnGetSearchUser("latest"));runCurrent()
+        val latest=vm.uiState.value.searchUserPagingData;assertNotSame(empty,latest)
+        old.complete(Unit);runCurrent();assertSame(latest,vm.uiState.value.searchUserPagingData)
+        assertEquals("latest",vm.uiState.value.searchQuery);assertTrue(effects.values.isEmpty())
+    }
+
 }
 
 private class FakeFriendRepository : FriendRepository {
     var pagingCalls = 0; var receivedCalls = 0; var sentCalls = 0; var responses = 0
+    val responseArgs=mutableListOf<Pair<String,Boolean>>()
+    val cancelledIds=mutableListOf<Int>()
     var requests: (suspend () -> Result<List<FriendRequestItem>>)? = null
     var operation: (suspend () -> Result<Unit>)? = null
     val searches = mutableListOf<String>()
@@ -139,7 +164,7 @@ private class FakeFriendRepository : FriendRepository {
     override suspend fun getReceivedRequests(): Result<List<FriendRequestItem>> { receivedCalls++; return requests?.invoke() ?: received() }
     override suspend fun getSentRequests(): Result<List<FriendRequestItem>> { sentCalls++; return requests?.invoke() ?: Result.success(emptyList()) }
     override suspend fun sendFriendRequest(nickname: String) = operation?.invoke() ?: Result.success(Unit)
-    override suspend fun responseFriendRequest(nickname: String, isAccepted: Boolean): Result<Unit> { responses++; return operation?.invoke() ?: response() }
-    override suspend fun cancelFriendRequest(userId: Int) = operation?.invoke() ?: Result.success(Unit)
+    override suspend fun responseFriendRequest(nickname: String, isAccepted: Boolean): Result<Unit> { responses++; responseArgs+=nickname to isAccepted; return operation?.invoke() ?: response() }
+    override suspend fun cancelFriendRequest(userId: Int):Result<Unit> { cancelledIds+=userId; return operation?.invoke() ?: Result.success(Unit) }
     override suspend fun getSearchUsers(nickname: String, size: Int): Flow<PagingData<UserItem>> { searches += nickname; return search() }
 }

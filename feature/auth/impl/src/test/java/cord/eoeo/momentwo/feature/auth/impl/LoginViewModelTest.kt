@@ -37,7 +37,7 @@ class LoginViewModelTest {
         TryAutoLoginUseCase(preferences),
     ).also { store.put("login", it) }
 
-    @After fun clearViewModel() { store.clear() }
+    @After fun clearViewModel() { store.clear(); mainDispatcherRule.testDispatcher.scheduler.runCurrent() }
 
     @Test
     fun loginSuccessStoresSessionAndNavigatesToAlbum() = runTest(mainDispatcherRule.testDispatcher) {

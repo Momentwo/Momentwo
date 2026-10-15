@@ -20,7 +20,7 @@ class LocalAlbumViewModelTest {
     private val drafts = EmptyLibraryDrafts()
     private val store = ViewModelStore()
     private fun vm() = LocalAlbumViewModel(repo, drafts, "album").also { store.put("album", it); it.initialize() }
-    @After fun clear() = store.clear()
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun missingAlbumIsErrorAndCannotKeepDeletedContent() = runTest(main.testDispatcher) {
         val vm = vm(); runCurrent(); assertTrue(vm.uiState.value.screen is ScreenState.Success)
         repo.album.value = null; runCurrent()

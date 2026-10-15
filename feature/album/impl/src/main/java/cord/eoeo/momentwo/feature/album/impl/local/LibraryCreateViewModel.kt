@@ -84,7 +84,7 @@ internal class LibraryCreateViewModel(
                 if (snapshot.account && requireNotNull(accounts).identities().first() != snapshot.identity) return@launchRequest
                 if (uiState.value.revision == snapshot.revision) { dispatch(LibraryCreateAction.Reset(snapshot.draft.token)); emitEffect(LibraryCreateEffect.Created(snapshot.account)) }
                 else emitEffect(LibraryCreateEffect.Message("요청한 앨범을 저장했습니다"))
-            }, onFailure = { Log.e("LibraryCreate", "Create failed", it); emitEffect(LibraryCreateEffect.Message("앨범을 저장하지 못했습니다")) },
+            }, onFailure = { Log.e("LibraryCreate", "Create failed", it); if (!snapshot.account || requireNotNull(accounts).identities().first() == snapshot.identity) emitEffect(LibraryCreateEffect.Message("앨범을 저장하지 못했습니다")) },
             onFinished = { dispatch(LibraryCreateAction.Pending(false)) })
     }
 }

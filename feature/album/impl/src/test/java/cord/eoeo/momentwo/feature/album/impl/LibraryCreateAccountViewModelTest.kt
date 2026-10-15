@@ -25,7 +25,7 @@ class LibraryCreateAccountViewModelTest {
         }
     }
     private fun vm()=LibraryCreateViewModel(local,drafts,true,accounts,sync,GetFriendListUseCase(AlbumFriendRepository())).also{store.put("create",it);it.initialize()}
-    @After fun clear()=store.clear()
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun submissionCapturesOwnerEpochAndInvitationsAndKeepsLaterDraft()=runTest(main.testDispatcher){
         accounts.identity.value=a;val vm=vm();runCurrent();val effects=EffectRecorder(vm.effect,backgroundScope)
         vm.onEvent(LibraryCreateEvent.Text("first"));vm.onEvent(LibraryCreateEvent.Toggle("invited"));runCurrent()
@@ -54,4 +54,12 @@ class LibraryCreateAccountViewModelTest {
         create={throw CancellationException()};vm.onEvent(LibraryCreateEvent.Submit);runCurrent()
         assertEquals(1,effects.values.size);assertFalse(vm.uiState.value.pending)
     }
+    @Test fun oldAccountCreationFailureCannotShowMessageAfterSwitch()=runTest(main.testDispatcher){
+        accounts.identity.value=a;val vm=vm();runCurrent();val effects=EffectRecorder(vm.effect,backgroundScope)
+        vm.onEvent(LibraryCreateEvent.Text("old A"));runCurrent();val gate=ControlledCall<Unit>();create={gate.await()}
+        vm.onEvent(LibraryCreateEvent.Submit);runCurrent();accounts.identity.value=AccountIdentity("B","two",true);runCurrent()
+        gate.fail(IOException("old A failed"));runCurrent()
+        assertTrue(effects.values.isEmpty());assertFalse(vm.uiState.value.pending)
+    }
+
 }

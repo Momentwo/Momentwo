@@ -34,7 +34,7 @@ class AccountAccessViewModelTest {
     private val b = AccountIdentity("B", "b1", true)
     private fun vm() = AccountLibraryViewModel(accounts, local).also { store.put("library", it) }
     private fun content(vm: AccountLibraryViewModel) = (vm.uiState.value.screen as ScreenState.Success).content
-    @After fun clear() = store.clear()
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
 
     @Test fun gateSettlesWithoutAccountAndCannotReuseEarlierEpoch() = runTest(main.testDispatcher) {
         val vm = AccountGateViewModel(accounts).also { store.put("gate", it) }

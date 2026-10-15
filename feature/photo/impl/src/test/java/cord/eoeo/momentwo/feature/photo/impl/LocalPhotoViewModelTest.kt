@@ -18,7 +18,7 @@ class LocalPhotoViewModelTest {
     @get:Rule val main = MainDispatcherRule(StandardTestDispatcher())
     private val repo = PhotoLocalFake(); private val drafts = EmptyLibraryDrafts(); private val store = ViewModelStore()
     private fun vm() = LocalPhotoViewModel(repo,drafts,"photo").also {store.put("photo",it);it.initialize()}
-    @After fun clear() = store.clear()
+    @After fun clear() { store.clear(); main.testDispatcher.scheduler.runCurrent() }
     @Test fun knownParentTitlesRemainWhileFirstPageIsUnavailableButDisappearOnOwnershipLoss()=runTest(main.testDispatcher) {
         val vm=LocalPhotoListViewModel(repo,"child");store.put("list",vm);vm.initialize();runCurrent()
         assertEquals(ScreenState.Loading,vm.uiState.value.screen);assertEquals(LocalPhotoListHeader("old","child"),vm.uiState.value.header)
@@ -83,6 +83,20 @@ class LocalPhotoViewModelTest {
         assertEquals("private",repo.notes.value.single().text);assertTrue(repo.photo.value!!.favorite)
     }
 
+    @Test fun memoEditFailureKeepsDraftAndSuccessfulRetryAndDeleteTargetOnlyMemoId()=runTest(main.testDispatcher){
+        repo.notes.value=listOf(LocalMemo("one","photo","old",0),LocalMemo("two","photo","untouched",0))
+        val vm=vm();runCurrent();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        vm.onEvent(LocalPhotoEvent.Open(LocalPhotoDialog.Memo("one")));vm.onEvent(LocalPhotoEvent.Text("edited"));runCurrent()
+        repo.memoWrite={throw IOException("memo")};vm.onEvent(LocalPhotoEvent.Save);runCurrent()
+        assertEquals(LocalPhotoDialog.Memo("one"),vm.uiState.value.dialog);assertEquals("edited",vm.uiState.value.draft.text)
+        assertEquals("old",repo.notes.value.first().text);assertEquals(1,effects.values.size)
+        repo.memoWrite={};vm.onEvent(LocalPhotoEvent.Save);runCurrent()
+        assertEquals(listOf("untouched","edited"),repo.notes.value.map{it.text})
+        vm.onEvent(LocalPhotoEvent.DeleteMemo("one"));runCurrent()
+        assertEquals(listOf("two"),repo.notes.value.map{it.localId})
+        assertEquals("old",repo.photo.value!!.description);assertTrue(vm.uiState.value.pending.isEmpty())
+    }
+
 }
 internal class PhotoLocalFake : LocalLibraryRepository {
     var create: suspend (String, String) -> String = { _, id -> id }
@@ -118,8 +132,9 @@ internal class PhotoLocalFake : LocalLibraryRepository {
     override suspend fun importPhoto(subAlbumId: String, source: android.net.Uri, localId: String): String = error("unused")
     override suspend fun setDescription(id: String, text: String) { description(text) }
     override suspend fun setFavorite(id: String, value: Boolean) { photo.value = photo.value!!.copy(favorite=value) }
-    override suspend fun saveMemo(photoId: String, text: String, memoId: String): String { notes.value = notes.value + LocalMemo(memoId,photoId,text,0); return memoId }
-    override suspend fun deleteMemo(id: String): Unit = error("unused")
+    var memoWrite: suspend () -> Unit = {}
+    override suspend fun saveMemo(photoId: String, text: String, memoId: String): String { memoWrite(); notes.value = notes.value.filterNot { it.localId == memoId } + LocalMemo(memoId,photoId,text,0); return memoId }
+    override suspend fun deleteMemo(id: String) { memoWrite(); notes.value=notes.value.filterNot{it.localId==id} }
     override suspend fun deletePhoto(id: String): Unit = error("unused")
     var export: suspend () -> Unit = {}
     override suspend fun exportPhoto(id: String) { export() }

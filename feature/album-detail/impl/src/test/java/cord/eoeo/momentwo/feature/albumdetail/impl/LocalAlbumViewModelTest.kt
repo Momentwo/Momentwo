@@ -66,6 +66,38 @@ class LocalAlbumViewModelTest {
         vm.onEvent(LocalAlbumEvent.Dismiss); runCurrent(); repo.album.value = repo.album.value!!.copy(title="new"); runCurrent()
         assertEquals(LocalAlbumDialog.None, vm.uiState.value.dialog); assertNull(drafts.value)
     }
+    @Test fun failedWritePreservesEditorAndBackCancelsEditingBeforeNavigation() = runTest(main.testDispatcher) {
+        val vm=vm();runCurrent();val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        repo.edit={_,_,_->throw IOException("disk")}
+        vm.onEvent(LocalAlbumEvent.Open(LocalAlbumDialog.EditAlbum));vm.onEvent(LocalAlbumEvent.Text("keep"));runCurrent()
+        vm.onEvent(LocalAlbumEvent.Save);runCurrent()
+        assertEquals("keep",vm.uiState.value.draft.text);assertEquals(LocalAlbumDialog.EditAlbum,vm.uiState.value.dialog)
+        assertTrue(vm.uiState.value.pending.isEmpty());assertEquals(1,effects.values.size)
+        vm.onEvent(LocalAlbumEvent.Edit);vm.onEvent(LocalAlbumEvent.Back);runCurrent();assertFalse(vm.uiState.value.editing)
+        assertEquals(1,effects.values.size)
+        vm.onEvent(LocalAlbumEvent.Back);runCurrent();assertEquals(LocalAlbumEffect.Back,effects.values.last())
+    }
+
+    @Test fun accountMemberFailureCanRetryAndDeviceInvitationOnlyRequestsConnection() = runTest(main.testDispatcher) {
+        var reads=0;var failing=true
+        val account=object:StrictAccountLibraryAccess(){
+            override fun identities()=flowOf(AccountIdentity("A","one",true))
+            override suspend fun refreshAlbum(id:String) {}
+            override suspend fun members(id:String):List<MemberItem>{reads++;if(failing)throw IOException("offline");return listOf(MemberItem(7,"seven","",MemberAuth.MEMBER))}
+        }
+        repo.album.value=repo.album.value!!.copy(libraryId="account:A",remoteId=123,role=MemberAuth.ADMIN.roleString)
+        val vm=LocalAlbumViewModel(repo,drafts,"album",account).also{store.put("album",it)}
+        val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        vm.initialize();runCurrent();vm.onEvent(LocalAlbumEvent.Tab(1));runCurrent()
+        assertEquals(ScreenState.Error(UiError.Network),vm.uiState.value.members);assertTrue(effects.values.isEmpty())
+        failing=false;vm.onEvent(LocalAlbumEvent.Retry);runCurrent()
+        assertEquals(7,(vm.uiState.value.members as ScreenState.Success).content.single().id)
+        assertEquals(2,reads)
+        repo.album.value=repo.album.value!!.copy(libraryId="device",remoteId=null,role=null);runCurrent()
+        vm.onEvent(LocalAlbumEvent.Add);runCurrent();assertEquals(listOf(LocalAlbumEffect.Connect),effects.values)
+        assertEquals(2,reads)
+    }
+
 }
 private class AlbumLocalFake : LocalLibraryRepository {
     var create: suspend (String, String) -> String = { _, id -> id }

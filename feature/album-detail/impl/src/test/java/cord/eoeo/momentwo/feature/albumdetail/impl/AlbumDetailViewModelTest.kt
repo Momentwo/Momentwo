@@ -102,4 +102,52 @@ class AlbumDetailViewModelTest {
         assertEquals(2, sub.reads)
         assertFalse(vm.uiState.value.subAlbumsDirty)
     }
+    @Test fun tabErrorRetryAndRefreshFailureKeepExistingContentWithoutSnackbar() = runTest(main.testDispatcher) {
+        val effects=mutableListOf<AlbumDetailEffect>();val vm=vm()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)){vm.effect.collect{effects+=it}}
+        sub.read={Result.failure(IOException("first"))};vm.initialize();runCurrent()
+        sub.read={Result.success(sub.items)};vm.onEvent(AlbumDetailEvent.OnRetryTab(DetailTab.SubAlbums));runCurrent()
+        vm.onEvent(AlbumDetailEvent.OnClickEdit);vm.onEvent(AlbumDetailEvent.OnChangeSubAlbumSelected(true,1))
+        sub.read={Result.failure(IOException("refresh"))};vm.onEvent(AlbumDetailEvent.OnRetryTab(DetailTab.SubAlbums));runCurrent()
+        assertEquals(RefreshState.Error(UiError.Network),(vm.uiState.value.subAlbums as ScreenState.Success).refresh)
+        assertEquals(listOf(1),vm.uiState.value.selectedSubAlbumIds);assertTrue(effects.isEmpty())
+        vm.onEvent(AlbumDetailEvent.OnCancelEdit);assertFalse(vm.uiState.value.isEditMode)
+        vm.onEvent(AlbumDetailEvent.OnBack);runCurrent();assertEquals(listOf(AlbumDetailEffect.PopBackStack),effects)
+    }
+    @Test fun failedSettingsAndMemberOperationsNeverNavigateOrClearPendingData() = runTest(main.testDispatcher) {
+        val vm=vm();vm.initialize();runCurrent()
+        val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        album.operation={Result.failure(IOException("write"))};album.title={Result.failure(IOException("title"))}
+        member.operation={Result.failure(IOException("member"))};sub.operation={Result.failure(IOException("sub"))}
+        val events=listOf(
+            AlbumDetailEvent.OnSubAlbumEvents(SubAlbumEvent.Create("new")),
+            AlbumDetailEvent.OnSubAlbumEvents(SubAlbumEvent.EditTitle(1,"new")),
+            AlbumDetailEvent.OnAlbumSettingEvents(AlbumSettingEvent.EditTitle("new")),
+            AlbumDetailEvent.OnAlbumSettingEvents(AlbumSettingEvent.EditSubTitle("new")),
+            AlbumDetailEvent.OnAlbumSettingEvents(AlbumSettingEvent.DeleteSubTitle),
+            AlbumDetailEvent.OnAlbumSettingEvents(AlbumSettingEvent.ChangeImage),
+            AlbumDetailEvent.OnAlbumSettingEvents(AlbumSettingEvent.DeleteAlbum),
+            AlbumDetailEvent.OnMemberEvents(MemberEvent.Exit),
+            AlbumDetailEvent.OnMemberEvents(MemberEvent.KickMembers(listOf(7))))
+        events.forEach{vm.onEvent(it);runCurrent();assertTrue(vm.uiState.value.pendingWrites.isEmpty())}
+        assertEquals(events.size,effects.values.size);assertTrue(effects.values.all{it is AlbumDetailEffect.ShowSnackbar})
+        assertEquals("fixture",vm.uiState.value.albumItem.title)
+    }
+    @Test fun successfulCreationFollowedByReadFailureIsCommittedAndKeepsTabContent() = runTest(main.testDispatcher) {
+        val vm=vm();vm.initialize();runCurrent()
+        val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        sub.read={Result.failure(IOException("reload"))}
+        vm.onEvent(AlbumDetailEvent.OnSubAlbumEvents(SubAlbumEvent.Create("created")));runCurrent()
+        assertEquals(1,sub.creates);assertTrue(vm.uiState.value.subAlbums is ScreenState.Success)
+        assertEquals(RefreshState.Error(UiError.Network),(vm.uiState.value.subAlbums as ScreenState.Success).refresh)
+        assertTrue(effects.values.isEmpty());assertTrue(vm.uiState.value.pendingWrites.isEmpty())
+    }
+    @Test fun successfulExitAndDeletionEmitOneBackEffectEach() = runTest(main.testDispatcher) {
+        val vm=vm();vm.initialize();runCurrent()
+        val effects=cord.eoeo.momentwo.core.testing.EffectRecorder(vm.effect,backgroundScope)
+        vm.onEvent(AlbumDetailEvent.OnMemberEvents(MemberEvent.Exit));runCurrent()
+        vm.onEvent(AlbumDetailEvent.OnAlbumSettingEvents(AlbumSettingEvent.DeleteAlbum));runCurrent()
+        assertEquals(listOf(AlbumDetailEffect.PopBackStack,AlbumDetailEffect.PopBackStack),effects.values)
+    }
+
 }

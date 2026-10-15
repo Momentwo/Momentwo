@@ -33,3 +33,4 @@
 
 - PR 1: 계정 인터페이스와 Hilt binding, 계정 gate/library의 구독·실패·전환·Effect 신규 8건. Album impl 단위 33건과 app Debug/Hilt 빌드, 영향 모듈 테스트·Lint 검증.
 - 나머지 항목은 각 PR에서 대응표와 검증 결과를 갱신한다.
+- PR 2: Friend 14건, Album 38건, AlbumDetail 33건 (합계 85건, 신규 16건) 통과. 검색 취소/불일치 인자, 양쪽 요청 탭 실패·재시도, 쓰기 실패·취소, 초대 payload와 계정 epoch, 상세 쓰기/후속 조회 실패, 로컬 멤버 재시도·계정 연결 안내를 보완했다. 영향 모듈 Debug 빌드와 app Lint 통과. 기존 요청 목록은 제거 대신 isUpdated로 표시하는 계약을 유지한다.

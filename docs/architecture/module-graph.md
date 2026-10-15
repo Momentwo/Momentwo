@@ -1,6 +1,6 @@
 # Momentwo 실제 모듈 의존성
 
-2026-10-14 기준 settings.gradle.kts 및 각 모듈 build.gradle.kts, Feature convention plugin의 프로젝트 의존을 정리했다. 총 24개 include 모듈이며 build-logic은 별도 included build다. 아래 표는 외부 라이브러리를 제외한다. 단위·기기 테스트 전용 의존을 실행 의존과 구별한다.
+2026-10-15 기준 settings.gradle.kts 및 각 모듈 build.gradle.kts, Feature convention plugin의 프로젝트 의존을 정리했다. 총 24개 include 모듈이며 build-logic은 별도 included build다. 아래 표는 외부 라이브러리를 제외한다. 단위·기기 테스트 전용 의존을 실행 의존과 구별한다.
 
 | 모듈 | 실행 프로젝트 의존 (convention 기본값 포함) | 테스트 프로젝트 의존 |
 |---|---|---|
@@ -10,7 +10,7 @@
 | `:core:common` | 없음 | `:core:testing` |
 | `:core:ui` | `:core:common`, `:core:designsystem`, `:core:model` | `:core:testing` |
 | `:core:datastore` | `:core:common`, `:core:model` | `:core:testing` |
-| `:core:network` | `:core:datastore` | 없음 |
+| `:core:network` | `:core:datastore`, `:core:model` | 없음 |
 | `:core:database` | `:core:model` | 없음 |
 | `:core:data` | `:core:common`, `:core:model`, `:core:network`, `:core:database`, `:core:datastore` | `:core:testing` |
 | `:core:domain` | `:core:common`, `:core:data`, `:core:model`, `:core:datastore` | `:core:testing` |
@@ -37,8 +37,9 @@
 - 화면 이동은 app callback으로 연결한다. 서로 다른 Feature 사이의 유일한 프로젝트 의존은 album-detail:impl → subalbum:api이다.
 - SubAlbum의 상태·MVI·CRUD는 AlbumDetail이 소유한다. app의 SubAlbumContentAdapter가 상태 조각/콜백을 실제 SubAlbumListScreen에 전달하며 두 impl이 서로 import하지 않는다.
 - Feature→app, Core→Feature, impl→타 Feature impl, api→impl/data 의존은 금지한다.
+- 이 규칙과 빌드 맥락별 의존 사이클은 `./gradlew checkArchitecture`로 검사한다. [경계·사이클 검사 및 CI](module-boundaries.md)를 따른다.
 - core:navigation은 통합 키 이관 후 현재 공용 소스가 없다. 기존 모듈 계약과 Feature plugin 기본 의존을 유지한다.
-- core:testing은 MainDispatcherRule을 제공한다. Fake 구현은 사용하는 Feature의 테스트 소스에만 둔다.
+- core:testing은 MainDispatcherRule과 범용 응답 제어·Effect 기록 도구를 제공한다. Fake 구현은 사용하는 Feature의 테스트 소스에만 둔다.
 
 ## 앱과 MVI
 

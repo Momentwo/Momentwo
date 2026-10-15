@@ -120,6 +120,7 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 androidRoom = { id = "androidx.room", version.ref = "room" }
 
 # Momentwo convention plugins (build-logic)
+momentwo-module-architecture = { id = "momentwo.module-architecture", version = "unspecified" }
 momentwo-android-application = { id = "momentwo.android.application", version = "unspecified" }
 momentwo-android-application-compose = { id = "momentwo.android.application.compose", version = "unspecified" }
 momentwo-android-library = { id = "momentwo.android.library", version = "unspecified" }

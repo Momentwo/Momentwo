@@ -188,11 +188,14 @@ class ModuleArchitecturePluginTest {
     }
 
     @Test fun androidVariantsAreSeparateAndTestsConsumeOnlyProductionOutput() {
+        val agpVersion = requireNotNull(System.getProperty("momentwo.test.agp.version")) {
+            "Pass the catalog AGP version through the convention test task"
+        }
         val sdk = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-            ?: error("Set ANDROID_HOME to run the AGP 8.5.2 TestKit fixture")
+            ?: error("Set ANDROID_HOME to run the AGP $agpVersion TestKit fixture")
         val dir = fixture(":core:a", ":core:b")
         dir.resolve("settings.gradle").writeText("pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }; include ':core:a', ':core:b'")
-        dir.resolve("build.gradle").writeText("plugins { id 'com.android.library' version '8.5.2' apply false; id 'momentwo.module-architecture' }")
+        dir.resolve("build.gradle").writeText("plugins { id 'com.android.library' version '$agpVersion' apply false; id 'momentwo.module-architecture' }")
         dir.resolve("local.properties").writeText("sdk.dir=${sdk.replace("\\", "\\\\")}\n")
         listOf("a", "b").forEach { name -> dir.build(":core:$name").writeText("plugins { id 'com.android.library' }; android { namespace 'fixture.core.$name'; compileSdk 34 }\n") }
         dir.build(":core:a").appendText("dependencies { debugImplementation project(':core:b') }\n")

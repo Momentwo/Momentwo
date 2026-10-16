@@ -391,6 +391,8 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 
 `local.properties`에 `sdk.dir`과 기존 `BASE_URL` 설정이 필요합니다. BASE_URL의 BuildConfig는 `core:network`가 생성합니다. 로컬 설정과 인증 정보는 커밋하지 않습니다.
 
+핵심 도구 전환 #189와 후속 라이브러리·targetSdk 업데이트 #190의 순서와 검증 기준은 [빌드 도구 업데이트](docs/architecture/toolchain-upgrade.md)에 정리했습니다.
+
 ### 빌드·Lint·단위 테스트
 
 ```bash

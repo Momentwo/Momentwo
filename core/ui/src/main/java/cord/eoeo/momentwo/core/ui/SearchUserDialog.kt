@@ -43,8 +43,8 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import coil.ImageLoader
-import coil.imageLoader
+import coil3.ImageLoader
+import coil3.imageLoader
 import cord.eoeo.momentwo.core.common.UiError
 import java.io.IOException
 import cord.eoeo.momentwo.core.model.UserItem

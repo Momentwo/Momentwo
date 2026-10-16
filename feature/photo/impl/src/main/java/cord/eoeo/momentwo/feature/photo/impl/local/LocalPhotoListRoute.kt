@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.common.*
 import cord.eoeo.momentwo.core.ui.*
 import cord.eoeo.momentwo.feature.photo.impl.photolist.*

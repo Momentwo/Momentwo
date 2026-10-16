@@ -68,7 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.ui.CircleAsyncImage
 import cord.eoeo.momentwo.core.ui.TextFieldDialog
 import cord.eoeo.momentwo.core.ui.ScreenContent

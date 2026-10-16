@@ -27,9 +27,9 @@ kotlin-serialization = "1.11.0"
 coroutines = "1.11.0"
 
 # Image / Storage / Paging / Room
-coil = "2.7.0"
-datastore = "1.1.1"
-paging = "3.3.2"
+coil = "3.6.3"
+datastore = "1.2.1"
+paging = "3.5.3"
 room = "2.8.5"
 
 # Test
@@ -80,8 +80,10 @@ okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-i
 kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlin-serialization" }
 
 # Image / Storage / Paging / Room
-coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+coil-network-cache-control = { group = "io.coil-kt.coil3", name = "coil-network-cache-control", version.ref = "coil" }
 datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }

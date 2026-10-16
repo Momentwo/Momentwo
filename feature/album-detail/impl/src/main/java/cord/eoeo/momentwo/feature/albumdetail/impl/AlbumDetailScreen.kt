@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.ui.CollectEffect
 import cord.eoeo.momentwo.core.ui.ScreenContent
 import cord.eoeo.momentwo.core.ui.EmptyContent

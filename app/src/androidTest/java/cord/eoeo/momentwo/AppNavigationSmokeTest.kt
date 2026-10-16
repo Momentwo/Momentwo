@@ -37,7 +37,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import coil.imageLoader
+import coil3.imageLoader
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
 import cord.eoeo.momentwo.feature.friend.api.FriendDestination
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination

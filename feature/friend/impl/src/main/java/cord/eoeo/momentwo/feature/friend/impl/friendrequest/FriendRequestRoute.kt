@@ -3,7 +3,7 @@ package cord.eoeo.momentwo.feature.friend.impl.friendrequest
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.feature.friend.impl.FriendState
 import cord.eoeo.momentwo.feature.friend.impl.FriendEvent
 import cord.eoeo.momentwo.feature.friend.impl.RequestTab

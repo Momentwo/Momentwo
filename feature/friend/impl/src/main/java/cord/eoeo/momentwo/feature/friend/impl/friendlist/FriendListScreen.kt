@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.model.FriendItem
 import cord.eoeo.momentwo.core.ui.EmptyContent
 import cord.eoeo.momentwo.core.ui.PagingAppendContent

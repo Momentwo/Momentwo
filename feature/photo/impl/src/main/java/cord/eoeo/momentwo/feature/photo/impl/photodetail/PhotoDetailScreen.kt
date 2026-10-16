@@ -44,8 +44,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.paging.compose.LazyPagingItems
-import coil.ImageLoader
-import coil.compose.AsyncImage
+import coil3.ImageLoader
+import coil3.compose.AsyncImage
 import cord.eoeo.momentwo.core.common.ScreenState
 import cord.eoeo.momentwo.core.common.RefreshState
 import cord.eoeo.momentwo.core.ui.CollectEffect

@@ -6,7 +6,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.rememberNavController
-import coil.ImageLoader
+import coil3.ImageLoader
 
 @Composable
 internal fun MomentwoApp(

@@ -22,13 +22,15 @@ class GuestAlbumCrudSmokeTest {
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
     }
     @Test fun albumAndSubAlbumCanBeCreatedEditedReopenedAndDeletedWithoutApi() {
+        val albumTitle = "Guest fixture ${System.nanoTime()}"
         val counter = EntryPointAccessors.fromApplication(compose.activity.applicationContext, ApiDiagnostics::class.java).apiRequests()
         val before = counter.count
         compose.onNodeWithContentDescription("앨범 추가").performClick()
-        compose.onNode(hasSetTextAction()).performTextReplacement("Guest fixture")
+        compose.onNode(hasSetTextAction()).performTextReplacement(albumTitle)
         compose.onNodeWithText("완료", useUnmergedTree = true).performClick()
-        compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest fixture")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
-        compose.onNodeWithText("Guest fixture").performClick()
+        waitForLibrary()
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText(albumTitle) and hasClickAction()).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+        compose.onNode(hasText(albumTitle) and hasClickAction()).performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("서브 앨범")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.onNodeWithContentDescription("추가").performClick()
         compose.onNodeWithText("이름").performTextInput("Guest child")
@@ -42,13 +44,22 @@ class GuestAlbumCrudSmokeTest {
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Persisted subtitle")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("저장")).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty() }
         compose.onNodeWithContentDescription("뒤로").performClick()
-        compose.onNodeWithText("Guest fixture").performClick()
+        waitForLibrary()
+        compose.onNode(hasText(albumTitle) and hasClickAction()).performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest child")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.onNodeWithText("설정").performClick()
         compose.onNodeWithText("앨범 삭제").performClick()
         compose.onNode(hasText("삭제") and hasAnyAncestor(isDialog())).performClick()
-        compose.waitUntil(10_000) { compose.onAllNodes(hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
-        compose.onNodeWithText("Guest fixture").assertDoesNotExist()
+        waitForLibrary()
+        compose.onNodeWithText(albumTitle).assertDoesNotExist()
         assertEquals(before, counter.count)
+    }
+
+    private fun waitForLibrary() {
+        // The form and the album card share the title; wait for the outgoing destination to disappear.
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() &&
+                compose.onAllNodes(hasText("Create Album") or hasText("서브 앨범")).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+        }
     }
 }

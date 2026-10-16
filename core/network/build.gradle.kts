@@ -1,9 +1,9 @@
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.momentwo.android.library)
-    alias(libs.plugins.momentwo.android.network)
-    alias(libs.plugins.momentwo.android.hilt)
+    id("momentwo.android.library")
+    id("momentwo.android.network")
+    id("momentwo.android.hilt")
 }
 
 val localProperties = providers.fileContents(rootProject.layout.projectDirectory.file("local.properties"))

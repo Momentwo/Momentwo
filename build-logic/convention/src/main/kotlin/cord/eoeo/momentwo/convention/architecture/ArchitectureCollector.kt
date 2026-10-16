@@ -29,15 +29,20 @@ internal object ArchitectureCollector {
                 sources += codeRoots.map { SourceRoot(project.path, source.name, it.absolutePath) }
             }
             project.configurations.sortedBy { it.name }.forEach { origin ->
-                origin.dependencies.withType(ProjectDependency::class.java).forEach { dependency ->
+                origin.dependencies.withType(ProjectDependency::class.java).forEach dependencyLoop@{ dependency ->
+                    val targetProject = root.findProject(dependency.path)
+                    if (targetProject == null) {
+                        problems += unsupported(project.path, origin.name, "Project dependency to ${dependency.path} is outside the checked build")
+                        return@dependencyLoop
+                    }
                     val consumers = contexts.getValue(project.path).filter { origin in it.configuration.hierarchy }
                     if (consumers.isEmpty()) {
-                        problems += unsupported(project.path, origin.name, "Project dependency to ${dependency.dependencyProject.path} is not attached to a supported compile/runtime context")
+                        problems += unsupported(project.path, origin.name, "Project dependency to ${dependency.path} is not attached to a supported compile/runtime context")
                     }
                     consumers.forEach { consumer ->
-                        val target = selectTarget(dependency, consumer, contexts[dependency.dependencyProject.path].orEmpty())
+                        val target = selectTarget(dependency, targetProject, consumer, contexts[dependency.path].orEmpty())
                         if (target == null) problems += unsupported(project.path, origin.name,
-                            "Cannot select ${dependency.dependencyProject.path} output for ${consumer.node.key}; targetConfiguration=${dependency.targetConfiguration ?: "<variant-aware>"}, capabilities=${dependency.requestedCapabilities}, requestedAttributes=${dependency.attributes}")
+                            "Cannot select ${dependency.path} output for ${consumer.node.key}; targetConfiguration=${dependency.targetConfiguration ?: "<variant-aware>"}, capabilities=${dependency.requestedCapabilities}, requestedAttributes=${dependency.attributes}")
                         else edges += Edge(consumer.node, target, origin.name)
                     }
                 }
@@ -77,7 +82,7 @@ internal object ArchitectureCollector {
         return Context(config, Node(path, variant, kind, usage), buildType)
     }
 
-    private fun selectTarget(dep: ProjectDependency, consumer: Context, candidates: List<Context>): Node? {
+    private fun selectTarget(dep: ProjectDependency, targetProject: Project, consumer: Context, candidates: List<Context>): Node? {
         if (dep.artifacts.isNotEmpty() || dep.attributes.keySet().any { it.name != "com.android.build.api.attributes.BuildTypeAttr" }) return null
         val fixture = dep.requestedCapabilities.any { it.name.endsWith("-test-fixtures") }
         if (dep.requestedCapabilities.isNotEmpty() && (!fixture || dep.requestedCapabilities.size != 1)) return null
@@ -85,7 +90,7 @@ internal object ArchitectureCollector {
         val available = candidates.map { it.node }.filter { it.kind == kind && it.usage == consumer.node.usage }.distinct()
         val explicit = dep.targetConfiguration
         if (explicit != null && explicit != "default") {
-            val configuration = dep.dependencyProject.configurations.findByName(explicit) ?: return null
+            val configuration = targetProject.configurations.findByName(explicit) ?: return null
             if (!configuration.isCanBeConsumed) return null
             val suffix = when {
                 explicit == "apiElements" -> "apiElements"

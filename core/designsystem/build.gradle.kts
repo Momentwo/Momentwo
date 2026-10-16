@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.momentwo.android.library)
-    alias(libs.plugins.momentwo.android.library.compose)
+    id("momentwo.android.library")
+    id("momentwo.android.library.compose")
 }
 
 android {

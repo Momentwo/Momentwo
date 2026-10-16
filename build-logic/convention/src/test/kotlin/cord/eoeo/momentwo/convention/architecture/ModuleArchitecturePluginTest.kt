@@ -194,12 +194,35 @@ class ModuleArchitecturePluginTest {
         val sdk = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
             ?: error("Set ANDROID_HOME to run the AGP $agpVersion TestKit fixture")
         val dir = fixture(":core:a", ":core:b")
+        // AGP 9 enables host tests only for debug by default. Cover explicitly enabled release host tests too.
+        dir.resolve("gradle.properties").appendText("android.onlyEnableUnitTestForTheTestedBuildType=false\n")
         dir.resolve("settings.gradle").writeText("pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }; include ':core:a', ':core:b'")
         dir.resolve("build.gradle").writeText("plugins { id 'com.android.library' version '$agpVersion' apply false; id 'momentwo.module-architecture' }")
+        dir.resolve("build.gradle").appendText("""
+
+            tasks.named('checkArchitecture') {
+                doLast { verification ->
+                    def model = verification.snapshot.get()
+                    ['UNIT_TEST', 'ANDROID_TEST'].each { kind ->
+                        ['COMPILE', 'RUNTIME'].each { usage ->
+                            assert model.edges.any { edge ->
+                                edge.from.project == ':core:a' && edge.from.variant == 'debug' &&
+                                    edge.from.kind.toString() == kind && edge.from.usage.toString() == usage &&
+                                    edge.to.project == ':core:a' && edge.to.variant == 'debug' &&
+                                    edge.to.kind.toString() == 'MAIN' && edge.to.usage.toString() == usage
+                            } : "Missing Android tested-output context: " + kind + '/' + usage
+                        }
+                    }
+                    assert model.nodes.any { node ->
+                        node.project == ':core:a' && node.variant == 'release' && node.kind.toString() == 'UNIT_TEST'
+                    } : 'Explicitly enabled release host tests must be inspected'
+                }
+            }
+        """.trimIndent())
         dir.resolve("local.properties").writeText("sdk.dir=${sdk.replace("\\", "\\\\")}\n")
         listOf("a", "b").forEach { name -> dir.build(":core:$name").writeText("plugins { id 'com.android.library' }; android { namespace 'fixture.core.$name'; compileSdk 34 }\n") }
         dir.build(":core:a").appendText("dependencies { debugImplementation project(':core:b') }\n")
-        dir.build(":core:b").appendText("dependencies { releaseImplementation project(':core:a'); testDebugImplementation project(':core:a'); androidTestImplementation project(':core:a') }\n")
+        dir.build(":core:b").appendText("dependencies { releaseImplementation project(':core:a'); testDebugImplementation project(':core:a'); testReleaseImplementation project(':core:a'); androidTestImplementation project(':core:a') }\n")
         runner(dir, "checkArchitecture").build()
         dir.build(":core:b").appendText("dependencies { debugImplementation project(':core:a') }\n")
         val failure = runner(dir, "checkModuleCycles").buildAndFail()

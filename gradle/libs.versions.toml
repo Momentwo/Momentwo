@@ -1,8 +1,8 @@
 [versions]
 # Build toolchain
-agp = "8.5.2"
-kotlin = "2.0.20"
-ksp = "2.0.20-1.0.25"
+agp = "9.3.3"
+kotlin = "2.4.21"
+ksp = "2.3.12"
 
 # AndroidX Core
 core-ktx = "1.13.1"
@@ -18,7 +18,7 @@ navigation-compose = "2.8.3"
 hilt-compose = "1.2.0"
 
 # DI (Hilt)
-hilt = "2.52"
+hilt = "2.60.1"
 
 # Network / Serialization
 retrofit = "2.11.0"
@@ -31,7 +31,7 @@ coroutines = "1.7.3"
 coil = "2.7.0"
 datastore = "1.1.1"
 paging = "3.3.2"
-room = "2.6.1"
+room = "2.8.5"
 
 # Test
 junit = "4.13.2"
@@ -111,22 +111,9 @@ room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", vers
 # External plugins
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 androidRoom = { id = "androidx.room", version.ref = "room" }
-
-# Momentwo convention plugins (build-logic)
-momentwo-module-architecture = { id = "momentwo.module-architecture", version = "unspecified" }
-momentwo-android-application = { id = "momentwo.android.application", version = "unspecified" }
-momentwo-android-application-compose = { id = "momentwo.android.application.compose", version = "unspecified" }
-momentwo-android-library = { id = "momentwo.android.library", version = "unspecified" }
-momentwo-android-library-compose = { id = "momentwo.android.library.compose", version = "unspecified" }
-momentwo-android-feature = { id = "momentwo.android.feature", version = "unspecified" }
-momentwo-android-hilt = { id = "momentwo.android.hilt", version = "unspecified" }
-momentwo-android-room = { id = "momentwo.android.room", version = "unspecified" }
-momentwo-android-network = { id = "momentwo.android.network", version = "unspecified" }
-momentwo-jvm-library = { id = "momentwo.jvm.library", version = "unspecified" }

@@ -1,13 +1,13 @@
 plugins {
-    alias(libs.plugins.momentwo.android.application)
-    alias(libs.plugins.momentwo.android.application.compose)
-    alias(libs.plugins.momentwo.android.hilt)
+    id("momentwo.android.application")
+    id("momentwo.android.application.compose")
+    id("momentwo.android.hilt")
 }
 
 android {
     namespace = "cord.eoeo.momentwo"
 
-    sourceSets["androidTest"].assets.srcDir("$rootDir/core/database/schemas")
+    sourceSets["androidTest"].assets.directories.add("$rootDir/core/database/schemas")
 
     defaultConfig {
         applicationId = "cord.eoeo.momentwo"

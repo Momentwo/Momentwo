@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.momentwo.android.library)
-    alias(libs.plugins.momentwo.android.library.compose)
+    id("momentwo.android.library")
+    id("momentwo.android.library.compose")
 }
 
 android {
@@ -8,6 +8,8 @@ android {
 }
 
 dependencies {
+    // Public UI functions expose WindowInsetsControllerCompat from AndroidX Core.
+    api(libs.core.ktx)
     implementation(project(":core:common"))
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.coroutines.core)

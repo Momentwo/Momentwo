@@ -384,10 +384,13 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 
 | 항목 | 프로젝트 설정 |
 |---|---|
-| JDK / JVM target | 17 |
-| Kotlin | 2.0.20 |
-| Gradle Wrapper / Android Gradle Plugin | 8.7 / 8.5.2 |
+| Gradle 실행 JDK / 컴파일 toolchain | Temurin 25.0.4.1+1 LTS |
+| Java / Kotlin JVM 출력 대상 | 17 |
+| Kotlin / Compose Compiler / Serialization plugin | 2.4.21 |
+| Gradle Wrapper / Android Gradle Plugin | 9.7.0 / 9.3.3 |
 | Android SDK | minSdk 29, compileSdk 34, targetSdk 34 |
+
+터미널의 `JAVA_HOME`과 Android Studio의 **Gradle JDK**를 Temurin 25로 맞춥니다. IDE 자체는 기본 JBR을 사용합니다. JVM 출력 대상은 17로 유지하며 JDK 25 전용 API를 앱에 추가하지 않습니다.
 
 `local.properties`에 `sdk.dir`과 기존 `BASE_URL` 설정이 필요합니다. BASE_URL의 BuildConfig는 `core:network`가 생성합니다. 로컬 설정과 인증 정보는 커밋하지 않습니다.
 

@@ -1,7 +1,7 @@
 plugins {
-    alias(libs.plugins.momentwo.android.library)
-    alias(libs.plugins.momentwo.android.room)
-    alias(libs.plugins.momentwo.android.hilt)
+    id("momentwo.android.library")
+    id("momentwo.android.room")
+    id("momentwo.android.hilt")
 }
 
 android {

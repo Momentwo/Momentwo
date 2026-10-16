@@ -2,7 +2,7 @@
 
 ## 실행
 
-Temurin JDK 25와 Android SDK 34, 기존 local.properties 설정을 사용한다. 앱 컴파일이나 콘텐츠 API 호출 없이 구성된 프로젝트 의존을 검사한다. 첫 실행의 Gradle/플러그인 다운로드와 SDK 설정은 필요하다.
+Temurin JDK 25와 Android SDK 37(테스트 fixture는 34), 기존 local.properties 설정을 사용한다. 앱 컴파일이나 콘텐츠 API 호출 없이 구성된 프로젝트 의존을 검사한다. 첫 실행의 Gradle/플러그인 다운로드와 SDK 설정은 필요하다.
 
 ```bash
 ./gradlew checkArchitecture
@@ -63,7 +63,7 @@ Android verification 워크플로는 PR 대상 develop, develop push, 수동 실
 | PR | 검사 도구 JUnit/TestKit → checkArchitecture → Model JVM/전체 Debug 단위 테스트 → app Debug → 전체 Debug Lint |
 | develop push·수동 | PR 검사 + app Release/lintVitalRelease + 전체 Debug AndroidTest APK 빌드 |
 
-Ubuntu 24.04·Temurin 25.0.4.1+1·SDK 34·build-tools 36.0.0·command-line tools 16.0과 Gradle 9.7.0을 사용한다. Action은 확인한 release의 커밋 SHA로 고정한다. CI는 local.properties에 SDK 경로와 BASE_URL="https://example.invalid/"만 생성하며 운영 인증 정보·릴리스 서명을 요구하지 않는다. 이 주소로 만든 산출물은 배포용이 아니다.
+Ubuntu 24.04·Temurin 25.0.4.1+1·SDK 37.0(제품)·34(TestKit fixture)·build-tools 36.0.0·command-line tools 16.0과 Gradle 9.7.0을 사용한다. Action은 확인한 release의 커밋 SHA로 고정한다. CI는 local.properties에 SDK 경로와 BASE_URL="https://example.invalid/"만 생성하며 운영 인증 정보·릴리스 서명을 요구하지 않는다. 이 주소로 만든 산출물은 배포용이 아니다.
 
 일반 pull_request 이벤트와 contents:read, checkout persist-credentials:false를 사용한다. 동일 PR의 이전 실행은 취소한다. Gradle User Home 의존 캐시만 재사용하고 단위 테스트와 검사 도구 테스트는 --rerun-tasks --no-build-cache로 실행한다. 실패해도 검사·단위 테스트·Lint 보고서를 14일 보관한다. SDK/외부 라이브러리를 다운로드할 네트워크는 필요하지만 실제 백엔드는 필요하지 않다.
 

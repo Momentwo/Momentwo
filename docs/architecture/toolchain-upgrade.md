@@ -65,3 +65,10 @@ Kotlin 컴파일이 필요한 경우 `-Pkotlin.compiler.execution.strategy=in-pr
 - API 31 실기기에서 사진 기록·즐겨찾기·몰입/재시작 복원, 계정 연결 취소, 로그인/회원가입/뒤로가기 3건 통과.
 - 앨범 smoke는 폼 입력과 카드의 제목을 혼동하지 않도록 전환 완료·클릭 대상·고유 fixture 이름을 지정했다. 테스트 APK만 다시 빌드(13초 / 실행 6·재사용 491 task)하고 앨범 생성·서브앨범·수정·재진입·삭제 1건을 재실행해 5.545초에 통과했다. 제품 UI 흐름은 변경하지 않았다.
 - 원본 앱과 기기 원본 파일을 보존했다. 전체 테스트·Lint·Release·전체 계측 APK는 원격 CI에서 확인한다.
+
+### 핵심 전환 전체 CI 완료
+
+준비 #191과 핵심 #192를 순서대로 병합했다. #192 병합 커밋 87451ee81의
+[전체 CI](https://github.com/Momentwo/Momentwo/actions/runs/38854661780)가 통과했다.
+검사 도구 31 + 제품 단위 239 = 270건, 실패·오류·skip 0이며 Debug/Release·전체 Debug Lint·Release lintVital·전체 AndroidTest APK 빌드를 확인했다.
+#189는 종료했으며 후속 버전·SDK 변경은 [라이브러리 업데이트 기록](library-sdk-upgrade.md)에서 이어간다.

@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Momentwo"
         android:windowSoftInputMode="adjustResize"
-        tools:targetApi="34">
+        tools:targetApi="35">
         <activity
             android:name=".ui.MainActivity"
             android:exported="true">

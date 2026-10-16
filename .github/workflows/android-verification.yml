@@ -19,6 +19,8 @@ jobs:
     name: ${{ github.event_name == 'pull_request' && 'PR checks' || 'Full checks' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    outputs:
+      runtime-apis: ${{ steps.runtime.outputs.apis }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -37,6 +39,22 @@ jobs:
           cache-provider: basic
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           dependency-graph: disabled
+      - name: Select target SDK runtime checks
+        id: runtime
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          python3 - <<'PYCODE'
+          import json, os, re
+          from pathlib import Path
+          source = Path('build-logic/convention/src/main/kotlin/cord/eoeo/momentwo/convention/AndroidApplicationConventionPlugin.kt').read_text()
+          target = int(re.search(r'defaultConfig\.targetSdk = (\d+)', source)[1])
+          enabled = os.environ['EVENT_NAME'] != 'pull_request' or os.environ['HEAD_REF'].startswith('build/target-sdk-')
+          apis = ({35: [35], 36: [36], 37: [29, 35, 36, 37]}.get(target, []) if enabled else [])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'apis={json.dumps(apis)}\n')
+          PYCODE
       - name: Configure non-production endpoint
         shell: bash
         run: |
@@ -54,6 +72,19 @@ jobs:
         run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' :core:model:test testDebugUnitTest --rerun-tasks --no-build-cache --max-workers=2 --console=plain
       - name: Build Debug
         run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' :app:assembleDebug --max-workers=2 --console=plain
+      - name: Build selected SDK smoke test APK
+        if: steps.runtime.outputs.apis != '[]'
+        run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' :app:assembleDebugAndroidTest --max-workers=2 --console=plain
+      - name: Publish APKs for isolated remote emulator
+        if: steps.runtime.outputs.apis != '[]'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sdk-runtime-apks
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            app/build/outputs/apk/debug/
+            app/build/outputs/apk/androidTest/debug/
       - name: Lint all Android modules
         run: ./gradlew --no-daemon '-Dorg.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8' lintDebug --max-workers=2 --console=plain
       - name: Build Release and instrumentation APKs (no device execution)
@@ -71,3 +102,52 @@ jobs:
             **/build/reports/tests/
             **/build/test-results/
             **/build/reports/lint-results-*
+
+  sdk-runtime:
+    name: SDK ${{ matrix.api }} smoke
+    needs: verify
+    if: needs.verify.outputs.runtime-apis != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        api: ${{ fromJSON(needs.verify.outputs.runtime-apis) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25.0.4.1+1'
+      - name: Select stable system image package
+        id: image
+        env:
+          API: ${{ matrix.api }}
+        run: |
+          platform="$API"
+          if [ "$API" = 37 ]; then platform=37.0; fi
+          echo "package=system-images;android-$platform;google_apis;x86_64" >> "$GITHUB_OUTPUT"
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          cmdline-tools-version: '16111833' # 23.0; supports API 37.0 AVD metadata
+          packages: platform-tools emulator ${{ steps.image.outputs.package }}
+          log-accepted-android-sdk-licenses: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: sdk-runtime-apks
+          path: runtime-apks
+      - name: Enable KVM on ephemeral runner
+        run: sudo chmod 666 /dev/kvm
+      - name: Run short offline, photo and navigation smoke (no Gradle)
+        run: python3 scripts/ci/sdk-runtime.py --api ${{ matrix.api }} --apks runtime-apks
+      - name: Upload SDK runtime evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sdk-runtime-${{ matrix.api }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: build/reports/sdk-runtime/

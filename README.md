@@ -388,7 +388,7 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 | Java / Kotlin JVM 출력 대상 | 17 |
 | Kotlin / Compose Compiler / Serialization plugin | 2.4.21 |
 | Gradle Wrapper / Android Gradle Plugin | 9.7.0 / 9.3.3 |
-| Android SDK | minSdk 29, compileSdk 37, targetSdk 34 |
+| Android SDK | minSdk 29, compileSdk 37, targetSdk 35 |
 
 터미널의 `JAVA_HOME`과 Android Studio의 **Gradle JDK**를 Temurin 25로 맞춥니다. IDE 자체는 기본 JBR을 사용합니다. JVM 출력 대상은 17로 유지하며 JDK 25 전용 API를 앱에 추가하지 않습니다.
 

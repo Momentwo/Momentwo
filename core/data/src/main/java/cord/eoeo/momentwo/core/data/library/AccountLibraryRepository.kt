@@ -128,7 +128,6 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
         val current=db.libraryDao().photo(id) ?: return
         if(current.mediaName==null && (current.cacheName==null || !java.io.File(context.cacheDir,"server-media/${current.cacheName}").isFile))cachePhoto(current,session)
     }
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private suspend fun cachePhoto(photo:LocalPhotoEntity,session:cord.eoeo.momentwo.core.datastore.StoredSession)=withContext(Dispatchers.IO) {
         val directory=java.io.File(context.cacheDir,"server-media");if(!directory.exists() && !directory.mkdirs())throw java.io.IOException("사진 캐시를 만들 수 없습니다")
         val name="${UUID.randomUUID()}.img";val target=java.io.File(directory,name);var accepted=false
@@ -137,7 +136,7 @@ class AccountLibraryRepository @Inject constructor(private val db:MomentwoDataba
             val call=client.newCall(okhttp3.Request.Builder().url(photo.remoteUrl).build())
             val response=kotlinx.coroutines.suspendCancellableCoroutine<okhttp3.Response>{continuation->
                 continuation.invokeOnCancellation{call.cancel()}
-                call.enqueue(object:okhttp3.Callback{override fun onFailure(call:okhttp3.Call,error:java.io.IOException){if(continuation.isActive)continuation.resumeWith(Result.failure(error))};override fun onResponse(call:okhttp3.Call,response:okhttp3.Response){continuation.resume(response,onCancellation={response.close()})}})
+                call.enqueue(object:okhttp3.Callback{override fun onFailure(call:okhttp3.Call,error:java.io.IOException){if(continuation.isActive)continuation.resumeWith(Result.failure(error))};override fun onResponse(call:okhttp3.Call,response:okhttp3.Response){continuation.resume(response,onCancellation={_,value,_->value.close()})}})
             }
             response.use{check(it.isSuccessful);requireNotNull(it.body).byteStream().use{input->target.outputStream().use{out->val buffer=ByteArray(64*1024);while(true){kotlinx.coroutines.currentCoroutineContext().ensureActive();val size=input.read(buffer);if(size<0)break;out.write(buffer,0,size)};out.fd.sync()}}}
             val bounds=android.graphics.BitmapFactory.Options().apply{inJustDecodeBounds=true};android.graphics.BitmapFactory.decodeFile(target.path,bounds);check(bounds.outWidth>0 && bounds.outHeight>0)

@@ -65,3 +65,36 @@ BOM이 제공하는 Material icons 1.7.8을 사용하고 중복된 별도 버전
 - 로그인 smoke의 계정 화면은 저장 공간·세션 조회 후 본문을 표시하므로 Compose idleness만으로 준비를 판단하지 않는다. 비동기 본문 전환을 기다리지 않은 1회 실패를 확인했고, 명시적인 버튼 준비 대기를 보완했다. 제품 업무 로직은 변경하지 않았다.
 - 대기 보완 후 테스트 APK만 재빌드(31초, 실행 6/재사용 491 task)하고 로그인·시스템 바 2건만 다시 실행해 4.368초에 통과했다. 사진 통과 결과는 재사용했다.
 - PR 및 병합 후 전체 CI 결과는 별도로 확인한다.
+
+## AndroidX 단계 병합·전체 검증
+
+#193을 4c3555260으로 병합했고 [병합 후 전체 CI](https://github.com/Momentwo/Momentwo/actions/runs/38858025908)가 통과했다.
+PR CI의 검사 도구 31 + 제품 239 = 270건, 실패·오류·skip 0, 경계·사이클 위반 0을 확인했다.
+병합 후 Debug/Release·전체 Debug Lint·Release lintVital·전체 AndroidTest APK 빌드를 완료했다.
+
+## 네트워크·Coroutines
+
+Retrofit와 converter-moshi를 3.0.0, OkHttp BOM을 5.5.0, Moshi를 안정판 1.15.2,
+Coroutines core/test와 Serialization runtime을 각각 1.11.0으로 정렬한다.
+OkHttp Android 5.5.0 AAR도 minCompileSdk 37을 요구하며 minSdk 21이므로 앞 단계의 compileSdk 37 / 앱 minSdk 29와 호환된다.
+HTTP Service·DTO·payload·기본 주소·인증/계정 격리·자동 재전송 정책과 로깅 NONE은 유지한다.
+
+OkHttp 5의 공식 테스트 artifact인 mockwebserver3으로 전환한다. 요청 target/headers/body와 불변 MockResponse,
+수신 완료 후 응답 전 연결 종료 API를 사용해 기존 회원가입/계정 격리/불명확한 POST 재전송 금지 검증을 유지한다.
+회원가입 직렬화 테스트는 실제 Moshi 설정의 KotlinJsonAdapterFactory를 사용하며 코드 생성 어댑터를 검증한다고 표현하지 않는다.
+서버 사진 응답의 취소 정리는 Coroutines의 최신 resume(value, onCancellation) 오버로드가 전달하는 응답을 닫도록 한다.
+조회 결과의 취소 보존과 resource 정리 의미는 바꾸지 않는다.
+
+- [Retrofit 변경 기록](https://github.com/square/retrofit/blob/trunk/CHANGELOG.md)
+- [OkHttp 변경 기록](https://github.com/square/okhttp/blob/master/CHANGELOG.md)
+- [Coroutines 1.11.0](https://github.com/Kotlin/kotlinx.coroutines/releases/tag/1.11.0)
+- [Serialization 1.11.0](https://github.com/Kotlin/kotlinx.serialization/releases/tag/v1.11.0)
+
+### 네트워크 단계 로컬 영향 범위
+
+경계·사이클 위반 0(24/188/695). 취소/요청 제어 14건 + 회원가입 직렬화·실제 HTTP/계정 격리/불명확한 쓰기 12건을
+가상 시간과 MockWebServer로 새로 실행해 26건 모두 통과했다. 실패·오류·skip 0, 35초이며 Gradle 워커 1·힙 2GB, 테스트 worker 힙 256MB를 사용했다.
+
+app Debug·전체 Feature/Hilt 컴파일은 1분 23초(실행 72 / 재사용 408 task)에 통과했다.
+이전 AndroidTest APK를 그대로 사용해 API 31 별도 앱의 계정 연결 취소·생성 초안 보존·콘텐츠 API 요청 없음 1건을 3.845초에 확인했다.
+테스트 APK·전체 로컬 테스트·Release/Lint는 재빌드/반복하지 않았고 원래 설치 앱을 보존했다. 전체 검증은 원격 CI에서 확인한다.

@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
-import okhttp3.mockwebserver.*
+import mockwebserver3.*
 import org.junit.Assert.*
 import org.junit.Test
 import retrofit2.HttpException
@@ -29,7 +29,7 @@ class SignUpRequestTest {
         override suspend fun getRefreshToken():Result<String> = throw AssertionError("Unexpected refreshToken")
     }
     @Test fun signupUsesExistingWirePayloadAndSkipsSessionAndAuthentication() = runTest {
-        val server=MockWebServer();server.enqueue(MockResponse().setResponseCode(204));server.start()
+        val server=MockWebServer();server.enqueue(MockResponse(code=204));server.start()
         val client=OkHttpClient.Builder().addInterceptor { chain ->
             chain.proceed(chain.request().newBuilder().header("Authorization","Bearer fixture-must-be-removed").build())
         }.addInterceptor(AuthInterceptor(NoSessionReads())).build()
@@ -38,15 +38,15 @@ class SignUpRequestTest {
             val repository=SignUpRepositoryImpl(SignUpRemoteDataSource(retrofit.create(SignUpService::class.java),Dispatchers.IO))
             assertTrue(repository.requestSignUp(signUpFixture).isSuccess)
             val request=requireNotNull(server.takeRequest(5,TimeUnit.SECONDS))
-            assertEquals("POST",request.method);assertEquals("/signup",request.path)
-            assertTrue(request.getHeader("Content-Type")!!.startsWith("application/json"))
-            assertNull(request.getHeader("Authorization"));assertNull(request.getHeader("isAuthorizable"))
-            val json=ApiModule.provideJsonParser().adapter(Map::class.java).fromJson(request.body.readUtf8())!!
+            assertEquals("POST",request.method);assertEquals("/signup",request.target)
+            assertTrue(request.headers["Content-Type"]!!.startsWith("application/json"))
+            assertNull(request.headers["Authorization"]);assertNull(request.headers["isAuthorizable"])
+            val json=ApiModule.provideJsonParser().adapter(Map::class.java).fromJson(requireNotNull(request.body).utf8())!!
             assertEquals(mapOf("name" to signUpFixture.name,"username" to signUpFixture.email,"password" to signUpFixture.password,"nickname" to signUpFixture.nickname,"birthday" to "2000-01-02","phone" to "010-1234-5678"),json)
             assertEquals(1,server.requestCount)
-        } finally { client.dispatcher.executorService.shutdown();client.connectionPool.evictAll();server.shutdown() }
+        } finally { client.dispatcher.executorService.shutdown();client.connectionPool.evictAll();server.close() }
     }
-    @Test fun generatedAdapterKeepsSameSixNonNullFields() {
+    @Test fun dtoSerializationKeepsSameSixNonNullFields() {
         val moshi=ApiModule.provideJsonParser();val adapter=moshi.adapter(User::class.java)
         val dto=signUpFixture.toUserDto()
         assertEquals(dto,adapter.fromJson(adapter.toJson(dto)))
@@ -55,13 +55,13 @@ class SignUpRequestTest {
         assertTrue(json.values.none{it==null})
     }
     @Test fun httpFailureIsReturnedWithoutLosingStatusCode() = runTest {
-        val server=MockWebServer();server.enqueue(MockResponse().setResponseCode(409));server.start()
+        val server=MockWebServer();server.enqueue(MockResponse(code=409));server.start()
         val client=OkHttpClient.Builder().addInterceptor(AuthInterceptor(NoSessionReads())).build()
         try {
             val retrofit=ApiModule.provideRetrofit(client,ApiModule.provideJsonParser()).newBuilder().baseUrl(server.url("/")).build()
             val result=SignUpRepositoryImpl(SignUpRemoteDataSource(retrofit.create(SignUpService::class.java),Dispatchers.IO)).requestSignUp(signUpFixture)
             assertEquals(409,(result.exceptionOrNull() as HttpException).code());assertEquals(1,server.requestCount)
-        } finally {client.dispatcher.executorService.shutdown();client.connectionPool.evictAll();server.shutdown()}
+        } finally {client.dispatcher.executorService.shutdown();client.connectionPool.evictAll();server.close()}
     }
     @Test fun existingLoginAndProfileResponseStillDecodesAfterSignupDtoVisibilityChange() {
         val profile=ApiModule.provideJsonParser().adapter(cord.eoeo.momentwo.core.data.model.UserProfile::class.java)

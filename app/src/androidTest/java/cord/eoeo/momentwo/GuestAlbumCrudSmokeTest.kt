@@ -17,6 +17,7 @@ import org.junit.runner.RunWith
 class GuestAlbumCrudSmokeTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
     @Before fun ready() {
+        awaitSdkRuntimeNetwork()
         compose.runOnUiThread { compose.activity.setShowWhenLocked(true); compose.activity.setTurnScreenOn(true); compose.activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
         compose.waitUntil(10_000) { compose.activity.hasWindowFocus() }
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Album")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }

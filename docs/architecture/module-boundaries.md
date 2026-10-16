@@ -67,7 +67,7 @@ Ubuntu 24.04·Temurin 25.0.4.1+1·SDK 37.0(제품)·34(TestKit fixture)·build-t
 
 일반 pull_request 이벤트와 contents:read, checkout persist-credentials:false를 사용한다. 동일 PR의 이전 실행은 취소한다. Gradle User Home 의존 캐시만 재사용하고 단위 테스트와 검사 도구 테스트는 --rerun-tasks --no-build-cache로 실행한다. 실패해도 검사·단위 테스트·Lint 보고서를 14일 보관한다. SDK/외부 라이브러리를 다운로드할 네트워크는 필요하지만 실제 백엔드는 필요하지 않다.
 
-기기·에뮬레이터 테스트는 CI에서 실행하지 않는다. AndroidTest APK 빌드를 기기 회귀 통과로 해석하지 않는다. 실제 서버·정식 업데이트/복원은 #150, 빈 navigation 모듈 정리는 #160에 남긴다. 브랜치 보호·자동 롤백 정책은 변경하지 않는다.
+일반 PR에서는 기기·에뮬레이터 테스트를 실행하지 않는다. target-sdk PR과 targetSdk35 이상 develop 반영 후에는 별도 Linux/KVM job에서 짧은 SDK 실행 검증을 수행한다. 이 job은 기존 빌드 job의 APK만 사용하며 Gradle과 에뮬레이터를 함께 실행하지 않는다. 자세한 대상·검증 범위는 [SDK 업데이트 가이드](library-sdk-upgrade.md)를 따른다. AndroidTest APK 빌드만으로 기기 회귀 통과로 해석하지 않는다. 실제 서버·정식 업데이트/복원은 #150, 빈 navigation 모듈 정리는 #160에 남긴다. 브랜치 보호·자동 롤백 정책은 변경하지 않는다.
 
 ## 검사 도구 회귀
 

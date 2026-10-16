@@ -102,6 +102,7 @@ class ImageLoaderCompatibilityTest {
     }
 
     @Test fun galleryExportPreservesOriginalDimensionsBeyondDefaultBitmapLimit() = runBlocking {
+        awaitSdkRuntimeNetwork()
         val access = EntryPointAccessors.fromApplication(context, LibraryTestAccess::class.java)
         val preferences = access.preferences()
         assertNull("The isolated fixture starts without an account", preferences.getSession().getOrThrow())

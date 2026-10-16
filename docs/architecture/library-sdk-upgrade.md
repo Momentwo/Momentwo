@@ -133,3 +133,45 @@ Debug APK의 graphics.path/datastore_shared_counter JNI8개가 ELF LOAD16KB 정�
 계정 사진 내보내기는 기존 AccountPhotoRepository가 계정 컨텍스트를 요구하므로 테스트에 만료된 fixture 계정을 설정하고 종료 시 정리한다.
 계정 없이 직접 호출한 초기 내보내기 테스트는 이 기존 전제 때문에 실패했으며, 제품 계정 정책은 변경하지 않았다.
 테스트 APK만 재빌드(14초, 실행6/재사용491 task)하고 내보내기1건만 다시 실행해 0.407초에 통과했다. 5000×3 해상도·인증 미첨부·API요청0·fixture 정리를 확인했다. 기존3건은 재사용했다.
+
+## 이미지·저장소 병합·전체 검증
+
+#195를 318b8c3e6으로 병합했고 [전체 CI](https://github.com/Momentwo/Momentwo/actions/runs/38869129725)가 통과했다.
+검사31+제품239=270건, 실패·오류·skip0, 경계·사이클0, Debug/Release·전체 Debug Lint·Release lintVital·전체 AndroidTest APK 빌드를 확인했다.
+
+## targetSdk 35 (Android 15)
+
+앱 defaultConfig와 라이브러리 계측 testOptions의 targetSdk를35로 맞춘다. compileSdk37/minSdk29/JVM17은 유지한다.
+
+- MainActivity의 enableEdgeToEdge/setDecorFitsSystemWindows(false), Scaffold·상하단 바의 insets와 사진의 의도적인 전체 화면을 유지한다. edge-to-edge 예외 설정을 추가하지 않는다.
+- 직접 작성한 코드에서 onBackPressed override, SequencedCollection 추가 메서드 직접 호출, 자체 TLS 검증 완화는 확인되지 않았다. AndroidX 뒤로가기와 기존 HTTP 설정을 유지한다.
+- GetContent 계열·영속 파일 복사·앱이 생성한 MediaStore 행을 사용한다. 추가 사진/외부 저장소 권한을 요구하지 않는다.
+- 기존 JobScheduler는 영속 작업·NETWORK_TYPE_ANY·IO에서의 처리와 중단 시 취소를 사용한다. FGS는 사용하지 않으며 Android15의 FGS 제한을 피하기 위한 서비스·권한을 추가하지 않는다. 실제 계정 동기화는 #150이다.
+
+### 원격 SDK 검증과 로컬 검증의 역할
+
+target-sdk PR과 targetSdk35 이상 develop 반영 후, 기존 verify job의 Debug·AndroidTest APK를 리모트 Linux/KVM job으로 전달한다.
+SDK35 단계는 API35, SDK36은 API36, SDK37은 API29/35/36/37에서 실행한다. 일반 기능 PR에는 에뮬레이터 job을 추가하지 않는다.
+공식 SDK 도구·안정 Google APIs x86_64 이미지를 사용한다. CLI23.0은 API37.0 AVD 메타데이터를 처리한다.
+headless/2core/2GB, matrix 동시2대까지이며 에뮬레이터 job에서는 Gradle을 실행하지 않는다. 스크립트는 Linux GitHub CI 밖에서 실행을 거부한다.
+
+새 설치 후 네트워크를 끊고 앨범·서브앨범 CRUD, 사진 설명/메모/즐겨찾기·Sheet·몰입/복원,
+로그인/회원가입 탐색과 시스템 바 lifecycle을 선택 실행한다. API35 이상은 실제 시스템 가장자리 gesture로 IME를 먼저 닫고 입력을 유지한 뒤 화면을 나가는지도 확인한다.
+설정만으로 오프라인을 판정하지 않고 테스트 안에서 activeNetwork가 없음을 확인한다. 이후 연결을 복구하고 loopback 이미지의 MediaStore 원본 해상도 내보내기를 확인한다.
+API37에서는 재부팅 후 영속 파일·기록과 대화면/가로·글자1.3배에서 사진·키보드/뒤로가기를 짧게 추가 검증한다.
+am instrument의 종료 코드0만으로 성공 처리하지 않고 선택한 테스트의 OK 건수까지 일치해야 통과한다. 로그와 단계별 결과는 별도 artifact로 보존한다.
+
+맥에서는 이미 통과한 전체 검증을 반복하지 않는다. 단일 Gradle/워커1/힙2GB로 필요한 APK만 빌드하고 API31 실기기의 별도 앱에만 설치한다.
+업데이트 전 seed → 별도 앱 프로세스 종료 → 새 APK 설치 → verify로 캐시 정리 후에도 사진 영속 파일·설명·메모·즐겨찾기가 유지되는지 확인한다.
+원본 앱·다른 갤러리 파일은 보존한다. 실서버·정식 서명 업데이트/OS 복원은 #150이며, APK 빌드·정적16KB 정렬과 실제 OS 실행 결과를 구분한다.
+
+[Android15 변경](https://developer.android.com/about/versions/15/behavior-changes-15) ·
+[Android16 변경](https://developer.android.com/about/versions/16/behavior-changes-16) ·
+[Android17 변경](https://developer.android.com/about/versions/17/behavior-changes-17)
+
+### targetSdk35 로컬 결과
+
+경계·사이클24/188/695·위반0, 별도 Debug/AndroidTest와 전체 Feature/Hilt 컴파일 통과(1분55초, 실행512/재사용3 task, 워커1·힙2GB).
+API31에서는 기존 테스트 APK를 재사용했다. 이전 target34의 seed1건0.216초 → 별도 앱만 force-stop/target35 APK 교체 → verify1건0.532초 통과.
+캐시 정리 후 영속 사진·설명·메모·즐겨찾기를 확인하고 fixture를 정리했다. 원본 앱의 version/min/target 및 최초 설치·최종 업데이트 시간이 동일함을 확인했다.
+새 API35 실행은 원격 CI 결과로 별도 기록한다.

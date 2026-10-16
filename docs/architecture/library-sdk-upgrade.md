@@ -179,3 +179,25 @@ API31에서는 기존 테스트 APK를 재사용했다. 이전 target34의 seed1
 API35 첫 원격 실행에서 앨범 CRUD·로그인 탐색·시스템 바·실제 IME/뒤로가기4건은 통과했고, 사진1건은 Sheet 이후 몰입 전환 대기에서 실패했다.
 기존 helper는 저장 후 바뀌는 메모 입력 placeholder로 Sheet가 열렸는지 판단하고 Compose idleness만 기다렸다.
 IME를 명시적으로 닫고 고정 Sheet 제목이 없어질 때까지 기다린 뒤 사진을 누르도록 테스트를 수정한다. 제품 동작과 대기 시간 한도는 변경하지 않는다. 수정 결과는 후속 CI에서 확인한다.
+
+## targetSdk35 병합·전체 검증
+
+수정 후 #197을521ed69fd로 병합했고 [전체 CI/API35 재실행](https://github.com/Momentwo/Momentwo/actions/runs/38874970308)이 통과했다.
+일반270건 실패·오류·skip0, 경계·사이클0, Debug/Release·Debug Lint/Release lintVital·전체 AndroidTest APK 빌드와 실제 API35 smoke를 확인했다.
+PR의 API35 offline UI5건51.799초·내보내기1건1.206초도 통과했다. 최초 실패는 #196에 남겼고 저장소의 모든 브랜치 직접 갱신 제한을 유지하며 #197로 대체했다.
+
+## targetSdk 36 (Android 16)
+
+앱과 라이브러리 계측 targetSdk를36으로 올린다. compileSdk37/minSdk29/JVM17과 라이브러리·DB·제품 코드는 유지한다.
+
+- 기존 edge-to-edge와 AndroidX BackHandler/NavController/OnBackPressedDispatcher를 사용한다. 예외 설정·legacy onBackPressed override는 없다.
+- Activity에 방향·비율·크기 제한을 선언하지 않으며 대화면 resizability 예외를 추가하지 않는다. 최종 API37에서 대화면/가로·글자 확대를 실제 확인한다.
+- Android16의 JobScheduler quota는 전체 앱에 적용된다. 기존 서비스는 coroutine에서 JobParameters를 보유하고 IO에서 작업하며 onStopJob에서 취소한다. 영속 outbox 복구 계약을 유지하고 쿼터 우회용 FGS·setImportantWhileForeground를 추가하지 않는다.
+- 정기 ScheduledExecutorService나 앱의 별도 시스템 폰트 렌더러는 사용하지 않는다. UI 구조·입력 정책은 변경하지 않는다.
+
+이 단계는 SDK 정수값과 문서만 바뀌므로 로컬 Gradle·실기기 설치를 반복하지 않는다. 값·XML·diff를 자체 확인한 뒤
+원격 CI에서 전체 검사/빌드/Lint·실제 API36 smoke를 실행한다. API31의 직전 자료 보존 결과를 재사용하고 최종37에서 새 APK로 다시 확인한다.
+실제 서버 동기화·정식 업데이트/OS 복원은 #150에 남긴다.
+
+[Android16 대상 변경](https://developer.android.com/about/versions/16/behavior-changes-16) ·
+[전체 앱 변경/JobScheduler quota](https://developer.android.com/about/versions/16/behavior-changes-all#job-scheduler)

@@ -38,8 +38,8 @@ Momentwo/
 │        └─ JvmLibraryConventionPlugin.kt
 │
 ├─ settings.gradle.kts                   ← pluginManagement { includeBuild("build-logic") }
-├─ gradle/libs.versions.toml             ← [plugins] 에 momentwo-android-* alias 등록
-└─ app/build.gradle.kts                  ← alias(libs.plugins.momentwo.android.application) ...
+├─ gradle/libs.versions.toml             ← 외부 의존성·플러그인 버전
+└─ app/build.gradle.kts                  ← id("momentwo.android.application") ...
 ```
 
 ### 2.1 includeBuild 메커니즘
@@ -87,31 +87,35 @@ internal val Project.libs: VersionCatalog
 ### 3.2 `KotlinAndroid.kt`
 
 ```kotlin
-internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, *, *, *, *, *>) {
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     commonExtension.apply {
         compileSdk = 34
-        defaultConfig { minSdk = 29 }
-        compileOptions {
+        defaultConfig.minSdk = 29
+        compileOptions.apply {
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
         }
     }
-    configure<KotlinAndroidProjectExtension> {
+    configure<KotlinAndroidExtension> {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(25))
+            vendor.set(JvmVendorSpec.ADOPTIUM)
+        }
         compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
     }
 }
 ```
 
-- compileSdk / minSdk / Java 17 / Kotlin JVM target 17을 한 곳에서 결정한다.
+- compileSdk / minSdk / Temurin 25 toolchain / Java·Kotlin 출력 대상 17을 한 곳에서 결정한다.
 - `CommonExtension` 타입을 받아 application이든 library든 동일하게 적용된다.
 - JVM 전용 모듈을 위한 `configureKotlinJvm()`도 함께 정의한다.
 
 ### 3.3 `AndroidCompose.kt`
 
 ```kotlin
-internal fun Project.configureAndroidCompose(commonExtension: CommonExtension<*, *, *, *, *, *>) {
+internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     commonExtension.apply {
-        buildFeatures { compose = true }
+        buildFeatures.apply { compose = true }
     }
     dependencies {
         val composeBom = libs.findLibrary("compose-bom").get()
@@ -132,15 +136,15 @@ Compose BOM, Compose UI/Graphics/Material3, Tooling preview까지의 “Compose�
 
 | Plugin id | 적용 대상 | 책임 |
 |---|---|---|
-| `momentwo.android.application` | `:app` | AGP application + Kotlin Android + Java/Kotlin 17 + targetSdk 34 |
+| `momentwo.android.application` | `:app` | AGP application·내장 Kotlin + Temurin 25 / 출력 대상 17 + targetSdk 34 |
 | `momentwo.android.application.compose` | `:app` | application 위에 Compose Compiler + Compose 의존성 |
-| `momentwo.android.library` | 모든 `:core:*`, `:feature:*:api/impl` | AGP library + Kotlin Android + Java 17 + `testOptions.targetSdk` |
+| `momentwo.android.library` | 모든 `:core:*`, `:feature:*:api/impl` | AGP library·내장 Kotlin + Temurin 25 / 출력 대상 17 + `testOptions.targetSdk` |
 | `momentwo.android.library.compose` | `:core:designsystem`, `:core:ui`, `:feature:*:impl` | library 위에 Compose 옵션 |
 | `momentwo.android.feature` | `:feature:*:impl` | `library + library.compose + hilt` + Lifecycle/Navigation/Hilt-compose/kotlinx-serialization |
 | `momentwo.android.hilt` | Hilt 가 필요한 모든 모듈 | KSP + Hilt Gradle plugin + hilt-android + hilt-compiler(ksp) |
-| `momentwo.android.room` | `:core:database`, (현재는 `:app`) | KSP + Room Gradle plugin + `schemaDirectory("$projectDir/schemas")` + room/ktx/paging/compiler(ksp) |
+| `momentwo.android.room` | `:core:database` | KSP + Room Gradle plugin + `schemaDirectory("$projectDir/schemas")` + room/ktx/paging/compiler(ksp) |
 | `momentwo.android.network` | `:core:network` | Retrofit + OkHttp BOM + okhttp/logging-interceptor + Moshi + Moshi converter |
-| `momentwo.jvm.library` | `:core:model`, `:core:common` | 순수 Kotlin JVM (org.jetbrains.kotlin.jvm) + Java 17 |
+| `momentwo.jvm.library` | `:core:model` | 순수 Kotlin JVM (org.jetbrains.kotlin.jvm), Temurin 25 / 출력 대상 17 |
 
 ### 4.1 `momentwo.android.application`
 
@@ -149,8 +153,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         with(pluginManager) {
             apply("com.android.application")
-            apply("org.jetbrains.kotlin.android")
-        }
+                }
         extensions.configure<ApplicationExtension> {
             configureKotlinAndroid(this)
             defaultConfig.targetSdk = 34
@@ -159,7 +162,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 }
 ```
 
-`:app`에서 가장 먼저 적용해야 하는 기반 plugin. AGP `application` + Kotlin Android + Java/Kotlin 17 + targetSdk 34를 일괄 적용한다.
+`:app`에서 가장 먼저 적용해야 하는 기반 plugin. AGP `application`·내장 Kotlin + Temurin 25 / 출력 대상 17 + targetSdk 34를 일괄 적용한다.
 
 ### 4.2 `momentwo.android.application.compose`
 
@@ -174,7 +177,7 @@ extensions.configure<LibraryExtension> {
 }
 ```
 
-`com.android.library` + Kotlin Android. **`defaultConfig.targetSdk` 대신 `testOptions.targetSdk`를 쓰는 이유**: AGP 9에서 library DSL의 `defaultConfig.targetSdk`가 제거된다. NIA 가이드대로 안드로이드 테스트 대상 SDK만 명시한다.
+`com.android.library`와 AGP 내장 Kotlin을 사용한다. **`defaultConfig.targetSdk` 대신 `testOptions.targetSdk`를 쓰는 이유**: AGP 9에서 library DSL의 `defaultConfig.targetSdk`가 제거된다. NIA 가이드대로 안드로이드 테스트 대상 SDK만 명시한다.
 
 ### 4.4 `momentwo.android.library.compose`
 
@@ -249,37 +252,34 @@ pluginManager.apply("org.jetbrains.kotlin.jvm")
 configureKotlinJvm()
 ```
 
-`:core:model`, `:core:common`처럼 Android에 의존하지 않는 순수 Kotlin/JVM 모듈을 위한 plugin. Android SDK 의존이 없어 컴파일/테스트가 가장 빠르다.
+`:core:model`처럼 Android에 의존하지 않는 순수 Kotlin/JVM 모듈을 위한 plugin. Android SDK 의존이 없어 컴파일/테스트가 가장 빠르다.
 
-## 5. Version Catalog의 plugin alias
+## 5. 외부 버전과 포함 빌드 플러그인 참조
 
-`gradle/libs.versions.toml`의 `[plugins]` 섹션 마지막에 다음을 둔다.
+외부 라이브러리·플러그인 버전은 `gradle/libs.versions.toml`로 관리한다.
+Convention Plugin은 `build-logic`의 `gradlePlugin` 등록과 `settings.gradle.kts`의 `includeBuild`로 연결한다.
+모듈에서는 다음처럼 버전 없는 ID를 사용한다.
 
-```toml
-momentwo-android-application         = { id = "momentwo.android.application",          version = "unspecified" }
-momentwo-android-application-compose = { id = "momentwo.android.application.compose",  version = "unspecified" }
-momentwo-android-library             = { id = "momentwo.android.library",              version = "unspecified" }
-momentwo-android-library-compose     = { id = "momentwo.android.library.compose",      version = "unspecified" }
-momentwo-android-feature             = { id = "momentwo.android.feature",              version = "unspecified" }
-momentwo-android-hilt                = { id = "momentwo.android.hilt",                 version = "unspecified" }
-momentwo-android-room                = { id = "momentwo.android.room",                 version = "unspecified" }
-momentwo-android-network             = { id = "momentwo.android.network",              version = "unspecified" }
-momentwo-jvm-library                 = { id = "momentwo.jvm.library",                  version = "unspecified" }
+```kotlin
+plugins {
+    id("momentwo.android.feature")
+}
 ```
 
-`version = "unspecified"`로 둔다. includeBuild로 들어온 plugin은 메인 빌드와 같은 버전을 공유하므로 별도 버전이 필요 없다. alias 이름의 점(`.`)은 IDE 자동완성을 위해 하이픈(`-`)을 사용한다 — 호출부에서는 `libs.plugins.momentwo.android.application` 식으로 점으로 다시 변환된다.
+내부 플러그인에 가짜 `unspecified` 버전을 지정하지 않으며, 루트의 형제 플러그인 `apply false` 등록도 필요하지 않다.
+외부 플러그인에만 `alias(libs.plugins.…)`를 사용한다.
 
 ## 6. 사용 예시 (Cheat Sheet)
 
-새 모듈을 만들 때 `build.gradle.kts`에 plugin alias 1~3줄만 적으면 된다.
+새 모듈을 만들 때 `build.gradle.kts`에 plugin ID 1~3줄만 적으면 된다.
 
 ### 6.1 `:app` (현재)
 
 ```kotlin
 plugins {
-    alias(libs.plugins.momentwo.android.application)
-    alias(libs.plugins.momentwo.android.application.compose)
-    alias(libs.plugins.momentwo.android.hilt)
+    id("momentwo.android.application")
+    id("momentwo.android.application.compose")
+    id("momentwo.android.hilt")
 }
 
 android {
@@ -298,7 +298,7 @@ app에는 Room/serialization 플러그인과 BASE_URL/BuildConfig 생성이 필�
 
 ```kotlin
 plugins {
-    alias(libs.plugins.momentwo.android.feature)
+    id("momentwo.android.feature")
 }
 
 android {
@@ -317,9 +317,9 @@ dependencies {
 
 ```kotlin
 plugins {
-    alias(libs.plugins.momentwo.android.library)
-    alias(libs.plugins.momentwo.android.hilt)
-    alias(libs.plugins.momentwo.android.network)
+    id("momentwo.android.library")
+    id("momentwo.android.hilt")
+    id("momentwo.android.network")
 }
 
 android { namespace = "cord.eoeo.momentwo.core.network" }
@@ -329,7 +329,7 @@ android { namespace = "cord.eoeo.momentwo.core.network" }
 
 ```kotlin
 plugins {
-    alias(libs.plugins.momentwo.jvm.library)
+    id("momentwo.jvm.library")
 }
 ```
 
@@ -351,7 +351,7 @@ compileSdk, minSdk, Java 버전, Kotlin JVM target, Compose 옵션, Hilt/Room �
 Convention plugin은 한 번 컴파일된 후 캐시된다. `configuration-cache`와 `build-cache`(이미 활성화된 옵션) 하에서 동일 설정을 가진 모듈 빌드가 빠르게 재현된다. 모듈마다 다른 KTS 스크립트가 흩어져 있을 때보다 캐시 적중률이 높다.
 
 ### 7.6 새 모듈 진입 장벽 감소
-Phase 1~2에서 23개 모듈을 새로 만들어야 한다. 새 `build.gradle.kts`를 작성할 때 “어떤 의존을 적어야 하지?”를 매번 고민할 필요 없이 plugin alias만 골라 적으면 된다. 멀티모듈 작업의 실제 비용은 모듈을 만드는 비용이 아니라 **각 모듈의 빌드 스크립트를 정합성 있게 유지하는 비용**인데, 그 비용을 사실상 0으로 만든다.
+Phase 1~2에서 23개 모듈을 새로 만들어야 한다. 새 `build.gradle.kts`를 작성할 때 “어떤 의존을 적어야 하지?”를 매번 고민할 필요 없이 plugin ID만 골라 적으면 된다. 멀티모듈 작업의 실제 비용은 모듈을 만드는 비용이 아니라 **각 모듈의 빌드 스크립트를 정합성 있게 유지하는 비용**인데, 그 비용을 사실상 0으로 만든다.
 
 ### 7.7 잘못된 의존 조합 차단
 예를 들어 `:core:model`은 `momentwo.jvm.library`만 적용하므로 Android SDK / Compose를 의존성으로 끌어올 길이 컴파일러에서 막힌다. 아키텍처 규칙(예: `:core:model`은 순수 Kotlin)을 빌드 구성으로 강제할 수 있다.
@@ -364,7 +364,7 @@ Phase 1~2에서 23개 모듈을 새로 만들어야 한다. 새 `build.gradle.kt
 - **첫 빌드 cold-start 오버헤드**: `:build-logic:convention:compileKotlin`이 한 번 더 실행된다. 이후 incremental 빌드에는 영향이 없다.
 - **Convention plugin 자체를 수정하면 적용 모듈 전체가 재구성된다.** 빈번한 수정은 피한다. 대신 catalog 값(`libs.versions.toml`) 조정으로 처리 가능한 변경은 그쪽을 우선한다.
 - **IDE 인덱싱 부담 증가**: Android Studio가 build-logic을 별도 모듈처럼 인덱싱한다. 큰 문제는 아니나, 동기화가 더 길어진 인상을 받을 수 있다.
-- **`version = "unspecified"`의 의미**: included build의 로컬 plugin 요청에 사용하는 표기다. Gradle 8.7의 catalog alias에는 빈 version을 전달할 수 없으므로 이 값을 유지한다. 루트에서 같은 convention artifact를 먼저 적용하는 경우 형제 plugin의 요청도 `apply false`로 등록해 unknown-version classpath 충돌을 피한다.
+- **포함 빌드의 플러그인 참조**: `id("momentwo.…")`로 버전 없이 참조한다. Gradle 9에서는 같은 artifact의 플러그인에 가짜 `unspecified` 버전을 요청하면 unknown-version 충돌이 발생하므로 내부 플러그인의 catalog alias와 루트 형제 플러그인 `apply false` 등록을 제거했다. 외부 플러그인 버전은 카탈로그로 관리한다.
 - **순환 의존**: convention plugin 안에서 다른 convention plugin을 `apply("momentwo.android.library")` 식으로 적용할 수 있지만, plugin 간 순환 의존이 생기지 않도록 조심한다. 본 구성에서는 `feature → library + library.compose + hilt`의 단방향 호출만 사용한다.
 
 ## 9. 마이그레이션 적용 결과
@@ -380,7 +380,7 @@ Phase 1~3에서 다음 설정을 적용했다.
 
 ### 루트 아키텍처 검사 (#158)
 
-루트는 `momentwo.module-architecture`를 적용하고 같은 artifact의 형제 Convention 요청은 `apply false`로 등록한다. 수집기는 설정 완료 후 실제 프로젝트 configuration의 의존을 스냅샷으로 만들고, task는 이 값과 소스 입력만 검사한다. 앱 컴파일이나 dependency resolution 없이 경계·사이클을 진단한다. 루트/각 모듈 `check`에 연결되며 included build 자체는 별도 JUnit/TestKit으로 검증한다.
+루트는 `id("momentwo.module-architecture")`를 버전 없이 적용한다. 형제 Convention도 각 모듈에서 버전 없는 ID로 참조한다. 수집기는 설정 완료 후 실제 프로젝트 configuration의 의존을 스냅샷으로 만들고, task는 이 값과 소스 입력만 검사한다. 앱 컴파일이나 dependency resolution 없이 경계·사이클을 진단한다. 루트/각 모듈 `check`에 연결되며 included build 자체는 별도 JUnit/TestKit으로 검증한다.
 
 규칙·variant/테스트 맥락·지원하지 않는 의존의 처리·CI 범위는 [모듈 경계 가이드](module-boundaries.md)를 따른다. 모듈 수를 고정하지 않으므로 #160의 빈 navigation 삭제에도 적용된다.
 
@@ -391,3 +391,11 @@ Phase 1~3에서 다음 설정을 적용했다.
 - [Gradle — Sharing build logic in a multi-repo setup](https://docs.gradle.org/current/userguide/sharing_build_logic_between_subprojects.html)
 - [Gradle — Composite builds (includeBuild)](https://docs.gradle.org/current/userguide/composite_builds.html)
 - [Gradle — Version catalogs](https://docs.gradle.org/current/userguide/platforms.html)
+
+## 핵심 도구 전환 (#189)
+
+Gradle 9.7.0·AGP 9.3.3·Kotlin 2.4.21을 사용한다. Android에서는 org.jetbrains.kotlin.android를 별도로 적용하지 않고 AGP 내장 Kotlin과 KotlinAndroidExtension 공개 인터페이스를 사용한다. 순수 JVM의 Kotlin 플러그인과 Compose Compiler·Serialization 플러그인은 2.4.21로 정렬한다.
+
+실행·컴파일 toolchain은 Temurin 25.0.4.1+1이며 build-logic을 포함한 Java/Kotlin 출력은 17이다. build-logic의 kotlin-dsl 컴파일러는 Gradle 내장 Kotlin(9.7.0에서는 2.4.0)을 사용하고, 제품 KGP 버전과 구분한다. Hilt 2.60.1·KSP 2.3.12(KSP2)·Room 2.8.5를 함께 검증하며 minSdk 29 / compileSdk·targetSdk 34는 유지한다.
+
+CommonExtension의 제네릭·블록 메서드 대신 공개 속성의 apply를 사용한다. core:network는 ProviderFactory.fileContents로 local.properties를 읽고 Gradle/AGP 내부 API에 의존하지 않는다. 새 DSL/내장 Kotlin 비활성화로 우회하지 않는다. 세부 검증은 [도구 업데이트 기록](toolchain-upgrade.md)을 따른다.

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     `kotlin-dsl`
 }
@@ -5,8 +7,18 @@ plugins {
 group = "cord.eoeo.momentwo.buildlogic"
 
 java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(17)
 }
 
 dependencies {

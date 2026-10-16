@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.momentwo.jvm.library)
+    id("momentwo.jvm.library")
 }
 
 dependencies {

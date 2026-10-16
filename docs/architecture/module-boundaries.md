@@ -2,7 +2,7 @@
 
 ## 실행
 
-JDK 17과 Android SDK 34, 기존 local.properties 설정을 사용한다. 앱 컴파일이나 콘텐츠 API 호출 없이 구성된 프로젝트 의존을 검사한다. 첫 실행의 Gradle/플러그인 다운로드와 SDK 설정은 필요하다.
+Temurin JDK 25와 Android SDK 34, 기존 local.properties 설정을 사용한다. 앱 컴파일이나 콘텐츠 API 호출 없이 구성된 프로젝트 의존을 검사한다. 첫 실행의 Gradle/플러그인 다운로드와 SDK 설정은 필요하다.
 
 ```bash
 ./gradlew checkArchitecture
@@ -63,7 +63,7 @@ Android verification 워크플로는 PR 대상 develop, develop push, 수동 실
 | PR | 검사 도구 JUnit/TestKit → checkArchitecture → Model JVM/전체 Debug 단위 테스트 → app Debug → 전체 Debug Lint |
 | develop push·수동 | PR 검사 + app Release/lintVitalRelease + 전체 Debug AndroidTest APK 빌드 |
 
-Ubuntu 24.04·Temurin 17·SDK 34·build-tools 34.0.0·command-line tools 16.0과 기존 Gradle 8.7을 사용한다. Action은 확인한 release의 커밋 SHA로 고정한다. CI는 local.properties에 SDK 경로와 BASE_URL="https://example.invalid/"만 생성하며 운영 인증 정보·릴리스 서명을 요구하지 않는다. 이 주소로 만든 산출물은 배포용이 아니다.
+Ubuntu 24.04·Temurin 25.0.4.1+1·SDK 34·build-tools 36.0.0·command-line tools 16.0과 Gradle 9.7.0을 사용한다. Action은 확인한 release의 커밋 SHA로 고정한다. CI는 local.properties에 SDK 경로와 BASE_URL="https://example.invalid/"만 생성하며 운영 인증 정보·릴리스 서명을 요구하지 않는다. 이 주소로 만든 산출물은 배포용이 아니다.
 
 일반 pull_request 이벤트와 contents:read, checkout persist-credentials:false를 사용한다. 동일 PR의 이전 실행은 취소한다. Gradle User Home 의존 캐시만 재사용하고 단위 테스트와 검사 도구 테스트는 --rerun-tasks --no-build-cache로 실행한다. 실패해도 검사·단위 테스트·Lint 보고서를 14일 보관한다. SDK/외부 라이브러리를 다운로드할 네트워크는 필요하지만 실제 백엔드는 필요하지 않다.
 
@@ -71,7 +71,7 @@ Ubuntu 24.04·Temurin 17·SDK 34·build-tools 34.0.0·command-line tools 16.0과
 
 ## 검사 도구 회귀
 
-JUnit은 정책·강결합요소·소스 lexer/행 번호를 검증하고 TestKit은 임시 프로젝트에서 정상/위반 의존과 플러그인 연결을 검증한다. 테스트 fixture에서만 순환과 잘못된 의존을 만들며 실제 제품 모듈은 오염시키지 않는다. AGP fixture는 현재 프로젝트와 같은 8.5.2·SDK 34를 사용한다.
+JUnit은 정책·강결합요소·소스 lexer/행 번호를 검증하고 TestKit은 임시 프로젝트에서 정상/위반 의존과 플러그인 연결을 검증한다. 테스트 fixture에서만 순환과 잘못된 의존을 만들며 실제 제품 모듈은 오염시키지 않는다. AGP fixture는 테스트 task가 Version Catalog에서 전달하는 버전(현재 9.3.3)·SDK 34를 사용한다. 단위/기기 테스트의 컴파일·런타임 맥락이 자신의 운영 출력으로 연결되는지도 확인한다.
 
 운영/테스트 역방향의 오탐 방지, Debug/Release 분리, 상속·늦은 선언·Convention 의존, compileOnly/runtimeOnly, fixture 출력·미지원 맥락, 모듈 추가/삭제, check 연결, 실패 보고서, 생성 코드 제외와 새 소스 입력 무효화를 포함한다. 설정 캐시 재사용 후 새 소스 파일의 위반도 다시 검출하는지 확인한다. 프로젝트 전체의 configuration-cache 옵션을 강제로 활성화하지 않는다. CI 제품 검증은 로컬 재검증과 동일하게 --no-daemon·Gradle heap 4GiB·worker 2개를 사용하며 기존 gradle.properties의 로컬 기본값은 유지한다.
 
@@ -82,3 +82,9 @@ JUnit은 정책·강결합요소·소스 lexer/행 번호를 검증하고 TestKi
 - validatePlugins·actionlint·git diff --check, app Debug/Release/lintVitalRelease·전체 Debug Lint·전체 Debug AndroidTest APK 빌드 통과.
 - 로컬 DEX 병합 지연 후 app 산출물을 정리하고 단일 실행 프로세스/4GiB로 재검증했다. 기기 설치·기기 테스트·실제 API 성공을 확인한 결과는 아니며 기존 설치 앱은 변경하지 않았다.
 - PR CI와 병합 커밋의 전체 CI 결과는 #158에 실행 링크로 기록한 뒤 종료한다.
+
+## Gradle 9 전환 (#189)
+
+ProjectDependency.path와 현재 빌드의 프로젝트 조회로 대상 configuration을 찾는다. 제거된 dependencyProject API를 사용하지 않으며 알 수 없는 대상/맥락은 계속 실패한다. AGP 내장 Kotlin과 새 공개 DSL의 소스 집합에서도 생성 코드는 제외하고 직접 작성한 Kotlin/Java import를 검사한다.
+
+AGP 9는 기본적으로 tested build type(Debug)의 단위 테스트만 구성한다. 따라서 현재 그래프는 24개 모듈·188개 맥락·695개 간선이며 Debug 단위/기기 테스트와 Debug/Release 운영 출력을 모두 포함한다. 이전 234개 맥락과의 차이는 Release 단위 테스트 46개 맥락이 기본 생성되지 않기 때문이다. TestKit에서는 Release 단위 테스트를 명시적으로 켜고 해당 맥락의 수집도 검증한다. 이 수치는 정책에 하드코딩하지 않는다.

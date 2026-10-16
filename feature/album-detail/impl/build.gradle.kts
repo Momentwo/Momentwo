@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.momentwo.android.feature)
+    id("momentwo.android.feature")
     alias(libs.plugins.kotlinSerialization)
 }
 

@@ -195,9 +195,16 @@ PR의 API35 offline UI5건51.799초·내보내기1건1.206초도 통과했다. �
 - Android16의 JobScheduler quota는 전체 앱에 적용된다. 기존 서비스는 coroutine에서 JobParameters를 보유하고 IO에서 작업하며 onStopJob에서 취소한다. 영속 outbox 복구 계약을 유지하고 쿼터 우회용 FGS·setImportantWhileForeground를 추가하지 않는다.
 - 정기 ScheduledExecutorService나 앱의 별도 시스템 폰트 렌더러는 사용하지 않는다. UI 구조·입력 정책은 변경하지 않는다.
 
-이 단계는 SDK 정수값과 문서만 바뀌므로 로컬 Gradle·실기기 설치를 반복하지 않는다. 값·XML·diff를 자체 확인한 뒤
-원격 CI에서 전체 검사/빌드/Lint·실제 API36 smoke를 실행한다. API31의 직전 자료 보존 결과를 재사용하고 최종37에서 새 APK로 다시 확인한다.
+초기 SDK 정수값/문서 변경은 값·XML·diff만 자체 확인한 뒤 로컬 Gradle·실기기 설치를 반복하지 않고 원격 CI로 검증했다.
+실행에서 드러난 테스트 준비 조건을 보완한 경우에만 테스트 APK 컴파일을 추가한다. 전체 검사/빌드/Lint·실제 API36 smoke는 CI에서 확인한다. API31의 직전 자료 보존 결과를 재사용하고 최종37에서 새 APK로 다시 확인한다.
 실제 서버 동기화·정식 업데이트/OS 복원은 #150에 남긴다.
 
 [Android16 대상 변경](https://developer.android.com/about/versions/16/behavior-changes-16) ·
 [전체 앱 변경/JobScheduler quota](https://developer.android.com/about/versions/16/behavior-changes-all#job-scheduler)
+
+API36 첫 원격 실행은 사진·탐색·시스템 바·실제 gesture4건이 통과했고 앨범1건은 탭 제목 직후의 추가 버튼 탐색에서 실패했다.
+실패 로그에는 버튼이 unmerged tree에만 있다고 표시되었다. 탭 제목은 필수 로컬 데이터와 목적지 전환 완료를 보장하지 않으므로
+실제로 활성화된 merged 추가 버튼을 기다리도록 테스트를 보완한다. 숨겨진 unmerged 노드로 클릭을 우회하지 않고 기존10초 한도를 유지한다.
+새 테스트 소스 컴파일에 필요한 테스트 APK만 로컬 워커1/힙2GB로 빌드하며 제품 코드는 변경하지 않는다. 실제 결과는 후속 API36 CI에서 확인한다.
+
+버튼 준비 대기 보완 후 테스트 APK 컴파일은1분45초(실행494/재사용3 task, 워커1·힙2GB·in-process)에 통과했다. 실기기 설치와 전체 로컬 단위 테스트/Release/Lint는 반복하지 않았다.

@@ -30,7 +30,17 @@ class GuestPhotoCrudSmokeTest{
         val counter=EntryPointAccessors.fromApplication(context,ApiDiagnostics::class.java).apiRequests();val before=counter.count
         try{
             fun wait(predicate: SemanticsMatcher) { compose.waitUntil(10_000){compose.onAllNodes(predicate).fetchSemanticsNodes(atLeastOneRootRequired=false).isNotEmpty()} }
-            fun closeSheet() { androidx.test.espresso.Espresso.pressBack();compose.waitForIdle();if(compose.onAllNodes(hasText("설명") or hasText("개인 메모 입력")).fetchSemanticsNodes(atLeastOneRootRequired=false).isNotEmpty())androidx.test.espresso.Espresso.pressBack();compose.waitForIdle() }
+            fun closeSheet(title: String) {
+                // The memo draft/placeholder can change after save. It is not a sheet lifetime signal.
+                // Close the IME explicitly, then await the stable sheet header disappearing before
+                // injecting a photo tap; Compose idleness alone does not remove the dialog window.
+                androidx.test.espresso.Espresso.closeSoftKeyboard()
+                androidx.test.espresso.Espresso.pressBack()
+                compose.waitUntil(10_000) {
+                    compose.onAllNodes(hasText(title)).fetchSemanticsNodes(atLeastOneRootRequired=false).isEmpty()
+                }
+                compose.waitForIdle()
+            }
             scenario=ActivityScenario.launch(MainActivity::class.java);scenario.onActivity{it.setShowWhenLocked(true);it.setTurnScreenOn(true);it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
             wait(hasText(title))
             compose.onNodeWithText(title).performClick()
@@ -43,11 +53,14 @@ class GuestPhotoCrudSmokeTest{
             compose.onNodeWithContentDescription("사진 설명").performClick();compose.onNodeWithContentDescription("설명 작성").performClick()
             compose.onNodeWithText("제목 입력").performTextInput("Offline caption");compose.onNodeWithText("내용 입력").performTextInput("Offline body\nsecond line")
             compose.onNodeWithContentDescription("확인").performClick();wait(hasText("Offline caption"));compose.waitUntil(10_000){runBlocking{repo.photo(photo).first()!!.description=="Offline caption\nOffline body\nsecond line"}}
-            closeSheet()
-            compose.onNodeWithContentDescription("개인 메모").performClick();compose.onNodeWithText("개인 메모 입력").performTextInput("Private memo");compose.onNodeWithContentDescription("개인 메모 작성").performClick();wait(hasText("Private memo"));closeSheet()
-            compose.onNodeWithContentDescription("사진").performClick();compose.waitUntil(10_000){compose.onAllNodes(hasContentDescription("즐겨찾기")).fetchSemanticsNodes(atLeastOneRootRequired=false).isEmpty()};compose.onNodeWithContentDescription("사진").performClick();wait(hasContentDescription("즐겨찾기"))
+            closeSheet("설명")
+            compose.onNodeWithContentDescription("개인 메모").performClick();compose.onNodeWithText("개인 메모 입력").performTextInput("Private memo");compose.onNodeWithContentDescription("개인 메모 작성").performClick();wait(hasText("Private memo"));closeSheet("개인 메모")
+            compose.onNodeWithContentDescription("사진").performClick()
+            compose.waitUntil(10_000){compose.onAllNodes(hasContentDescription("즐겨찾기")).fetchSemanticsNodes(atLeastOneRootRequired=false).isEmpty()}
+            compose.onNodeWithContentDescription("사진").performClick()
+            wait(hasContentDescription("즐겨찾기"))
             scenario.recreate();scenario.onActivity{it.setShowWhenLocked(true);it.setTurnScreenOn(true);it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)};wait(hasContentDescription("즐겨찾기"))
-            compose.onNodeWithContentDescription("사진 설명").performClick();wait(hasText("Offline caption"));compose.onNodeWithText("Offline caption").assertExists();closeSheet()
+            compose.onNodeWithContentDescription("사진 설명").performClick();wait(hasText("Offline caption"));compose.onNodeWithText("Offline caption").assertExists();closeSheet("설명")
             compose.onNodeWithContentDescription("개인 메모").performClick();wait(hasText("Private memo"));compose.onNodeWithText("Private memo").assertExists()
             assertEquals(before,counter.count);assertTrue(repo.photo(photo).first()!!.favorite)
         }finally{if(::scenario.isInitialized)scenario.close();repo.deleteAlbum(album)}

@@ -33,7 +33,13 @@ class GuestAlbumCrudSmokeTest {
         compose.waitUntil(10_000) { compose.onAllNodes(hasText(albumTitle) and hasClickAction()).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
         compose.onNode(hasText(albumTitle) and hasClickAction()).performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("서브 앨범")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
-        compose.onNodeWithContentDescription("추가").performClick()
+        // Tab chrome is present while the required local data/destination transition is loading.
+        // Wait for the actionable merged semantics; do not click a hidden unmerged icon.
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasContentDescription("추가") and isEnabled())
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
+        compose.onNodeWithContentDescription("추가").assertIsDisplayed().assertIsEnabled().performClick()
         compose.onNodeWithText("이름").performTextInput("Guest child")
         compose.onNodeWithText("저장").performClick()
         compose.waitUntil(10_000) { compose.onAllNodes(hasText("Guest child")).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }

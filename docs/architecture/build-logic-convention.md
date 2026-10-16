@@ -396,6 +396,6 @@ Phase 1~3에서 다음 설정을 적용했다.
 
 Gradle 9.7.0·AGP 9.3.3·Kotlin 2.4.21을 사용한다. Android에서는 org.jetbrains.kotlin.android를 별도로 적용하지 않고 AGP 내장 Kotlin과 KotlinAndroidExtension 공개 인터페이스를 사용한다. 순수 JVM의 Kotlin 플러그인과 Compose Compiler·Serialization 플러그인은 2.4.21로 정렬한다.
 
-실행·컴파일 toolchain은 Temurin 25.0.4.1+1이며 build-logic을 포함한 Java/Kotlin 출력은 17이다. build-logic의 kotlin-dsl 컴파일러는 Gradle 내장 Kotlin(9.7.0에서는 2.4.0)을 사용하고, 제품 KGP 버전과 구분한다. Hilt 2.60.1·KSP 2.3.12(KSP2)·Room 2.8.5를 함께 검증하며 핵심 전환 시 minSdk 29 / compileSdk·targetSdk 34를 유지했다. #190의 라이브러리 단계에서는 compileSdk37/targetSdk34를 사용했고, 현재 앱 defaultConfig와 라이브러리 testOptions의 targetSdk는 35다. SDK 단계별 결과는 [라이브러리·SDK 가이드](library-sdk-upgrade.md)를 따른다.
+실행·컴파일 toolchain은 Temurin 25.0.4.1+1이며 build-logic을 포함한 Java/Kotlin 출력은 17이다. build-logic의 kotlin-dsl 컴파일러는 Gradle 내장 Kotlin(9.7.0에서는 2.4.0)을 사용하고, 제품 KGP 버전과 구분한다. Hilt 2.60.1·KSP 2.3.12(KSP2)·Room 2.8.5를 함께 검증하며 핵심 전환 시 minSdk 29 / compileSdk·targetSdk 34를 유지했다. #190의 라이브러리 단계에서는 compileSdk37/targetSdk34를 사용했고, 현재 앱 defaultConfig와 라이브러리 testOptions의 targetSdk는 36이다. SDK 단계별 결과는 [라이브러리·SDK 가이드](library-sdk-upgrade.md)를 따른다.
 
 CommonExtension의 제네릭·블록 메서드 대신 공개 속성의 apply를 사용한다. core:network는 ProviderFactory.fileContents로 local.properties를 읽고 Gradle/AGP 내부 API에 의존하지 않는다. 새 DSL/내장 Kotlin 비활성화로 우회하지 않는다. 세부 검증은 [도구 업데이트 기록](toolchain-upgrade.md)을 따른다.

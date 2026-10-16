@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.feature.album.impl.account
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable fun AccountAccessGuard(onAccountRequired:()->Unit,content: @Composable () -> Unit){AccountGuardRoute(onAccountRequired,content)}
 @Composable private fun AccountGuardRoute(onAccountRequired:()->Unit,content: @Composable () -> Unit,vm:AccountGateViewModel=hiltViewModel()){

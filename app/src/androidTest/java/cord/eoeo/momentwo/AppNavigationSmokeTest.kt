@@ -27,6 +27,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.hasClickAction
@@ -110,6 +111,11 @@ class AppNavigationSmokeTest {
     fun loginSignUpAndBackUseFeatureGraph() {
         compose.onNodeWithContentDescription("메뉴").performClick()
         compose.onNodeWithText("계정·저장 공간").performClick()
+        // Storage/session observation runs outside Compose idleness; wait for its ready body.
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodesWithText("로그인")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
         compose.onNodeWithText("로그인").performClick()
         compose.onNodeWithText("회원가입").performClick()
         compose.waitForIdle()

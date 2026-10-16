@@ -20,6 +20,10 @@ dependencies {
     compileOnly(libs.room.gradlePlugin)
 }
 
+tasks.test {
+    systemProperty("momentwo.test.agp.version", libs.versions.agp.get())
+}
+
 gradlePlugin {
     plugins {
         register("moduleArchitecture") {

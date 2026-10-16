@@ -1,4 +1,4 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.momentwo.android.library)
@@ -6,19 +6,24 @@ plugins {
     alias(libs.plugins.momentwo.android.hilt)
 }
 
+val localProperties = providers.fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+    .asText.map { contents -> Properties().apply { contents.reader().use { load(it) } } }
+
 android {
     namespace = "cord.eoeo.momentwo.core.network"
 
     defaultConfig {
-        buildConfigField("String", "BASE_URL", getLocalProperty("BASE_URL"))
+        buildConfigField("String", "BASE_URL", localProperties.map { properties ->
+            requireNotNull(properties.getProperty("BASE_URL")) {
+                "Set the quoted BASE_URL property in local.properties"
+            }
+        }.get())
     }
 
     buildFeatures {
         buildConfig = true
     }
 }
-
-fun getLocalProperty(key: String): String = gradleLocalProperties(rootDir, providers).getProperty(key)
 
 dependencies {
     implementation(project(":core:datastore"))

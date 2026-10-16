@@ -98,3 +98,38 @@ OkHttp 5의 공식 테스트 artifact인 mockwebserver3으로 전환한다. 요�
 app Debug·전체 Feature/Hilt 컴파일은 1분 23초(실행 72 / 재사용 408 task)에 통과했다.
 이전 AndroidTest APK를 그대로 사용해 API 31 별도 앱의 계정 연결 취소·생성 초안 보존·콘텐츠 API 요청 없음 1건을 3.845초에 확인했다.
 테스트 APK·전체 로컬 테스트·Release/Lint는 재빌드/반복하지 않았고 원래 설치 앱을 보존했다. 전체 검증은 원격 CI에서 확인한다.
+
+## 네트워크 단계 병합·전체 검증
+
+#194를 094bd89fa로 병합했고 [병합 후 전체 CI](https://github.com/Momentwo/Momentwo/actions/runs/38864797852)가 통과했다.
+검사31 + 제품239 =270건, 실패·오류·skip0, 경계·사이클 위반0, Debug/Release·전체 Debug Lint·Release lintVital·전체 AndroidTest APK 빌드를 확인했다.
+
+## Coil 3·저장소·Paging
+
+Coil 3.6.3의 io.coil-kt.coil3 좌표와 coil3 패키지로 일괄 전환하며 DataStore 1.2.1 / Paging 3.5.3을 사용한다.
+화면 구성·경로·기록 저장 형식·계정 구분과 DB schema는 유지한다.
+
+- app의 SingletonImageLoader.Factory에서 OkHttp network fetcher와 CacheControlCacheStrategy를 등록한다.
+  기존 Coil2의 respectCacheHeaders=true를 유지해 no-store 응답을 디스크에 저장하지 않는다.
+  기존처럼 독립 클라이언트를 사용하며 API/계정 인증 클라이언트를 이미지 전역 로더에 연결하지 않는다.
+- 직접 가져온 library-media 영속 파일과 server-media 열람 캐시는 기존 저장소가 계속 관리한다. Coil cache로 이관하거나 원본을 삭제하지 않는다.
+- 내보내기 요청은 Size.ORIGINAL과 maxBitmapSize(Size.ORIGINAL), software bitmap을 사용한다.
+  Coil3의 기본 4096 비트맵 제한이 갤러리 내보내기의 원본 해상도를 줄이지 않도록 한다. 화면 표시 요청은 해당 화면 크기에 맞게 처리한다.
+- 실제 app singleton의 no-store 재요청/인증 미첨부, 저장한 응답의 네트워크 없는 재사용,
+  실제 PhotoRepository·MediaStore를 통한 5000×3 PNG 원본 해상도 내보내기만 작은 loopback fixture로 검증한다.
+  원본 앱·다른 갤러리 파일을 보존하고 UUID로 생성한 테스트 행만 정리한다.
+- PhotoRepository 접근용 Hilt getter는 기존 debug 전용 LibraryTestAccess에만 추가한다. Release 공개 계약에 테스트 접근점을 추가하지 않는다.
+
+[Coil3 전환](https://coil-kt.github.io/coil/upgrading_to_coil3/) · [네트워크/Cache-Control 설정](https://coil-kt.github.io/coil/network/)
+
+### 이미지·저장소 로컬 영향 범위
+
+DataStore 세션·취소4 + Friend/Photo Mediator9 =13건 새 실행, 실패·오류·skip0 (1분8초). 경계·사이클24/188/695·위반0.
+별도 app Debug·AndroidTest와 전체 Feature/Hilt 컴파일은 워커1·힙2GB·in-process로 2분1초(실행442/재사용73 task)에 통과했다. DB schema 파일은 변경되지 않았다.
+Debug APK의 graphics.path/datastore_shared_counter JNI8개가 ELF LOAD16KB 정렬을 가지며 zipalign의 16KB 검사도 통과했다.
+이는 정적 APK 검사이며 16KB 페이지 기기 실행을 확인했다고 기록하지 않는다.
+
+실기기의 no-store/인증 헤더·오프라인 캐시 2건과 기존 로컬 사진 설명·메모·즐겨찾기·몰입/재시작 1건은 통과했다.
+계정 사진 내보내기는 기존 AccountPhotoRepository가 계정 컨텍스트를 요구하므로 테스트에 만료된 fixture 계정을 설정하고 종료 시 정리한다.
+계정 없이 직접 호출한 초기 내보내기 테스트는 이 기존 전제 때문에 실패했으며, 제품 계정 정책은 변경하지 않았다.
+테스트 APK만 재빌드(14초, 실행6/재사용491 task)하고 내보내기1건만 다시 실행해 0.407초에 통과했다. 5000×3 해상도·인증 미첨부·API요청0·fixture 정리를 확인했다. 기존3건은 재사용했다.

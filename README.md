@@ -368,7 +368,7 @@ MVI는 `core:common`의 `ReducerViewModel`과 순수 Reducer를 사용합니다.
 | Local Storage | Room, Preferences DataStore, 앱 영속 파일 | 로컬 원본·계정별 캐시·대기 작업 / 세션·편집 초안 / 사진 보관 |
 | Background Sync | Android JobScheduler | 사용자가 저장한 계정 작업의 연결 복구·재시작 후 이어가기 |
 | Paging | Paging 3, RemoteMediator | 페이지 단위 로딩과 Room/원격 데이터 연동 |
-| Image | Coil, Coil Compose | 이미지 로딩·Compose 표시 |
+| Image | Coil 3, Coil Compose | 이미지 로딩·Compose 표시, HTTP Cache-Control 유지 |
 | Testing | JUnit 4, Coroutines Test, AndroidX Test, Compose UI Test | Reducer·요청·취소 회귀, 경로·lifecycle·Paging·Room 기기 검증 |
 | Build | Gradle Kotlin DSL, Version Catalog, Convention Plugins | 의존성·버전·공통 Android/Compose/Hilt 설정 관리 |
 

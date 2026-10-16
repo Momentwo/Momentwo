@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
-import coil.imageLoader
+import coil3.ImageLoader
+import coil3.imageLoader
 import cord.eoeo.momentwo.core.ui.CollectEffect
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme
 import kotlinx.coroutines.CoroutineScope

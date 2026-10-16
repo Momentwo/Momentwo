@@ -2,7 +2,7 @@ package cord.eoeo.momentwo.feature.auth.impl
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.feature.auth.api.LoginDestination
 import cord.eoeo.momentwo.feature.auth.api.ProfileDestination
 import cord.eoeo.momentwo.feature.auth.api.SignUpDestination

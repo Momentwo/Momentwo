@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.model.AlbumItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

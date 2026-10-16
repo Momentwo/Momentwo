@@ -25,7 +25,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.paging.compose.LazyPagingItems
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.common.ScreenState
 import cord.eoeo.momentwo.core.ui.CollectEffect
 import cord.eoeo.momentwo.core.ui.ScreenContent

@@ -12,7 +12,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import coil.imageLoader
+import coil3.imageLoader
 import cord.eoeo.momentwo.core.data.library.LibraryTestAccess
 import cord.eoeo.momentwo.core.database.*
 import cord.eoeo.momentwo.core.designsystem.theme.MomentwoTheme

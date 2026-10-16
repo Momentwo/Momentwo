@@ -62,7 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.ui.message
 import cord.eoeo.momentwo.core.ui.CircleAsyncImage
 import cord.eoeo.momentwo.core.model.DescriptionItem

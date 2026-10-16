@@ -4,7 +4,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.feature.photo.api.PhotoListDestination
 import cord.eoeo.momentwo.feature.photo.api.PhotoDetailDestination
 import cord.eoeo.momentwo.feature.photo.impl.photolist.PhotoListRoute

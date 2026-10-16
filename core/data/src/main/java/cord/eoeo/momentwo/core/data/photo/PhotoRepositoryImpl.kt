@@ -3,7 +3,6 @@ package cord.eoeo.momentwo.core.data.photo
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.paging.ExperimentalPagingApi
@@ -11,9 +10,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.BitmapImage
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.request.maxBitmapSize
+import coil3.size.Size
 import cord.eoeo.momentwo.core.data.model.PresignedRequest
 import cord.eoeo.momentwo.core.data.model.UploadPhoto
 import cord.eoeo.momentwo.core.data.model.UriRequestBody
@@ -118,18 +121,15 @@ class PhotoRepositoryImpl(
 
     private suspend fun loadBitmapFromUrl(imageUrl: String): Bitmap? =
         withContext(dispatcher) {
-            (
-                (
-                    (
-                        imageLoader.execute(
-                            ImageRequest
-                                .Builder(applicationContext)
-                                .data(imageUrl)
-                                .allowHardware(false)
-                                .build(),
-                        ) as? SuccessResult
-                    )?.drawable
-                ) as? BitmapDrawable
-            )?.bitmap
+            val result = imageLoader.execute(
+                ImageRequest.Builder(applicationContext)
+                    .data(imageUrl)
+                    .allowHardware(false)
+                    // Export keeps the source resolution; UI requests retain their display-sized limit.
+                    .size(Size.ORIGINAL)
+                    .maxBitmapSize(Size.ORIGINAL)
+                    .build(),
+            )
+            ((result as? SuccessResult)?.image as? BitmapImage)?.bitmap
         }
 }

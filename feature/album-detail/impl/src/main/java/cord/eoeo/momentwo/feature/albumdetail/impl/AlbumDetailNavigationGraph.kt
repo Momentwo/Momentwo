@@ -3,7 +3,7 @@ package cord.eoeo.momentwo.feature.albumdetail.impl
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.feature.albumdetail.api.AlbumDetailDestination
 import kotlinx.coroutines.CoroutineScope
 

@@ -18,7 +18,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.common.ScreenState
 import cord.eoeo.momentwo.core.ui.*
 import cord.eoeo.momentwo.feature.albumdetail.api.LocalAlbumDetailDestination

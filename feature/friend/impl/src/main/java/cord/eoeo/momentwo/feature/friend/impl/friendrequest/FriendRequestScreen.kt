@@ -9,7 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.core.ui.ScreenContent
 import cord.eoeo.momentwo.core.ui.EmptyContent
 import cord.eoeo.momentwo.feature.friend.impl.*

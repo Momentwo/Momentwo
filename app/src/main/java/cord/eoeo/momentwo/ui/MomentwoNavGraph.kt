@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import coil.ImageLoader
+import coil3.ImageLoader
 import cord.eoeo.momentwo.feature.album.impl.albumScreens
 import cord.eoeo.momentwo.feature.album.impl.account.accountLibraryScreen
 import cord.eoeo.momentwo.feature.album.impl.account.AccountAccessGuard

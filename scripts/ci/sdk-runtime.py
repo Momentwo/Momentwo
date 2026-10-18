@@ -123,12 +123,21 @@ def main():
             shell("svc", "wifi", "disable")
             shell("svc", "data", "disable")
             shell("cmd", "connectivity", "airplane-mode", "enable")
-            staged_args = ("-e", "requireOffline", "true", "-e", "verifyScheduler", "true")
+            # Default am instrument force-stops the target at start AND finish, cancelling its jobs.
+            # Attach only these repository-only staged tests to an explicitly running app instead.
+            staged_args = ("--no-restart", "-e", "requireOffline", "true", "-e", "verifyScheduler", "true")
+            shell("am", "start", "-W", "-n", "cord.eoeo.momentwo/.ui.MainActivity")
             instrument("persistence-seed", 1, persistence, "-e", "persistenceStage", "seed", *staged_args)
+            (output / "job-before-reboot.txt").write_text(shell("cmd", "jobscheduler", "get-job-state", "cord.eoeo.momentwo", "162"))
+            # JobStore batches disk writes (AOSP JOB_PERSIST_DELAY=2s). The assertion after reboot,
+            # not elapsed time, is the persistence verdict. Allow a small remote-only batching grace.
+            time.sleep(3)
             run(adb, "-s", serial, "reboot")
             run(adb, "-s", serial, "wait-for-disconnect", timeout=30)
             run(adb, "-s", serial, "wait-for-device", timeout=120)
             wait_boot()
+            (output / "job-after-reboot.txt").write_text(shell("cmd", "jobscheduler", "get-job-state", "cord.eoeo.momentwo", "162"))
+            shell("am", "start", "-W", "-n", "cord.eoeo.momentwo/.ui.MainActivity")
             instrument("persistence-verify", 1, persistence, "-e", "persistenceStage", "verify", *staged_args)
             shell("wm", "size", "1200x1600")
             shell("wm", "density", "200")

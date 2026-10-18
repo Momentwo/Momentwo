@@ -250,3 +250,15 @@ API31 실기기는 이미 저장한 target35 fixture를 target37 앱만 교체�
 API31에서 이전 target35 seed를 보존한 채 별도 앱 APK만37로 교체하고 기존 테스트 APK의 verify1건을0.509초에 통과했다.
 캐시 정리 후 영속 사진·설명·메모·즐겨찾기 유지, 콘텐츠 API 요청0과 fixture 정리를 확인했다. 원본 앱 version/min/target 및 최초 설치·최종 업데이트 시간은 동일하다.
 Python/XML 구문·diff와 Linux CI 외 런타임 스크립트 실행 거부도 확인했다. 실제 API29/35/36/37 및 전체 검증은 원격 CI에서 별도 확인한다.
+
+### API29 관찰·SDK 설치·재부팅 검증 보완
+
+최초 #200 일반 CI270건 실패·오류·skip0 및 API35 기본6건, API37 기본6+계정/저장소3+seed1건은 통과했다.
+API29 시스템 바1건은 연결 View 없는 root-insets 관찰에서 대기 실패했다. AndroidX의 view-aware 변환을 사용해 API29의 실제 시스템 UI 표시 정보를 포함한다. 기존10초 한도와 숨김/복원 assertion을 유지한다.
+API36은 테스트 실행 전 setup-android의 license stdin 쓰기에서 EPIPE로 종료했다. 고정 Action은 CLI 설치만 담당하고 Python subprocess가 라이선스/패키지 설치의 실제 종료 코드를 확인한다. 조기 stdin 종료를 SDK 설치 성공으로 추정하거나 실패를 무시하지 않는다.
+API37 재부팅 뒤 job 검증은 일반 am instrument가 시작/종료 때 대상 앱을 force-stop하는 테스트 수명과 충돌했다. 계정 없는 앱을 먼저 실행하고 이 두 저장소 단계만 --no-restart로 연결해 예약을 지우지 않는다. JobStore의 비동기 저장 배치에 짧은 여유를 주되 실제 재부팅 후 JobInfo를 다시 확인해야 통과한다.
+수정된 테스트 APK만16초(실행6/재사용491 task, 워커1·힙2GB)에 컴파일했다. 실기기 설치/전체 로컬 검증은 반복하지 않는다. 최종 결과는 수정 후 원격 실행에서 확인한다.
+
+[AndroidX view-aware insets](https://developer.android.com/reference/androidx/core/view/WindowInsetsCompat#toWindowInsetsCompat(android.view.WindowInsets,android.view.View)) ·
+[AOSP instrumentation 수명](https://github.com/aosp-mirror/platform_frameworks_base/blob/main/services/core/java/com/android/server/am/ActivityManagerService.java) ·
+[AOSP JobStore](https://github.com/aosp-mirror/platform_frameworks_base/blob/main/apex/jobscheduler/service/java/com/android/server/job/JobStore.java)

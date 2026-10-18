@@ -2,6 +2,7 @@
 
 추적: [#190](https://github.com/Momentwo/Momentwo/issues/190). 선행 핵심 도구는 #189 / PR #192에서 갱신했다.
 각 PR은 최신 develop에서 시작하며 선행 병합의 전체 CI 통과 후 다음 단계로 진행한다.
+현재 설정은 minSdk 29 / compileSdk 37 / targetSdk 37 / JVM 출력 17이다. 아래 targetSdk 34~36 표기는 단계별 이력이다.
 
 ## 안정판 고정 (2026-10-16)
 
@@ -208,3 +209,44 @@ API36 첫 원격 실행은 사진·탐색·시스템 바·실제 gesture4건이 
 새 테스트 소스 컴파일에 필요한 테스트 APK만 로컬 워커1/힙2GB로 빌드하며 제품 코드는 변경하지 않는다. 실제 결과는 후속 API36 CI에서 확인한다.
 
 버튼 준비 대기 보완 후 테스트 APK 컴파일은1분45초(실행494/재사용3 task, 워커1·힙2GB·in-process)에 통과했다. 실기기 설치와 전체 로컬 단위 테스트/Release/Lint는 반복하지 않았다.
+
+
+## targetSdk36 병합·전체 검증
+
+#199를 b74840b03으로 병합했고 [전체 CI/API36 재실행](https://github.com/Momentwo/Momentwo/actions/runs/38880456797)이 통과했다.
+일반270건 실패·오류·skip0, Debug/Release·Lint/lintVital·전체 AndroidTest APK와 실제 API36 실행을 확인했다.
+수정 후 PR의 offline UI5건50.057초·갤러리 내보내기1건0.789초도 통과했다. 최초 실패와 대체 이유는 #198/#199에 보존했다.
+
+## targetSdk 37 (Android 17)
+
+앱 defaultConfig와 라이브러리 testOptions, Manifest 점검 기준을37로 맞춘다. minSdk29/compileSdk37/JVM17과 라이브러리·DB·API 계약은 유지한다.
+
+- Android17 대상 앱은 대화면 방향/크기 제한의 예외를 사용할 수 없다. 기존 Activity에는 해당 제한이 없으며 예외를 추가하지 않는다.
+- 자체 MessageQueue 비공개 필드 접근·static final 변경·RemoteViews/위젯·동적 네이티브 코드 로딩은 사용하지 않는다. Espresso3.7.0을 유지하고 실제 새 OS에서 Compose/IME 실행을 확인한다.
+- LAN 장치 검색/연결 기능이 없으므로 ACCESS_LOCAL_NETWORK 권한을 추가하지 않는다. 기본 TLS/CT를 완화하지 않으며 실서버 TLS·인증 확인은 #150에 남긴다.
+- 자체 사진은 기존 영속 파일, 내보내기는 MediaStore의 앱 생성 행을 사용한다. 추가 저장소 권한과 UI 변경은 없다.
+
+### 최종 원격 실행 범위
+
+앞서 빌드한 APK 하나를 API29/35/36/37 Linux/KVM에서 사용한다. 맥 에뮬레이터와 추가 로컬 전체 검사는 실행하지 않는다.
+API29는 offline UI4건+내보내기1건, API35/36은 실제 IME/시스템 뒤로가기를 포함한 offline UI5건+내보내기1건을 실행한다.
+API37은 위6건에 다음7건을 더한다.
+
+- 기존 저장소 계측3건을 재사용해 계정 격리/로그아웃의 로컬 원본 보존, v3 DB migration, 불명확한 쓰기의 재전송 차단·오래된 실행 claim 격리를 확인한다.
+- 별도 seed→기기 재부팅→verify2건에서 영속 사진·설명·메모·즐겨찾기와 실제 JobScheduler의 persisted/NETWORK_TYPE_ANY/서비스 연결 보존을 확인한다. 재부팅 후에는 transport 단절→재연결→boot 완료를 기다린다.
+- 마지막2건은 사진/Sheet/몰입·키보드/뒤로가기를 대화면/가로/글자1.3배에서 반복한다. 요청한 wm 설정뿐 아니라 실제 Activity Configuration의 sw>=600dp·LANDSCAPE·fontScale1.3을 assertion으로 확인한다.
+
+JobScheduler 검증은 계정과 활성 네트워크가 없는 임시 CI 앱에서 예약/재부팅 보존만 확인한다. fixture가 생성한 job162만 취소하며 기존 작업을 덮어쓰지 않는다.
+실제 서버 전송·quota·네트워크 작업 중 onStopJob 실행, 정식 서명 업데이트/OS 백업 복원과16KB 페이지 런타임은 이 검증으로 확인했다고 표시하지 않는다. 서버·운영 환경 확인은 #150이다.
+API31 실기기는 이미 저장한 target35 fixture를 target37 앱만 교체한 뒤 검증한다. 기존 테스트 APK를 재사용하며 스케줄러/대화면 CI 인자는 전달하지 않는다.
+
+[Android17 대상 변경](https://developer.android.com/about/versions/17/behavior-changes-17) ·
+[전체 앱 변경](https://developer.android.com/about/versions/17/behavior-changes-all)
+
+### targetSdk37 로컬 최소 결과 (2026-10-19)
+
+경계·사이클24모듈/188맥락/695간선·위반0과 별도 앱 Debug/AndroidTest APK 빌드를2분8초(실행512/재사용3 task)에 통과했다.
+워커1·최대 힙2GB·Kotlin in-process로 실행했고 전체 로컬 단위 테스트·Release/Lint와 에뮬레이터는 반복하지 않았다.
+API31에서 이전 target35 seed를 보존한 채 별도 앱 APK만37로 교체하고 기존 테스트 APK의 verify1건을0.509초에 통과했다.
+캐시 정리 후 영속 사진·설명·메모·즐겨찾기 유지, 콘텐츠 API 요청0과 fixture 정리를 확인했다. 원본 앱 version/min/target 및 최초 설치·최종 업데이트 시간은 동일하다.
+Python/XML 구문·diff와 Linux CI 외 런타임 스크립트 실행 거부도 확인했다. 실제 API29/35/36/37 및 전체 검증은 원격 CI에서 별도 확인한다.

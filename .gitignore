@@ -142,3 +142,9 @@ google-services.json
 !core/database/schemas/**
 
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio,kotlin
+
+# macOS metadata
+.DS_Store
+
+# Personal Impeccable overrides; shared defaults stay versioned.
+/.impeccable/config.local.json

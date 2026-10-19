@@ -27,6 +27,11 @@ class GuestAlbumCrudSmokeTest {
         val counter = EntryPointAccessors.fromApplication(compose.activity.applicationContext, ApiDiagnostics::class.java).apiRequests()
         val before = counter.count
         compose.onNodeWithContentDescription("앨범 추가").performClick()
+        // Navigation and form initialization can finish after the click has returned.
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasSetTextAction() and isEnabled())
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).size == 1
+        }
         compose.onNode(hasSetTextAction()).performTextReplacement(albumTitle)
         compose.onNodeWithText("완료", useUnmergedTree = true).performClick()
         waitForLibrary()

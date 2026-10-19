@@ -2,7 +2,10 @@ package cord.eoeo.momentwo
 import android.graphics.Bitmap
 import android.view.WindowManager
 import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.test.*
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -32,15 +35,24 @@ class GuestPhotoCrudSmokeTest{
         try{
             fun wait(predicate: SemanticsMatcher) { compose.waitUntil(10_000){compose.onAllNodes(predicate).fetchSemanticsNodes(atLeastOneRootRequired=false).isNotEmpty()} }
             fun closeSheet(title: String) {
-                // The memo draft/placeholder can change after save. It is not a sheet lifetime signal.
-                // Close the IME explicitly, then await the stable sheet header disappearing before
-                // injecting a photo tap; Compose idleness alone does not remove the dialog window.
-                androidx.test.espresso.Espresso.closeSoftKeyboard()
-                androidx.test.espresso.Espresso.pressBack()
+                // Use the sheet's accessibility dismiss action: a Back key may be consumed by IME.
+                // The header can disappear before the dialog window stops intercepting touches.
+                compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.Dismiss) and hasText(title))
+                    .performSemanticsAction(SemanticsActions.Dismiss)
                 compose.waitUntil(10_000) {
-                    compose.onAllNodes(hasText(title)).fetchSemanticsNodes(atLeastOneRootRequired=false).isEmpty()
+                    compose.onAllNodes(hasText(title)).fetchSemanticsNodes(atLeastOneRootRequired=false).isEmpty() &&
+                        compose.onAllNodes(isDialog(), useUnmergedTree=true)
+                            .fetchSemanticsNodes(atLeastOneRootRequired=false).isEmpty()
                 }
-                compose.waitForIdle()
+                compose.waitUntil(10_000) {
+                    var ready = false
+                    scenario.onActivity {
+                        val insets = ViewCompat.getRootWindowInsets(it.window.decorView)
+                        ready = it.hasWindowFocus() && insets != null &&
+                            !insets.isVisible(WindowInsetsCompat.Type.ime())
+                    }
+                    ready
+                }
             }
             scenario=ActivityScenario.launch(MainActivity::class.java);scenario.onActivity{assertSdkRuntimeDisplay(it);it.setShowWhenLocked(true);it.setTurnScreenOn(true);it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
             wait(hasText(title))

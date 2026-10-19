@@ -6,9 +6,9 @@
 
 ## 1. 도입 배경
 
-단일 모듈에서 멀티모듈로 전환하면 모듈 수가 1개에서 24개(`:app` + `:core:* 11` + `:feature:* 12`)로 늘어난다. 이때 각 모듈이 자신만의 `build.gradle.kts`를 갖게 되는데, 같은 설정(compileSdk, Kotlin/Java 버전, Compose 활성화, Hilt 적용, Room 옵션 등)을 모든 모듈에 그대로 복붙하면 다음 문제가 즉시 발생한다.
+Phase 1~3에서 단일 모듈을 24개로 분리했고, #160에서 빈 navigation을 제거해 현재는 23개(`:app` + `:core:* 10` + `:feature:* 12`)다. 이때 각 모듈이 자신만의 `build.gradle.kts`를 갖게 되는데, 같은 설정(compileSdk, Kotlin/Java 버전, Compose 활성화, Hilt 적용, Room 옵션 등)을 모든 모듈에 그대로 복붙하면 다음 문제가 즉시 발생한다.
 
-- Kotlin/AGP 버전을 하나 올릴 때 24개 파일을 일일이 수정해야 한다.
+- Kotlin/AGP 버전을 하나 올릴 때 모듈별 파일을 일일이 수정해야 한다.
 - 신규 모듈을 만들 때마다 같은 50~100줄을 복사한다.
 - 모듈마다 미세하게 다른 옵션이 누적되어 빌드 동작이 비결정적으로 변한다.
 - 잘못된 plugin 조합(예: Compose 모듈인데 `compose-compiler`를 빠뜨림)을 컴파일러가 막지 못한다.
@@ -195,7 +195,6 @@ dependencies {
     add("implementation", project(":core:ui"))
     add("implementation", project(":core:designsystem"))
     add("implementation", project(":core:domain"))
-    add("implementation", project(":core:navigation"))
     add("implementation", libs.findLibrary("lifecycle-runtime").get())
     add("implementation", libs.findLibrary("lifecycle-runtime-compose").get())
     add("implementation", libs.findLibrary("lifecycle-viewmodel").get())
@@ -208,7 +207,7 @@ dependencies {
 
 `:feature:*:impl`이 반드시 갖춰야 하는 최소 의존을 한 곳에 모은 메타 plugin. 다른 convention plugin을 조합(`apply("momentwo.android.library")` …)해서 빌드 블록 한 줄로 “Feature 모듈”을 정의한다.
 
-> 2026-10-12 Phase 2 준비 브랜치에서 `:core:ui`, `:core:designsystem`, `:core:domain`, `:core:navigation` 기본 의존성을 추가했다. `core:common/model/data` 및 Coil/Paging 등은 각 Feature가 실제 사용하는 경우 직접 선언한다. serialization 런타임과 compiler plugin은 별개이며, 직렬화 키를 선언하는 모듈에는 `kotlinSerialization` plugin도 적용한다. 진행 상태는 [Phase 2 실행 계획](phase2-feature-migration-plan.md)을 따른다.
+> 2026-10-12 Phase 2 준비 브랜치에서 `:core:ui`, `:core:designsystem`, `:core:domain`, `:core:navigation` 기본 의존성을 추가했다. #160에서 빈 navigation 의존만 제거했으며 현재 기본 프로젝트 의존은 ui/designsystem/domain이다. `core:common/model/data` 및 Coil/Paging 등은 각 Feature가 실제 사용하는 경우 직접 선언한다. serialization 런타임과 compiler plugin은 별개이며, 직렬화 키를 선언하는 모듈에는 `kotlinSerialization` plugin도 적용한다. 진행 상태는 [Phase 2 실행 계획](phase2-feature-migration-plan.md)을 따른다.
 
 ### 4.6 `momentwo.android.hilt`
 
@@ -336,7 +335,7 @@ plugins {
 ## 7. 도입 이점
 
 ### 7.1 단일 출처(DRY)
-compileSdk, minSdk, Java 버전, Kotlin JVM target, Compose 옵션, Hilt/Room 적용 방식이 **`build-logic` 한 곳**에 정의된다. SDK 버전을 올릴 때 `KotlinAndroid.kt` 한 파일만 수정하면 24개 모듈이 일괄 반영된다.
+compileSdk, minSdk, Java 버전, Kotlin JVM target, Compose 옵션, Hilt/Room 적용 방식이 **`build-logic` 한 곳**에 정의된다. SDK 버전을 올릴 때 `KotlinAndroid.kt` 한 파일만 수정하면 23개 모듈에 공통 설정이 반영된다.
 
 ### 7.2 모듈 build.gradle.kts 슬림화
 적용 전 `:app/build.gradle.kts`는 약 110줄 — Compose BOM, lifecycle, room 의존성이 모두 펼쳐져 있었다. Phase 3에서 app의 데이터/UI 구현 의존을 제거했으며, 새 feature 모듈에는 실제 사용하는 의존만 명시한다. 모듈 파일에 남는 것은 **그 모듈만의 특이사항**뿐이다.
@@ -382,7 +381,7 @@ Phase 1~3에서 다음 설정을 적용했다.
 
 루트는 `id("momentwo.module-architecture")`를 버전 없이 적용한다. 형제 Convention도 각 모듈에서 버전 없는 ID로 참조한다. 수집기는 설정 완료 후 실제 프로젝트 configuration의 의존을 스냅샷으로 만들고, task는 이 값과 소스 입력만 검사한다. 앱 컴파일이나 dependency resolution 없이 경계·사이클을 진단한다. 루트/각 모듈 `check`에 연결되며 included build 자체는 별도 JUnit/TestKit으로 검증한다.
 
-규칙·variant/테스트 맥락·지원하지 않는 의존의 처리·CI 범위는 [모듈 경계 가이드](module-boundaries.md)를 따른다. 모듈 수를 고정하지 않으므로 #160의 빈 navigation 삭제에도 적용된다.
+규칙·variant/테스트 맥락·지원하지 않는 의존의 처리·CI 범위는 [모듈 경계 가이드](module-boundaries.md)를 따른다. 모듈 수를 고정하지 않으며, #160의 빈 navigation 제거 후에도 같은 정책으로 23개 모듈을 검사한다.
 
 ## 10. 참고 자료
 
@@ -399,3 +398,10 @@ Gradle 9.7.0·AGP 9.3.3·Kotlin 2.4.21을 사용한다. Android에서는 org.jet
 실행·컴파일 toolchain은 Temurin 25.0.4.1+1이며 build-logic을 포함한 Java/Kotlin 출력은 17이다. build-logic의 kotlin-dsl 컴파일러는 Gradle 내장 Kotlin(9.7.0에서는 2.4.0)을 사용하고, 제품 KGP 버전과 구분한다. Hilt 2.60.1·KSP 2.3.12(KSP2)·Room 2.8.5를 함께 검증하며 핵심 전환 시 minSdk 29 / compileSdk·targetSdk 34를 유지했다. #190의 라이브러리 단계에서는 compileSdk37/targetSdk34를 사용했고, 현재 앱 defaultConfig와 라이브러리 testOptions의 targetSdk는 37이다. SDK 단계별 결과는 [라이브러리·SDK 가이드](library-sdk-upgrade.md)를 따른다.
 
 CommonExtension의 제네릭·블록 메서드 대신 공개 속성의 apply를 사용한다. core:network는 ProviderFactory.fileContents로 local.properties를 읽고 Gradle/AGP 내부 API에 의존하지 않는다. 새 DSL/내장 Kotlin 비활성화로 우회하지 않는다. 세부 검증은 [도구 업데이트 기록](toolchain-upgrade.md)을 따른다.
+
+
+### 빈 navigation 모듈 정리 (#160)
+
+공용 Navigation 소스가 없어 settings 등록·Feature 기본 의존과 모듈 설정을 제거했다. 현재 include는 app1+Core10+Feature12=23개이며 대체 모듈은 만들지 않는다.
+Feature API의 Destination과 기존 @SerialName·JSON 계약, app의 그래프/이동 콜백은 유지한다. Phase 1~3의 24개 도입 기록과 당시 검증 수치는 역사적 결과로 보존한다.
+검사기는 설정된 프로젝트를 동적으로 수집하며 기존 TestKit의 모듈 추가/삭제 회귀를 재사용한다. 검증 결과는 [실제 모듈 의존성](module-graph.md)을 따른다.

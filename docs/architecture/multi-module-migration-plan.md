@@ -7,9 +7,11 @@
 
 ---
 
+> **#160 후속 정리 (2026-10-19):** 공용 소스가 없는 core:navigation과 Feature 기본 의존을 제거해 현재는 app1+Core10+Feature12=23개 모듈이다. Feature 경로 식별자와 app 그래프는 유지한다. 아래 Phase 1~3 완료 기록의 24개 수치는 당시 결과다.
+
 ## 1. 배경 (Context)
 
-Momentwo는 마이그레이션 시작 시 `:app` 단일 모듈로 구성된 Android 앱이었다. 현재는 Core 11개와 Feature api/impl 12개로 분리됐고, `:app`에는 앱 시작과 화면 조립 코드만 남아 있다. 아래 배경은 최초 계획 수립 당시의 문제를 설명한다.
+Momentwo는 마이그레이션 시작 시 `:app` 단일 모듈로 구성된 Android 앱이었다. 현재는 Core 10개와 Feature api/impl 12개로 구성되며, `:app`에는 앱 시작과 화면 조립 코드만 남아 있다. 아래 배경은 최초 계획 수립 당시의 문제를 설명한다.
 
 그러나 단일 모듈에서 비롯되는 한계가 누적되고 있다.
 
@@ -48,7 +50,6 @@ build-logic/                      ← includeBuild
 :core:domain                      ← UseCase
 :core:designsystem                ← Theme, Color, Type, 기본 컴포넌트
 :core:ui                          ← 도메인성 공유 Composable(AlbumItemCard, UserItemBox 등)
-:core:navigation                  ← 현재 공용 소스 없음. 통합 키는 feature:api로 이관 완료
 :core:testing                     ← MainDispatcherRule. Auth Fake는 해당 impl 테스트에만 위치
 
 :feature:auth:api                 ← Login/SignUp/Profile destination 키만
@@ -65,7 +66,7 @@ build-logic/                      ← includeBuild
 :feature:friend:impl              ← Friend, FriendRequest, FriendList
 ```
 
-총 **24개 include 모듈** (`:app` 1 + `:core:*` 11 + `:feature:*` 12). `build-logic`은 `includeBuild`로 별도.
+현재 총 **23개 include 모듈** (`:app` 1 + `:core:*` 10 + `:feature:*` 12). `build-logic`은 `includeBuild`로 별도.
 
 ### 3.2 화면 → Feature 매핑 (sub-feature 흡수)
 
@@ -152,7 +153,7 @@ NIA의 16개를 다음 **9개**로 축약한다.
 | `momentwo.android.application.compose` | `:app` | Compose BOM, compose compiler |
 | `momentwo.android.library` | 모든 `:core:*`, `:feature:*` | AGP library + Kotlin 공통 |
 | `momentwo.android.library.compose` | `:core:designsystem`, `:core:ui`, `:feature:*:impl` | Compose 옵션 |
-| `momentwo.android.feature` | `:feature:*:impl` | library.compose + Hilt + 기본 의존성(core:ui, core:designsystem, core:domain, core:navigation, lifecycle, navigation-compose) |
+| `momentwo.android.feature` | `:feature:*:impl` | library.compose + Hilt + 기본 의존성(core:ui, core:designsystem, core:domain, lifecycle, navigation-compose) |
 | `momentwo.android.hilt` | Hilt 필요 모듈 | hilt plugin + dagger-hilt + ksp |
 | `momentwo.android.room` | `:core:database` | room plugin + schema 디렉토리 |
 | `momentwo.android.network` | `:core:network` | retrofit + okhttp + moshi 묶음 |

@@ -1,5 +1,8 @@
 # Momentwo Phase 2 — Feature 분리 재개 계획
 
+> #160 후속 정리 (2026-10-19): 빈 core:navigation과 Feature 기본 의존을 제거해 현재 모듈 수는 23개다. 아래 24개 구성과 navigation 이관/유지 설명은 당시 계획·실행 이력이며, 최신 구성은 [실제 의존 표](module-graph.md)를 따른다.
+
+
 > 2026-10-02 작성. 기준: `develop` / `c67f368` (원격 develop과 동일).
 > 2026-10-12 갱신: 작업별 새 브랜치·PR, develop 기준 순차 병합 흐름 확정. 아래 초기 현황은 재개 전 기준이며, 실제 완료 상태와 검증 결과는 실행 기록에 누적한다.
 > 상위 이슈: [#109](https://github.com/Momentwo/Momentwo/issues/109). 전체 계획: [multi-module-migration-plan.md](multi-module-migration-plan.md).

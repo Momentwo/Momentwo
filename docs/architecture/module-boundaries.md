@@ -67,7 +67,7 @@ Ubuntu 24.04·Temurin 25.0.4.1+1·SDK 37.0(제품)·34(TestKit fixture)·build-t
 
 일반 pull_request 이벤트와 contents:read, checkout persist-credentials:false를 사용한다. 동일 PR의 이전 실행은 취소한다. Gradle User Home 의존 캐시만 재사용하고 단위 테스트와 검사 도구 테스트는 --rerun-tasks --no-build-cache로 실행한다. 실패해도 검사·단위 테스트·Lint 보고서를 14일 보관한다. SDK/외부 라이브러리를 다운로드할 네트워크는 필요하지만 실제 백엔드는 필요하지 않다.
 
-일반 PR에서는 기기·에뮬레이터 테스트를 실행하지 않는다. target-sdk PR과 targetSdk35 이상 develop 반영 후에는 별도 Linux/KVM job에서 짧은 SDK 실행 검증을 수행한다. 이 job은 기존 빌드 job의 APK만 사용하며 Gradle과 에뮬레이터를 함께 실행하지 않는다. 자세한 대상·검증 범위는 [SDK 업데이트 가이드](library-sdk-upgrade.md)를 따른다. AndroidTest APK 빌드만으로 기기 회귀 통과로 해석하지 않는다. 실제 서버·정식 업데이트/복원은 #150, 빈 navigation 모듈 정리는 #160에 남긴다. 브랜치 보호·자동 롤백 정책은 변경하지 않는다.
+일반 PR에서는 기기·에뮬레이터 테스트를 실행하지 않는다. target-sdk PR과 targetSdk35 이상 develop 반영 후에는 별도 Linux/KVM job에서 짧은 SDK 실행 검증을 수행한다. 이 job은 기존 빌드 job의 APK만 사용하며 Gradle과 에뮬레이터를 함께 실행하지 않는다. 자세한 대상·검증 범위는 [SDK 업데이트 가이드](library-sdk-upgrade.md)를 따른다. AndroidTest APK 빌드만으로 기기 회귀 통과로 해석하지 않는다. 실제 서버·정식 업데이트/복원은 #150에 남긴다. 빈 navigation 모듈은 #160에서 제거했다. 브랜치 보호·자동 롤백 정책은 변경하지 않는다.
 
 ## 검사 도구 회귀
 
@@ -87,4 +87,10 @@ JUnit은 정책·강결합요소·소스 lexer/행 번호를 검증하고 TestKi
 
 ProjectDependency.path와 현재 빌드의 프로젝트 조회로 대상 configuration을 찾는다. 제거된 dependencyProject API를 사용하지 않으며 알 수 없는 대상/맥락은 계속 실패한다. AGP 내장 Kotlin과 새 공개 DSL의 소스 집합에서도 생성 코드는 제외하고 직접 작성한 Kotlin/Java import를 검사한다.
 
-AGP 9는 기본적으로 tested build type(Debug)의 단위 테스트만 구성한다. 따라서 현재 그래프는 24개 모듈·188개 맥락·695개 간선이며 Debug 단위/기기 테스트와 Debug/Release 운영 출력을 모두 포함한다. 이전 234개 맥락과의 차이는 Release 단위 테스트 46개 맥락이 기본 생성되지 않기 때문이다. TestKit에서는 Release 단위 테스트를 명시적으로 켜고 해당 맥락의 수집도 검증한다. 이 수치는 정책에 하드코딩하지 않는다.
+AGP 9는 기본적으로 tested build type(Debug)의 단위 테스트만 구성한다. 도구 전환 직후 그래프는 24개 모듈·188개 맥락·695개 간선이었으며 Debug 단위/기기 테스트와 Debug/Release 운영 출력을 모두 포함한다. 이전 234개 맥락과의 차이는 Release 단위 테스트 46개 맥락이 기본 생성되지 않기 때문이다. TestKit에서는 Release 단위 테스트를 명시적으로 켜고 해당 맥락의 수집도 검증한다. 이 수치는 정책에 하드코딩하지 않는다.
+
+
+## #160 빈 모듈 제거 후 검증
+
+core:navigation 제거 후 23개 프로젝트를 같은 경계/사이클 정책으로 검사한다. 정책이나 검사기에 모듈 수를 고정하지 않으며 기존 TestKit의 모듈 추가·삭제 회귀를 재사용한다.
+앞의 24개/234개 또는188개 맥락 수치는 각 실행 시점의 기록이다. 변경 후 실제 맥락·간선 수와 검증 범위는 [모듈 의존 표](module-graph.md)에 기록한다.

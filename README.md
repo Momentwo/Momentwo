@@ -245,7 +245,7 @@
 
 ## 🏗️ 모듈 구조
 
-`app` 1개, Core 11개, Feature 6개 × `api`/`impl`로 구성한 **24개 Gradle 모듈**입니다. `build-logic`은 `includeBuild`로 연결한 별도 빌드이며 모듈 수에 포함하지 않습니다.
+`app` 1개, Core 10개, Feature 6개 × `api`/`impl`로 구성한 **23개 Gradle 모듈**입니다. `build-logic`은 `includeBuild`로 연결한 별도 빌드이며 모듈 수에 포함하지 않습니다.
 
 ### 구조도
 
@@ -255,7 +255,7 @@
 flowchart LR
     app["app<br/>앱 시작 · 화면 조립"]
     feature["Feature × 6<br/>api · impl<br/>화면 · MVI"]
-    core["Core × 11<br/>공유 UI · 도메인<br/>데이터 · 테스트"]
+    core["Core × 10<br/>공유 UI · 도메인<br/>데이터 · 테스트"]
 
     app -->|"화면 연결"| feature
     feature -->|"공통 기능 사용"| core
@@ -278,7 +278,6 @@ Momentwo/
 │   ├── network/                 # HTTP 클라이언트와 인증
 │   ├── database/                # Room 저장소
 │   ├── datastore/               # 토큰과 세션 설정
-│   ├── navigation/              # 공용 Navigation 모듈 (현재 소스 없음)
 │   └── testing/                 # MainDispatcherRule
 ├── feature/                     # 각 Feature 아래 api/와 impl/
 │   ├── auth/
@@ -304,8 +303,9 @@ Momentwo/
 | `core:network` | Retrofit·OkHttp·Moshi 설정, 인증 Interceptor/Authenticator, BASE_URL |
 | `core:database` | Room v4, 로컬 원본·계정별 캐시·동기화 작업·연결 정보, 명시적 migration |
 | `core:datastore` | Preferences DataStore 기반 원자적 계정 세션·편집 초안 저장 |
-| `core:navigation` | 공용 Navigation 확장용 모듈. 경로 키는 Feature API로 이동했고 현재 공용 소스는 없음 |
 | `core:testing` | 코루틴 ViewModel 테스트에 사용하는 MainDispatcherRule |
+
+빈 `core:navigation`은 #160에서 제거했습니다. 경로 키는 Feature API, 루트 그래프와 화면 연결은 app이 소유하며 기존 직렬화 식별자는 유지합니다.
 
 ### Feature 모듈의 책임
 

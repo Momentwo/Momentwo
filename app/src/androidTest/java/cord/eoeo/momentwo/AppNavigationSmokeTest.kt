@@ -2,7 +2,6 @@ package cord.eoeo.momentwo
 
 import android.view.WindowManager
 import androidx.compose.material3.Text
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -311,6 +310,15 @@ class AppNavigationSmokeTest {
         channel.close()
     }
 
+    private fun statusBarsVisible(): Boolean? {
+        val decor = compose.activity.window.decorView
+        // API 29 root insets can retain the layout inset while fullscreen. Passing the attached
+        // view lets AndroidX account for the window's actual system UI visibility flags.
+        return decor.rootWindowInsets?.let {
+            WindowInsetsCompat.toWindowInsetsCompat(it, decor).isVisible(WindowInsetsCompat.Type.statusBars())
+        }
+    }
+
     @Test
     fun systemBarsRestoreOnPauseAndDisposalAndReapplyOnResume() {
         val visible = mutableStateOf(false)
@@ -320,18 +328,18 @@ class AppNavigationSmokeTest {
             compose.activity.setContent { if (enabled.value) SystemBarsEffect(controller, visible.value) }
         }
         compose.waitForIdle()
-        compose.waitUntil(timeoutMillis = 10_000) { ViewCompat.getRootWindowInsets(compose.activity.window.decorView)?.isVisible(WindowInsetsCompat.Type.statusBars()) == false }
+        compose.waitUntil(timeoutMillis = 10_000) { statusBarsVisible() == false }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE, controller.systemBarsBehavior) }
         compose.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
         compose.activityRule.scenario.onActivity { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior) }
         compose.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
         compose.waitForIdle()
-        compose.waitUntil(timeoutMillis = 10_000) { ViewCompat.getRootWindowInsets(compose.activity.window.decorView)?.isVisible(WindowInsetsCompat.Type.statusBars()) == false }
+        compose.waitUntil(timeoutMillis = 10_000) { statusBarsVisible() == false }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE, controller.systemBarsBehavior) }
         compose.runOnIdle { visible.value = true }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior); visible.value = false }
         compose.runOnIdle { enabled.value = false }
-        compose.waitUntil(timeoutMillis = 10_000) { ViewCompat.getRootWindowInsets(compose.activity.window.decorView)?.isVisible(WindowInsetsCompat.Type.statusBars()) == true }
+        compose.waitUntil(timeoutMillis = 10_000) { statusBarsVisible() == true }
         compose.runOnIdle { assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.systemBarsBehavior) }
     }
 

@@ -32,8 +32,16 @@ jobs:
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
         with:
           cmdline-tools-version: '12266719' # 16.0, requires JDK 17 or newer
-          packages: platform-tools platforms;android-34 platforms;android-37.0 build-tools;36.0.0
-          log-accepted-android-sdk-licenses: false
+          packages: ''
+          accept-android-sdk-licenses: false
+      - name: Accept licenses and install build SDK
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          # communicate handles early stdin closure; only sdkmanager's exit status determines success.
+          subprocess.run(['sdkmanager', '--licenses'], input='y\n' * 100, text=True, stdout=subprocess.DEVNULL, check=True)
+          subprocess.run(['sdkmanager', 'platform-tools', 'platforms;android-34', 'platforms;android-37.0', 'build-tools;36.0.0'], input='y\n' * 100, text=True, check=True)
+          PY
       - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           cache-provider: basic
@@ -133,8 +141,17 @@ jobs:
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
         with:
           cmdline-tools-version: '16111833' # 23.0; supports API 37.0 AVD metadata
-          packages: platform-tools emulator ${{ steps.image.outputs.package }}
-          log-accepted-android-sdk-licenses: false
+          packages: ''
+          accept-android-sdk-licenses: false
+      - name: Accept licenses and install runtime SDK
+        env:
+          SYSTEM_IMAGE: ${{ steps.image.outputs.package }}
+        run: |
+          python3 - <<'PY'
+          import os, subprocess
+          subprocess.run(['sdkmanager', '--licenses'], input='y\n' * 100, text=True, stdout=subprocess.DEVNULL, check=True)
+          subprocess.run(['sdkmanager', 'platform-tools', 'emulator', os.environ['SYSTEM_IMAGE']], input='y\n' * 100, text=True, check=True)
+          PY
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: sdk-runtime-apks

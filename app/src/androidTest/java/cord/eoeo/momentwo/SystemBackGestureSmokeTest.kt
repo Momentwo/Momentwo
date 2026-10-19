@@ -44,9 +44,11 @@ class SystemBackGestureSmokeTest {
     }
 
     @Test fun systemBackHidesImeBeforeLeavingCreateAlbumAndPreservesInput() {
+        awaitSdkRuntimeNetwork()
         val pendingImeAnimations = AtomicInteger()
         compose.runOnUiThread {
             val activity = compose.activity
+            assertSdkRuntimeDisplay(activity)
             activity.setShowWhenLocked(true)
             activity.setTurnScreenOn(true)
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

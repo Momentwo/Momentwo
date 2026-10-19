@@ -23,6 +23,7 @@ class GuestPhotoCrudSmokeTest{
     @get:Rule val compose=createEmptyComposeRule()
     private lateinit var scenario:ActivityScenario<MainActivity>
     @Test fun captionMemoFavoriteAndImmersiveWorkWithoutApiAndPersistAfterActivityRestart()=runBlocking{
+        awaitSdkRuntimeNetwork()
         val context=InstrumentationRegistry.getInstrumentation().targetContext
         val access=EntryPointAccessors.fromApplication(context,LibraryTestAccess::class.java)
         val repo=access.repository();val title="Photos-${UUID.randomUUID()}";val album=repo.createAlbum(title);val sub=repo.createSubAlbum(album,"My photos")
@@ -41,7 +42,7 @@ class GuestPhotoCrudSmokeTest{
                 }
                 compose.waitForIdle()
             }
-            scenario=ActivityScenario.launch(MainActivity::class.java);scenario.onActivity{it.setShowWhenLocked(true);it.setTurnScreenOn(true);it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
+            scenario=ActivityScenario.launch(MainActivity::class.java);scenario.onActivity{assertSdkRuntimeDisplay(it);it.setShowWhenLocked(true);it.setTurnScreenOn(true);it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
             wait(hasText(title))
             compose.onNodeWithText(title).performClick()
             wait(hasText("My photos"))
@@ -59,7 +60,7 @@ class GuestPhotoCrudSmokeTest{
             compose.waitUntil(10_000){compose.onAllNodes(hasContentDescription("즐겨찾기")).fetchSemanticsNodes(atLeastOneRootRequired=false).isEmpty()}
             compose.onNodeWithContentDescription("사진").performClick()
             wait(hasContentDescription("즐겨찾기"))
-            scenario.recreate();scenario.onActivity{it.setShowWhenLocked(true);it.setTurnScreenOn(true);it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)};wait(hasContentDescription("즐겨찾기"))
+            scenario.recreate();scenario.onActivity{assertSdkRuntimeDisplay(it);it.setShowWhenLocked(true);it.setTurnScreenOn(true);it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)};wait(hasContentDescription("즐겨찾기"))
             compose.onNodeWithContentDescription("사진 설명").performClick();wait(hasText("Offline caption"));compose.onNodeWithText("Offline caption").assertExists();closeSheet("설명")
             compose.onNodeWithContentDescription("개인 메모").performClick();wait(hasText("Private memo"));compose.onNodeWithText("Private memo").assertExists()
             assertEquals(before,counter.count);assertTrue(repo.photo(photo).first()!!.favorite)

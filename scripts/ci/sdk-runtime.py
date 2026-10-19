@@ -115,18 +115,38 @@ def main():
         shell("svc", "wifi", "enable")
         instrument("gallery-export", 1, prefix + "ImageLoaderCompatibilityTest#galleryExportPreservesOriginalDimensionsBeyondDefaultBitmapLimit", "-e", "requireOnline", "true")
         if args.api == 37:
-            instrument("persistence-seed", 1, persistence, "-e", "persistenceStage", "seed")
+            instrument("storage-account", 3, ",".join([
+                prefix + "AccountStorageTest#sameServerIdsAndNicknamesAreIsolatedAndLogoutCannotEraseDeviceData",
+                prefix + "AccountSyncPersistenceTest#v3UpgradePreservesDeviceDataAndOnlyLinksOwnedAccountRows",
+                prefix + "AccountSyncPersistenceTest#interruptedAttemptsRecoverWithoutReplayingUncertainWritesAndOldClaimsCannotSettle",
+            ]))
+            shell("svc", "wifi", "disable")
+            shell("svc", "data", "disable")
+            shell("cmd", "connectivity", "airplane-mode", "enable")
+            # Default am instrument force-stops the target at start AND finish, cancelling its jobs.
+            # Attach only these repository-only staged tests to an explicitly running app instead.
+            staged_args = ("--no-restart", "-e", "requireOffline", "true", "-e", "verifyScheduler", "true")
+            shell("am", "start", "-W", "-n", "cord.eoeo.momentwo/.ui.MainActivity")
+            instrument("persistence-seed", 1, persistence, "-e", "persistenceStage", "seed", *staged_args)
+            (output / "job-before-reboot.txt").write_text(shell("cmd", "jobscheduler", "get-job-state", "cord.eoeo.momentwo", "162"))
+            # JobStore batches disk writes (AOSP JOB_PERSIST_DELAY=2s). The assertion after reboot,
+            # not elapsed time, is the persistence verdict. Allow a small remote-only batching grace.
+            time.sleep(3)
             run(adb, "-s", serial, "reboot")
+            run(adb, "-s", serial, "wait-for-disconnect", timeout=30)
             run(adb, "-s", serial, "wait-for-device", timeout=120)
             wait_boot()
-            instrument("persistence-verify", 1, persistence, "-e", "persistenceStage", "verify")
-            shell("wm", "size", "1600x1200")
+            (output / "job-after-reboot.txt").write_text(shell("cmd", "jobscheduler", "get-job-state", "cord.eoeo.momentwo", "162"))
+            shell("am", "start", "-W", "-n", "cord.eoeo.momentwo/.ui.MainActivity")
+            instrument("persistence-verify", 1, persistence, "-e", "persistenceStage", "verify", *staged_args)
+            shell("wm", "size", "1200x1600")
             shell("wm", "density", "200")
             shell("settings", "put", "system", "font_scale", "1.3")
             shell("settings", "put", "system", "accelerometer_rotation", "0")
             shell("settings", "put", "system", "user_rotation", "1")
             # The new activity must adapt to the larger display without an opt-out or orientation lock.
-            instrument("large-screen", 2, ",".join([tests[1], tests[-1]]))
+            instrument("large-screen", 2, ",".join([tests[1], tests[-1]]),
+                       "-e", "requireLargeLandscape", "true", "-e", "requireOffline", "true")
         (output / "result.json").write_text(json.dumps({"api": args.api, "status": "passed"}, indent=2) + "\n")
     finally:
         (output / "logcat.txt").write_text(run(adb, "-s", serial, "logcat", "-d", "-s", "AndroidRuntime:E", "TestRunner:I", check=False, timeout=30))

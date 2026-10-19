@@ -1,5 +1,8 @@
 # Momentwo Phase 1 — Core 모듈 분리 구현 계획
 
+> #160 후속 정리 (2026-10-19): 빈 core:navigation과 Feature 기본 의존을 제거해 현재 모듈 수는 23개다. 아래 24개 구성과 navigation 이관/유지 설명은 당시 계획·실행 이력이며, 최신 구성은 [실제 의존 표](module-graph.md)를 따른다.
+
+
 > 본 문서는 [멀티모듈 마이그레이션 계획](multi-module-migration-plan.md)의 **Phase 1(Core 분리)** 실행 계획이다. GitHub 상위 이슈 [#108](https://github.com/Momentwo/Momentwo/issues/108)에 대응하며, 각 `:core:*` 모듈은 서브이슈 #111~#121과 1:1로 매핑된다. GitHub Wiki 이관을 전제로 작성한다.
 
 ---
